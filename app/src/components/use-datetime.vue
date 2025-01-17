@@ -1,7 +1,3 @@
-<template>
-	<slot :datetime="displayValue" />
-</template>
-
 <script setup lang="ts">
 import { localizedFormat } from '@/utils/localized-format';
 import { localizedFormatDistance } from '@/utils/localized-format-distance';
@@ -19,6 +15,8 @@ export interface Props {
 	round?: 'floor' | 'round' | 'ceil';
 	suffix?: boolean;
 }
+
+defineOptions({ inheritAttrs: false });
 
 const props = withDefaults(defineProps<Props>(), {
 	format: 'long',
@@ -89,7 +87,7 @@ watch(
 			displayValue.value = localizedFormat(newValue, format);
 		}
 	},
-	{ immediate: true }
+	{ immediate: true },
 );
 
 let refreshInterval: number | null = null;
@@ -107,3 +105,7 @@ onUnmounted(() => {
 	if (refreshInterval) clearInterval(refreshInterval);
 });
 </script>
+
+<template>
+	<slot :datetime="displayValue" />
+</template>

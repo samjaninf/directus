@@ -1,3 +1,22 @@
+<script setup lang="ts">
+import { storeToRefs } from 'pinia';
+import { computed } from 'vue';
+import { useI18n } from 'vue-i18n';
+import { syncFieldDetailStoreProperty, useFieldDetailStore } from '../store';
+import { getCurrentLanguage } from '@/lang/get-current-language';
+
+const { t } = useI18n();
+const fieldDetailStore = useFieldDetailStore();
+const readonly = syncFieldDetailStoreProperty('field.meta.readonly', false);
+const hidden = syncFieldDetailStoreProperty('field.meta.hidden', false);
+const required = syncFieldDetailStoreProperty('field.meta.required', false);
+const note = syncFieldDetailStoreProperty('field.meta.note');
+const translations = syncFieldDetailStoreProperty('field.meta.translations');
+const { loading, field } = storeToRefs(fieldDetailStore);
+const type = computed(() => field.value.type);
+const isGenerated = computed(() => field.value.schema?.is_generated);
+</script>
+
 <template>
 	<div class="form">
 		<div v-if="!isGenerated" class="field half-left">
@@ -43,11 +62,11 @@
 							display: 'formatted-value',
 							display_options: {
 								font: 'monospace',
-								color: 'var(--foreground-subdued)',
+								color: 'var(--theme--foreground-subdued)',
 							},
 						},
 						schema: {
-							default_value: 'en-US',
+							default_value: getCurrentLanguage(),
 						},
 					},
 					{
@@ -71,44 +90,26 @@
 	</div>
 </template>
 
-<script setup lang="ts">
-import { storeToRefs } from 'pinia';
-import { computed } from 'vue';
-import { useI18n } from 'vue-i18n';
-import { syncFieldDetailStoreProperty, useFieldDetailStore } from '../store';
-
-const { t } = useI18n();
-const fieldDetailStore = useFieldDetailStore();
-const readonly = syncFieldDetailStoreProperty('field.meta.readonly', false);
-const hidden = syncFieldDetailStoreProperty('field.meta.hidden', false);
-const required = syncFieldDetailStoreProperty('field.meta.required', false);
-const note = syncFieldDetailStoreProperty('field.meta.note');
-const translations = syncFieldDetailStoreProperty('field.meta.translations');
-const { loading, field } = storeToRefs(fieldDetailStore);
-const type = computed(() => field.value.type);
-const isGenerated = computed(() => field.value.schema?.is_generated);
-</script>
-
 <style lang="scss" scoped>
-@import '@/styles/mixins/form-grid';
+@use '@/styles/mixins';
 
 .type-title {
 	margin-bottom: 32px;
 }
 
 .form {
-	--form-vertical-gap: 32px;
-	--form-horizontal-gap: 32px;
+	--theme--form--row-gap: 32px;
+	--theme--form--column-gap: 32px;
 
-	@include form-grid;
+	@include mixins.form-grid;
 }
 
 .monospace {
-	--v-input-font-family: var(--family-monospace);
+	--v-input-font-family: var(--theme--fonts--monospace--font-family);
 }
 
 .required {
-	--v-icon-color: var(--primary);
+	--v-icon-color: var(--theme--primary);
 }
 
 .v-notice {

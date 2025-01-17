@@ -8,7 +8,7 @@ import { translate } from '@/utils/translate-object-values';
 import { unexpectedError } from '@/utils/unexpected-error';
 import formatTitle from '@directus/format-title';
 import { DeepPartial, Field, FieldRaw, Relation } from '@directus/types';
-import { isEqual, isNil, merge, omit, orderBy } from 'lodash';
+import { isEmpty, isEqual, isNil, merge, omit, orderBy } from 'lodash';
 import { nanoid } from 'nanoid';
 import { defineStore } from 'pinia';
 import { ref } from 'vue';
@@ -118,10 +118,8 @@ export const useFieldsStore = defineStore('fieldsStore', () => {
 			}
 		}
 
-		if (field.meta && !isNil(field.meta.translations) && Array.isArray(field.meta.translations)) {
-			for (let i = 0; i < field.meta.translations.length; i++) {
-				const { language, translation } = field.meta.translations[i];
-
+		if (field.meta && Array.isArray(field.meta.translations)) {
+			for (const { language, translation } of field.meta.translations) {
 				i18n.global.mergeLocaleMessage(language, {
 					...(translation
 						? {
@@ -148,16 +146,26 @@ export const useFieldsStore = defineStore('fieldsStore', () => {
 
 	function translateFields() {
 		fields.value = fields.value.map((field) => {
+			const translations: Partial<Field> = {};
+
 			if (i18n.global.te(`fields.${field.collection}.${field.field}`)) {
-				field.name = i18n.global.t(`fields.${field.collection}.${field.field}`);
+				translations.name = i18n.global.t(`fields.${field.collection}.${field.field}`);
 			}
 
-			if (field.meta?.note) field.meta.note = translateLiteral(field.meta.note);
-			if (field.meta?.options) field.meta.options = translate(field.meta.options);
-			if (field.meta?.display_options) field.meta.display_options = translate(field.meta.display_options);
+			if (field.meta) {
+				translations.meta = {} as Field['meta'];
+			}
+
+			if (field.meta?.note) translations.meta!.note = translateLiteral(field.meta.note);
+			if (field.meta?.options) translations.meta!.options = translate(field.meta.options);
+			if (field.meta?.display_options) translations.meta!.display_options = translate(field.meta.display_options);
 
 			if (field.meta?.validation_message) {
-				field.meta.validation_message = translateLiteral(field.meta.validation_message);
+				translations.meta!.validation_message = translateLiteral(field.meta.validation_message);
+			}
+
+			if (!isEmpty(translations)) {
+				return merge({}, field, translations);
 			}
 
 			return field;
@@ -192,10 +200,10 @@ export const useFieldsStore = defineStore('fieldsStore', () => {
 			fields.value = [...fields.value, createdField];
 
 			return createdField;
-		} catch (err: any) {
+		} catch (error) {
 			// reset the changes if the api sync failed
 			fields.value = stateClone;
-			unexpectedError(err);
+			unexpectedError(error);
 		}
 	}
 
@@ -223,10 +231,10 @@ export const useFieldsStore = defineStore('fieldsStore', () => {
 
 				return field;
 			});
-		} catch (err: any) {
+		} catch (error) {
 			// reset the changes if the api sync failed
 			fields.value = stateClone;
-			unexpectedError(err);
+			unexpectedError(error);
 		}
 	}
 
@@ -266,10 +274,10 @@ export const useFieldsStore = defineStore('fieldsStore', () => {
 
 				translateFields();
 			}
-		} catch (err: any) {
+		} catch (error) {
 			// reset the changes if the api sync failed
 			fields.value = stateClone;
-			unexpectedError(err);
+			unexpectedError(error);
 		}
 	}
 
@@ -299,16 +307,16 @@ export const useFieldsStore = defineStore('fieldsStore', () => {
 		try {
 			await api.delete(`/fields/${collectionKey}/${fieldKey}`);
 			await collectionsStore.hydrate();
-		} catch (err: any) {
+		} catch (error) {
 			fields.value = stateClone;
 			relationsStore.relations = relationsStateClone;
-			unexpectedError(err);
+			unexpectedError(error);
 		}
 	}
 
 	function getPrimaryKeyFieldForCollection(collection: string): Field | null {
 		const primaryKeyField = fields.value.find(
-			(field) => field.collection === collection && field.schema?.is_primary_key === true
+			(field) => field.collection === collection && field.schema?.is_primary_key === true,
 		);
 
 		return primaryKeyField ?? null;
@@ -318,7 +326,7 @@ export const useFieldsStore = defineStore('fieldsStore', () => {
 		return orderBy(
 			fields.value.filter((field) => field.collection === collection),
 			[(field) => field.meta?.system === true, (field) => (field.meta?.sort ? Number(field.meta?.sort) : null)],
-			['desc', 'asc']
+			['desc', 'asc'],
 		);
 	}
 
@@ -337,7 +345,7 @@ export const useFieldsStore = defineStore('fieldsStore', () => {
 	function getFieldsForCollectionSorted(collection: string): Field[] {
 		const fieldsSorted = orderBy(
 			fields.value.filter((field) => field.collection === collection),
-			'meta.sort'
+			'meta.sort',
 		);
 
 		const nonGroupFields = fieldsSorted.filter((field: Field) => !field.meta?.group);
@@ -378,10 +386,10 @@ export const useFieldsStore = defineStore('fieldsStore', () => {
 	 */
 	function getRelationalField(collection: string, fields: string) {
 		const relationsStore = useRelationsStore();
-		const [field, ...path] = fields.split('.');
+		const [field, ...path] = fields.split('.') as [string] & string[];
 
 		if (field.includes(':')) {
-			const [_, collection] = field.split(':');
+			const [_, collection] = field.split(':') as [string, string];
 			return getField(collection, path.join('.'));
 		}
 

@@ -1,18 +1,18 @@
-<template>
-	<div class="bar-chart">
-		<div ref="chartEl" />
-	</div>
-</template>
-
 <script setup lang="ts">
 import { useFieldsStore } from '@/stores/fields';
 import { PanelFunction, StringConditionalFillOperators } from '@/types/panels';
 import type { Filter } from '@directus/types';
-import { cssVar } from '@directus/utils/browser';
 import ApexCharts from 'apexcharts';
 import { isNil, snakeCase } from 'lodash';
 import { computed, onMounted, onUnmounted, ref, watch } from 'vue';
 import { useI18n } from 'vue-i18n';
+
+type ConditionalFillFormat = {
+	axis: 'X' | 'Y';
+	operator: StringConditionalFillOperators;
+	color: string;
+	value: number;
+};
 
 const props = withDefaults(
 	defineProps<{
@@ -25,29 +25,24 @@ const props = withDefaults(
 		function?: PanelFunction;
 		yAxis: string;
 		decimals?: number;
-		color?: string;
+		color?: string | null;
 		filter?: Filter;
 		showAxisLabels?: string;
 		showDataLabel?: boolean;
-		conditionalFill?: {
-			axis: 'X' | 'Y';
-			operator: StringConditionalFillOperators;
-			color: string;
-			value: number;
-		}[];
+		conditionalFill?: ConditionalFillFormat[] | null;
 	}>(),
 	{
 		showHeader: false,
 		data: () => [],
 		horizontal: false,
 		decimals: 2,
-		color: cssVar('--primary'),
+		color: 'var(--theme--primary)',
 		function: 'max',
 		filter: () => ({}),
 		showAxisLabels: 'both',
 		showDataLabel: true,
 		conditionalFill: () => [],
-	}
+	},
 );
 
 const { t, n } = useI18n();
@@ -79,7 +74,7 @@ watch(
 		chart.value?.destroy();
 		setUpChart();
 	},
-	{ deep: true }
+	{ deep: true },
 );
 
 onMounted(setUpChart);
@@ -120,8 +115,8 @@ function setUpChart() {
 			height: '100%',
 			width: '100%',
 			toolbar: { show: false },
-			fontFamily: 'var(--family-sans-serif)',
-			foreColor: 'var(--foreground-subdued)',
+			fontFamily: 'var(--theme--fonts--sans--font-family)',
+			foreColor: 'var(--theme--foreground-subdued)',
 			selection: { enabled: false },
 			zoom: { enabled: false },
 		},
@@ -136,7 +131,7 @@ function setUpChart() {
 			opacity: 1,
 		},
 		grid: {
-			borderColor: 'var(--border-subdued)',
+			borderColor: 'var(--theme--border-color-subdued)',
 			padding: {
 				top: props.showHeader ? -20 : -5,
 				bottom: 5,
@@ -190,7 +185,7 @@ function setUpChart() {
 				show: !props.horizontal,
 				height: 0.5,
 				width: '1px',
-				color: 'var(--border-subdued)',
+				color: 'var(--theme--border-color-subdued)',
 			},
 			axisTicks: {
 				show: false,
@@ -200,8 +195,8 @@ function setUpChart() {
 				rotate: 0,
 				showDuplicates: true,
 				style: {
-					fontFamily: 'var(--family-sans-serif)',
-					foreColor: 'var(--foreground-subdued)',
+					fontFamily: 'var(--theme--fonts--sans--font-family)',
+					foreColor: 'var(--theme--foreground-subdued)',
 					fontWeight: 600,
 					fontSize: '10px',
 				},
@@ -221,7 +216,7 @@ function setUpChart() {
 				show: props.horizontal,
 				height: 0.5,
 				width: '1px',
-				color: 'var(--border-subdued)',
+				color: 'var(--theme--border-color-subdued)',
 			},
 			axisTicks: {
 				show: false,
@@ -230,8 +225,8 @@ function setUpChart() {
 				show: ['both', 'yOnly'].includes(props.showAxisLabels),
 				formatter: formatNumericValue,
 				style: {
-					fontFamily: 'var(--family-sans-serif)',
-					foreColor: 'var(--foreground-subdued)',
+					fontFamily: 'var(--theme--fonts--sans--font-family)',
+					foreColor: 'var(--theme--foreground-subdued)',
 					fontWeight: 600,
 					fontSize: '10px',
 				},
@@ -242,8 +237,8 @@ function setUpChart() {
 	chart.value.render();
 
 	function getFillColor(x: string | number, y: string | number) {
-		if (isNil(x) || isNil(y) || props.conditionalFill.length === 0) return props.color;
-		let fillColor = props.color;
+		let fillColor = props.color || 'var(--theme--primary)';
+		if (isNil(x) || isNil(y) || !props.conditionalFill?.length) return fillColor;
 
 		for (const format of props.conditionalFill) {
 			const shouldChangeFillColor = checkMatchingConditionalFill(format);
@@ -252,7 +247,7 @@ function setUpChart() {
 
 		return fillColor;
 
-		function checkMatchingConditionalFill(format: (typeof props)['conditionalFill'][number]): boolean {
+		function checkMatchingConditionalFill(format: ConditionalFillFormat): boolean {
 			let value: string | number;
 			let compareValue: string | number;
 
@@ -327,6 +322,12 @@ function setUpChart() {
 }
 </script>
 
+<template>
+	<div class="bar-chart">
+		<div ref="chartEl" />
+	</div>
+</template>
+
 <style scoped>
 .bar-chart {
 	padding: 0px;
@@ -337,20 +338,20 @@ function setUpChart() {
 
 <style>
 .apexcharts-tooltip.apexcharts-theme-light {
-	border-color: var(--border-normal) !important;
+	border-color: var(--theme--form--field--input--border-color) !important;
 }
 
 .apexcharts-tooltip.apexcharts-theme-light .apexcharts-tooltip-title {
-	border-color: var(--border-normal) !important;
+	border-color: var(--theme--form--field--input--border-color) !important;
 	margin-bottom: 0;
 	padding: 0 4px;
 	font-weight: 600 !important;
 	font-size: 10px !important;
-	background-color: var(--background-subdued) !important;
+	background-color: var(--theme--background-subdued) !important;
 }
 
 .apexcharts-tooltip-series-group {
-	background-color: var(--background-normal-alt) !important;
+	background-color: var(--theme--background-accent) !important;
 	padding: 0;
 }
 
@@ -365,6 +366,6 @@ function setUpChart() {
 
 .apexcharts-tooltip-text {
 	line-height: 1.5 !important;
-	color: var(--foreground-normal);
+	color: var(--theme--foreground);
 }
 </style>

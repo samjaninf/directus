@@ -26,6 +26,7 @@ type RawColumn = {
 	CONSTRAINT_TYPE: 'P' | 'U' | 'R' | null;
 	VIRTUAL_COLUMN: 'YES' | 'NO';
 	IDENTITY_COLUMN: 'YES' | 'NO';
+	INDEX_NAME: string | null;
 };
 
 export function rawColumnToColumn(rawColumn: RawColumn): Column {
@@ -44,6 +45,7 @@ export function rawColumnToColumn(rawColumn: RawColumn): Column {
 		is_generated: rawColumn.VIRTUAL_COLUMN === 'YES',
 		is_nullable: rawColumn.NULLABLE === 'Y',
 		is_unique: rawColumn.CONSTRAINT_TYPE === 'U',
+		is_indexed: !!rawColumn.INDEX_NAME && rawColumn.INDEX_NAME.length > 0,
 		is_primary_key: rawColumn.CONSTRAINT_TYPE === 'P',
 		has_auto_increment: rawColumn.IDENTITY_COLUMN === 'YES',
 		foreign_key_column: rawColumn.REFERENCED_COLUMN_NAME,
@@ -170,7 +172,7 @@ export default class oracleDB implements SchemaInspector {
 				this.knex.raw(`
           /*+ OPTIMIZER_FEATURES_ENABLE('${OPTIMIZER_FEATURES}') */
             "TABLE_NAME" "name"
-        `)
+        `),
 			)
 			.from('USER_TABLES');
 
@@ -189,7 +191,7 @@ export default class oracleDB implements SchemaInspector {
 				this.knex.raw(`
           /*+ OPTIMIZER_FEATURES_ENABLE('${OPTIMIZER_FEATURES}') */
             "TABLE_NAME" "name"
-        `)
+        `),
 			)
 			.from('USER_TABLES');
 
@@ -209,7 +211,7 @@ export default class oracleDB implements SchemaInspector {
 				this.knex.raw(`
           /*+ OPTIMIZER_FEATURES_ENABLE('${OPTIMIZER_FEATURES}') */
             COUNT(*) "count"
-        `)
+        `),
 			)
 			.from('USER_TABLES')
 			.where({ TABLE_NAME: table })
@@ -231,7 +233,7 @@ export default class oracleDB implements SchemaInspector {
           /*+ OPTIMIZER_FEATURES_ENABLE('${OPTIMIZER_FEATURES}') NO_QUERY_TRANSFORMATION */
             "TABLE_NAME" "table",
             "COLUMN_NAME" "column"
-        `)
+        `),
 			)
 			.from('USER_TAB_COLS')
 			.where({ HIDDEN_COLUMN: 'NO' });
@@ -278,7 +280,7 @@ export default class oracleDB implements SchemaInspector {
           INNER JOIN "USER_CONS_COLUMNS" "ucc"
             ON "uc"."CONSTRAINT_NAME" = "ucc"."CONSTRAINT_NAME"
           WHERE "uc"."CONSTRAINT_TYPE" IN ('P', 'U', 'R')
-      `)
+      `),
 			)
 			.select(
 				this.knex.raw(`
@@ -296,7 +298,8 @@ export default class oracleDB implements SchemaInspector {
             "cm"."COMMENTS" "COLUMN_COMMENT",
             "ct"."CONSTRAINT_TYPE",
             "fk"."TABLE_NAME" "REFERENCED_TABLE_NAME",
-            "fk"."COLUMN_NAME" "REFERENCED_COLUMN_NAME"
+            "fk"."COLUMN_NAME" "REFERENCED_COLUMN_NAME",
+            "ui"."INDEX_NAME"
           FROM "USER_TAB_COLS" "c"
           LEFT JOIN "USER_COL_COMMENTS" "cm"
             ON "c"."TABLE_NAME" = "cm"."TABLE_NAME"
@@ -308,7 +311,11 @@ export default class oracleDB implements SchemaInspector {
             AND "ct"."CONSTRAINT_PRIORITY" = 1
           LEFT JOIN "uc" "fk"
             ON "ct"."R_CONSTRAINT_NAME" = "fk"."CONSTRAINT_NAME"
-        `)
+          LEFT JOIN "USER_IND_COLUMNS" "uic"
+            ON "uic"."TABLE_NAME" = "c"."TABLE_NAME" AND "uic"."COLUMN_NAME" = "c"."COLUMN_NAME"
+          LEFT JOIN "USER_INDEXES" "ui"
+            ON "uic"."INDEX_NAME" = "ui"."INDEX_NAME" AND "ui"."UNIQUENESS" = 'NONUNIQUE'
+        `),
 			)
 			.where({ 'c.HIDDEN_COLUMN': 'NO' });
 
@@ -350,7 +357,7 @@ export default class oracleDB implements SchemaInspector {
 				this.knex.raw(`
           /*+ OPTIMIZER_FEATURES_ENABLE('${OPTIMIZER_FEATURES}') NO_QUERY_TRANSFORMATION */
             COUNT(*) "count"
-        `)
+        `),
 			)
 			.from('USER_TAB_COLS')
 			.where({
@@ -376,7 +383,7 @@ export default class oracleDB implements SchemaInspector {
 				this.knex.select(this.knex.raw(`/*+ MATERIALIZE */ "CONSTRAINT_NAME"`)).from('USER_CONSTRAINTS').where({
 					TABLE_NAME: table,
 					CONSTRAINT_TYPE: 'P',
-				})
+				}),
 			)
 			.select(
 				this.knex.raw(`
@@ -385,7 +392,7 @@ export default class oracleDB implements SchemaInspector {
           FROM "USER_CONS_COLUMNS" "ucc"
           INNER JOIN "uc" "pk"
             ON "ucc"."CONSTRAINT_NAME" = "pk"."CONSTRAINT_NAME"
-        `)
+        `),
 			)
 			.first();
 
@@ -408,7 +415,7 @@ export default class oracleDB implements SchemaInspector {
             "COLUMN_NAME",
             "CONSTRAINT_NAME"
           FROM "USER_CONS_COLUMNS"
-        `)
+        `),
 			)
 			.select(
 				this.knex.raw(`
@@ -425,7 +432,7 @@ export default class oracleDB implements SchemaInspector {
             ON "uc"."CONSTRAINT_NAME" = "fcc"."CONSTRAINT_NAME"
           INNER JOIN "ucc" "rcc"
             ON "uc"."R_CONSTRAINT_NAME" = "rcc"."CONSTRAINT_NAME"
-      `)
+      `),
 			)
 			.where({ 'uc.CONSTRAINT_TYPE': 'R' });
 

@@ -4,9 +4,9 @@ import { throwIfEmpty } from '../../utils/index.js';
 import type { RestCommand } from '../../types.js';
 
 export type UpdateTranslationOutput<
-	Schema extends object,
+	Schema,
 	TQuery extends Query<Schema, Item>,
-	Item extends object = DirectusTranslation<Schema>
+	Item extends object = DirectusTranslation<Schema>,
 > = ApplyQueryFields<Schema, Item, TQuery['fields']>;
 
 /**
@@ -18,10 +18,10 @@ export type UpdateTranslationOutput<
  * @throws Will throw if keys is empty
  */
 export const updateTranslations =
-	<Schema extends object, const TQuery extends Query<Schema, DirectusTranslation<Schema>>>(
+	<Schema, const TQuery extends Query<Schema, DirectusTranslation<Schema>>>(
 		keys: DirectusTranslation<Schema>['id'][],
 		item: Partial<DirectusTranslation<Schema>>,
-		query?: TQuery
+		query?: TQuery,
 	): RestCommand<UpdateTranslationOutput<Schema, TQuery>[], Schema> =>
 	() => {
 		throwIfEmpty(keys, 'Keys cannot be empty');
@@ -35,6 +35,24 @@ export const updateTranslations =
 	};
 
 /**
+ * Update multiple translations as batch.
+ * @param items
+ * @param query
+ * @returns Returns the translation objects for the updated translations.
+ */
+export const updateTranslationsBatch =
+	<Schema, const TQuery extends Query<Schema, DirectusTranslation<Schema>>>(
+		items: Partial<DirectusTranslation<Schema>>[],
+		query?: TQuery,
+	): RestCommand<UpdateTranslationOutput<Schema, TQuery>[], Schema> =>
+	() => ({
+		path: `/translations`,
+		params: query ?? {},
+		body: JSON.stringify(items),
+		method: 'PATCH',
+	});
+
+/**
  * Update an existing translation.
  * @param key
  * @param item
@@ -43,10 +61,10 @@ export const updateTranslations =
  * @throws Will throw if key is empty
  */
 export const updateTranslation =
-	<Schema extends object, const TQuery extends Query<Schema, DirectusTranslation<Schema>>>(
+	<Schema, const TQuery extends Query<Schema, DirectusTranslation<Schema>>>(
 		key: DirectusTranslation<Schema>['id'],
 		item: Partial<DirectusTranslation<Schema>>,
-		query?: TQuery
+		query?: TQuery,
 	): RestCommand<UpdateTranslationOutput<Schema, TQuery>, Schema> =>
 	() => {
 		throwIfEmpty(String(key), 'Key cannot be empty');

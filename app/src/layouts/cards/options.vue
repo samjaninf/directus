@@ -1,49 +1,3 @@
-<template>
-	<div class="field">
-		<div class="type-label">{{ t('layouts.cards.image_source') }}</div>
-		<v-select v-model="imageSourceWritable" show-deselect item-value="field" item-text="name" :items="fileFields" />
-	</div>
-
-	<div class="field">
-		<div class="type-label">{{ t('layouts.cards.title') }}</div>
-		<v-field-template v-model="titleWritable" :collection="collection" />
-	</div>
-
-	<div class="field">
-		<div class="type-label">{{ t('layouts.cards.subtitle') }}</div>
-		<v-field-template v-model="subtitleWritable" :collection="collection" />
-	</div>
-
-	<v-detail class="field">
-		<template #title>{{ t('advanced') }}</template>
-
-		<div class="nested-options">
-			<div class="field">
-				<div class="type-label">{{ t('layouts.cards.image_fit') }}</div>
-				<v-select
-					v-model="imageFitWritable"
-					:disabled="imageSource === null"
-					:items="[
-						{
-							text: t('layouts.cards.crop'),
-							value: 'crop',
-						},
-						{
-							text: t('layouts.cards.contain'),
-							value: 'contain',
-						},
-					]"
-				/>
-			</div>
-
-			<div class="field">
-				<div class="type-label">{{ t('fallback_icon') }}</div>
-				<interface-select-icon :value="icon" @input="iconWritable = $event" />
-			</div>
-		</div>
-	</v-detail>
-</template>
-
 <script setup lang="ts">
 import { useI18n } from 'vue-i18n';
 
@@ -85,10 +39,56 @@ export default defineComponent({
 });
 </script>
 
+<template>
+	<div class="field">
+		<div class="type-label">{{ t('layouts.cards.image_source') }}</div>
+		<v-select v-model="imageSourceWritable" show-deselect item-value="field" item-text="name" :items="fileFields" />
+	</div>
+
+	<div class="field">
+		<div class="type-label">{{ t('layouts.cards.title') }}</div>
+		<v-collection-field-template v-model="titleWritable" :collection="collection" />
+	</div>
+
+	<div class="field">
+		<div class="type-label">{{ t('layouts.cards.subtitle') }}</div>
+		<v-collection-field-template v-model="subtitleWritable" :collection="collection" />
+	</div>
+
+	<v-detail class="field">
+		<template #title>{{ t('advanced') }}</template>
+
+		<div class="nested-options">
+			<div class="field">
+				<div class="type-label">{{ t('layouts.cards.image_fit') }}</div>
+				<v-select
+					v-model="imageFitWritable"
+					:disabled="imageSource === null"
+					:items="[
+						{
+							text: t('layouts.cards.crop'),
+							value: 'crop',
+						},
+						{
+							text: t('layouts.cards.contain'),
+							value: 'contain',
+						},
+					]"
+				/>
+			</div>
+
+			<div class="field">
+				<div class="type-label">{{ t('fallback_icon') }}</div>
+				<interface-select-icon :value="icon" @input="iconWritable = $event" />
+			</div>
+		</div>
+	</v-detail>
+</template>
+
 <style lang="scss" scoped>
-@import '@/styles/mixins/form-grid';
+@use '@/styles/mixins';
 
 .nested-options {
-	@include form-grid;
+	@include mixins.form-grid;
 }
 </style>

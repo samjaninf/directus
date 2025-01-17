@@ -1,3 +1,88 @@
+<script setup lang="ts">
+import { useExtension } from '@/composables/use-extension';
+import { useExtensions } from '@/extensions';
+import { nanoid } from 'nanoid/non-secure';
+import { storeToRefs } from 'pinia';
+import { computed, watch } from 'vue';
+import { useI18n } from 'vue-i18n';
+import ExtensionOptions from '../shared/extension-options.vue';
+import { syncFieldDetailStoreProperty, useFieldDetailStore } from '../store/';
+import RelationshipConfiguration from './relationship-configuration.vue';
+
+defineProps<{
+	row?: number;
+}>();
+
+defineEmits(['save', 'toggleAdvanced']);
+
+const fieldDetailStore = useFieldDetailStore();
+
+const { readyToSave, saving, localType } = storeToRefs(fieldDetailStore);
+
+const { t } = useI18n();
+
+const key = syncFieldDetailStoreProperty('field.field');
+const type = syncFieldDetailStoreProperty('field.type');
+const defaultValue = syncFieldDetailStoreProperty('field.schema.default_value');
+const chosenInterface = syncFieldDetailStoreProperty('field.meta.interface');
+const required = syncFieldDetailStoreProperty('field.meta.required', false);
+
+const chosenInterfaceConfig = useExtension('interface', chosenInterface);
+
+const typeOptions = computed(() => {
+	if (!chosenInterfaceConfig.value) return [];
+
+	return chosenInterfaceConfig.value.types.map((type) => ({
+		text: t(type === 'geometry' ? 'geometry.All' : type),
+		value: type,
+	}));
+});
+
+const typeDisabled = computed(() => typeOptions.value.length === 1 || localType.value !== 'standard');
+
+const { interfaces } = useExtensions();
+
+const interfaceIdsToInterface = computed(() => Object.fromEntries(interfaces.value.map((inter) => [inter.id, inter])));
+
+const customOptionsFields = computed(() => {
+	if (typeof chosenInterfaceConfig.value?.options === 'function') {
+		return chosenInterfaceConfig.value?.options(fieldDetailStore);
+	}
+
+	return null;
+});
+
+watch(
+	chosenInterface,
+	(newVal, oldVal) => {
+		if (!newVal) return;
+
+		if (interfaceIdsToInterface.value[newVal].autoKey) {
+			const simplifiedId = newVal.includes('-') ? newVal.split('-')[1] : newVal;
+			key.value = `${simplifiedId}-${nanoid(6).toLowerCase()}`;
+		} else if (oldVal && interfaceIdsToInterface.value[oldVal].autoKey) {
+			key.value = null;
+		}
+	},
+	{ immediate: true },
+);
+
+const options = computed({
+	get() {
+		return fieldDetailStore.field.meta?.options ?? {};
+	},
+	set(newOptions: Record<string, any>) {
+		fieldDetailStore.update({
+			field: {
+				meta: {
+					options: newOptions,
+				},
+			},
+		});
+	},
+});
+</script>
+
 <template>
 	<div class="field-configuration" :style="{ 'grid-row': row }">
 		<div class="setup">
@@ -61,96 +146,17 @@
 	</div>
 </template>
 
-<script setup lang="ts">
-import { useExtension } from '@/composables/use-extension';
-import { useExtensions } from '@/extensions';
-import { nanoid } from 'nanoid/non-secure';
-import { storeToRefs } from 'pinia';
-import { computed, watch } from 'vue';
-import { useI18n } from 'vue-i18n';
-import ExtensionOptions from '../shared/extension-options.vue';
-import { syncFieldDetailStoreProperty, useFieldDetailStore } from '../store/';
-import RelationshipConfiguration from './relationship-configuration.vue';
-
-defineProps<{
-	row?: number;
-}>();
-
-defineEmits(['save', 'toggleAdvanced']);
-
-const fieldDetailStore = useFieldDetailStore();
-
-const { readyToSave, saving, localType } = storeToRefs(fieldDetailStore);
-
-const { t } = useI18n();
-
-const key = syncFieldDetailStoreProperty('field.field');
-const type = syncFieldDetailStoreProperty('field.type');
-const defaultValue = syncFieldDetailStoreProperty('field.schema.default_value');
-const chosenInterface = syncFieldDetailStoreProperty('field.meta.interface');
-const required = syncFieldDetailStoreProperty('field.meta.required', false);
-
-const chosenInterfaceConfig = useExtension('interface', chosenInterface);
-
-const typeOptions = computed(() => {
-	if (!chosenInterfaceConfig.value) return [];
-
-	return chosenInterfaceConfig.value.types.map((type) => ({
-		text: t(type),
-		value: type,
-	}));
-});
-
-const typeDisabled = computed(() => typeOptions.value.length === 1 || localType.value !== 'standard');
-
-const { interfaces } = useExtensions();
-
-const interfaceIdsToInterface = computed(() => Object.fromEntries(interfaces.value.map((inter) => [inter.id, inter])));
-
-const customOptionsFields = computed(() => {
-	if (typeof chosenInterfaceConfig.value?.options === 'function') {
-		return chosenInterfaceConfig.value?.options(fieldDetailStore);
-	}
-
-	return null;
-});
-
-watch(
-	chosenInterface,
-	(newVal, oldVal) => {
-		if (!newVal) return;
-
-		if (interfaceIdsToInterface.value[newVal].autoKey) {
-			const simplifiedId = newVal.includes('-') ? newVal.split('-')[1] : newVal;
-			key.value = `${simplifiedId}-${nanoid(6).toLowerCase()}`;
-		} else if (oldVal && interfaceIdsToInterface.value[oldVal].autoKey) {
-			key.value = null;
-		}
-	},
-	{ immediate: true }
-);
-
-const options = computed({
-	get() {
-		return fieldDetailStore.field.meta?.options ?? {};
-	},
-	set(newOptions: Record<string, any>) {
-		fieldDetailStore.$patch((state) => {
-			state.field.meta = {
-				...(state.field.meta ?? {}),
-				options: newOptions,
-			};
-		});
-	},
-});
-</script>
-
 <style scoped lang="scss">
-@import '@/styles/mixins/form-grid';
+@use '@/styles/mixins';
 
 .field-configuration {
-	--v-button-background-color-disabled: var(--background-normal);
+	--v-button-background-color-disabled: var(--theme--background-normal);
 	--columns: 1;
+
+	grid-column: 1 / span var(--columns);
+	background-color: var(--theme--background-subdued);
+	border-top: var(--theme--border-width) solid var(--theme--form--field--input--border-color);
+	border-bottom: var(--theme--border-width) solid var(--theme--form--field--input--border-color);
 
 	@media (min-width: 400px) {
 		--columns: 2;
@@ -163,26 +169,21 @@ const options = computed({
 	@media (min-width: 840px) {
 		--columns: 4;
 	}
-
-	grid-column: 1 / span var(--columns);
-	background-color: var(--background-subdued);
-	border-top: var(--border-width) solid var(--border-normal);
-	border-bottom: var(--border-width) solid var(--border-normal);
 }
 
 .setup {
-	--form-vertical-gap: 20px;
+	--theme--form--row-gap: 20px;
 
 	margin: 34px;
 }
 
 .schema {
 	margin-bottom: 20px;
-	@include form-grid;
+	@include mixins.form-grid;
 }
 
 .monospace {
-	--v-input-font-family: var(--family-monospace);
+	--v-input-font-family: var(--theme--fonts--monospace--font-family);
 }
 
 .save {
@@ -200,12 +201,12 @@ const options = computed({
 .toggle-advanced {
 	width: 100%;
 	margin-top: 20px;
-	color: var(--foreground-subdued);
+	color: var(--theme--foreground-subdued);
 	text-align: center;
 	transition: color var(--fast) var(--transition);
 
 	&:hover {
-		color: var(--primary);
+		color: var(--theme--primary);
 	}
 }
 </style>

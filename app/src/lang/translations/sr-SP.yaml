@@ -1,24 +1,4 @@
 ---
-## Be aware:
-#Due to the way this is imported, JavaScript reserved words, including "delete", "private",
-#"void", etc are stripped out. See
-#https://github.com/rollup/plugins/blob/8748b8cd3bbab3c5ac6190556930219f19060e63/packages/pluginutils/src/makeLegalIdentifier.ts#L4
-#and
-#https://github.com/rollup/plugins/blob/8748b8cd3bbab3c5ac6190556930219f19060e63/packages/yaml/src/index.js#L45
-#Illegal words:
-#'break', 'case', 'class', 'catch', 'const', 'continue', 'debugger', 'default', 'delete', 'do',
-#'else', 'export', 'extends', 'finally', 'for', 'function', 'if', 'import', 'in', 'instanceof',
-#'let', 'new', 'return', 'super', 'switch', 'this', 'throw', 'try', 'typeof', 'var', 'void',
-#'while', 'with', 'yield', 'enum', 'await', 'implements', 'package', 'protected', 'static',
-#'interface', 'private', 'public', 'arguments', 'Infinity', 'NaN', 'undefined', 'null', 'true',
-#'false', 'eval', 'uneval', 'isFinite', 'isNaN', 'parseFloat', 'parseInt', 'decodeURI',
-#'decodeURIComponent', 'encodeURI', 'encodeURIComponent', 'escape', 'unescape', 'Object',
-#'Function', 'Boolean', 'Symbol', 'Error', 'EvalError', 'InternalError', 'RangeError',
-#'ReferenceError', 'SyntaxError', 'TypeError', 'URIError', 'Number', 'Math', 'Date', 'String',
-#'RegExp', 'Array', 'Int8Array', 'Uint8Array', 'Uint8ClampedArray', 'Int16Array', 'Uint16Array',
-#'Int32Array', 'Uint32Array', 'Float32Array', 'Float64Array', 'Map', 'Set', 'WeakMap', 'WeakSet',
-#'SIMD', 'ArrayBuffer', 'DataView', 'JSON', 'Promise', 'Generator', 'GeneratorFunction', 'Reflect',
-#'Proxy', 'Intl'
 identifier: Identifikator
 avatar: Аватар
 application: Апликација
@@ -39,6 +19,8 @@ half_width: Пола ширине
 full_width: Пуна ширина
 group: Група
 or: Или
+extension_display: Pokazatelj
+extension_modules: Модули
 fill_width: Попуни ширину
 required: Захтјева се
 create_role: Креирајте улогу
@@ -89,13 +71,6 @@ time: Vreme
 timestamp: Vremenska oznaka
 uuid: UUID
 hash: Isečak
-geometry: Geometrija (sve)
-geometry.Point: Tačka
-geometry.LineString: Linijski niz
-geometry.Polygon: Mnogougao
-geometry.MultiPoint: Višestruko
-geometry.MultiLineString: Višelinijski niz
-geometry.MultiPolygon: Mnogougao
 not_available_for_type: Није доступно за овај тип
 auto_generate: Аутоматски генериши
 add_note: Додај помоћну напомену за кориснике...
@@ -152,6 +127,7 @@ item_create_success: Kreirana stavka
 item_update_success: Postavka kreirana
 item_delete_success: Stavka je izbrisana
 this_collection: Ova zbirka
+display_label: Pokazatelj
 functions:
   count: Zbir
 months:
@@ -196,6 +172,7 @@ wysiwyg_options:
   table: Табела
 choices: Избори
 deselect: Поништи избор
+settings_presets: Сачуване странице
 discard_changes: Одбаци промене
 keep_editing: Наставите уређивање
 add_new: Додај нови
@@ -240,7 +217,6 @@ fields:
     description: Опис
     tags: Ознаке
     language: Језик
-    theme: Тема
     tfa_secret: Дво-факторска аутентификација
     status: Стање
     role: Рола
@@ -251,6 +227,8 @@ fields:
   directus_fields:
     display_template: Шаблон
   directus_roles:
+    description: Опис
+  directus_policies:
     description: Опис
   directus_webhooks:
     name: Име
@@ -286,6 +264,8 @@ interfaces:
     files: Фајлови
   input-hash:
     hash: Isečak
+  system-display:
+    display: Pokazatelj
   tags:
     tags: Ознаке
   input-block-editor:
@@ -300,6 +280,8 @@ displays:
     collection: Колекција
   formatted-value:
     text: Текст
+  hash:
+    hash: Isečak
   user:
     avatar: Аватар
     name: Име
@@ -319,3 +301,4 @@ both: Оба
 operations:
   mail:
     template: Шаблон
+compact: Компактни

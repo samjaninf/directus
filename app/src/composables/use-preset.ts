@@ -3,7 +3,7 @@ import { useUserStore } from '@/stores/user';
 import { translate } from '@/utils/translate-literal';
 import type { User } from '@directus/types';
 import { Filter, Preset } from '@directus/types';
-import { assign, debounce, isEqual } from 'lodash';
+import { assign, cloneDeep, debounce, isEqual } from 'lodash';
 import { ComputedRef, Ref, computed, ref, watch } from 'vue';
 
 type UsablePreset = {
@@ -27,8 +27,8 @@ type UsablePreset = {
 
 export function usePreset(
 	collection: Ref<string>,
-	bookmark: Ref<number | null> = ref(null),
-	temporary = false
+	bookmark = ref<number | null>(null),
+	temporary = false,
 ): UsablePreset {
 	const presetsStore = usePresetsStore();
 	const userStore = useUserStore();
@@ -69,8 +69,8 @@ export function usePreset(
 		return updatedValues;
 	};
 
-	const autoSave = debounce(async () => {
-		savePreset();
+	const autoSave = debounce(async (preset?: Partial<Preset>) => {
+		savePreset(preset);
 	}, 450);
 
 	/**
@@ -82,13 +82,19 @@ export function usePreset(
 			const bookmarkInStore = presetsStore.getBookmark(Number(bookmark.value));
 			bookmarkSaved.value = isEqual(localPreset.value, bookmarkInStore);
 		} else {
-			autoSave();
+			const preset = cloneDeep(localPreset.value);
+			autoSave(preset);
 		}
 	}
 
 	function updatePreset(preset: Partial<Preset>, immediate?: boolean) {
 		localPreset.value = assign({}, localPreset.value, preset);
-		immediate ? savePreset() : handleChanges();
+
+		if (immediate) {
+			savePreset();
+		} else {
+			handleChanges();
+		}
 	}
 
 	watch([collection, bookmark], () => {
@@ -185,7 +191,7 @@ export function usePreset(
 				search: null,
 				refresh_interval: null,
 			},
-			true
+			true,
 		);
 	}
 

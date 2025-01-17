@@ -4,9 +4,9 @@ import { throwIfEmpty } from '../../utils/index.js';
 import type { RestCommand } from '../../types.js';
 
 export type ReadFileOutput<
-	Schema extends object,
+	Schema,
 	TQuery extends Query<Schema, Item>,
-	Item extends object = DirectusFile<Schema>
+	Item extends object = DirectusFile<Schema>,
 > = ApplyQueryFields<Schema, Item, TQuery['fields']>;
 
 /**
@@ -15,8 +15,8 @@ export type ReadFileOutput<
  * @returns An array of up to limit file objects. If no items are available, data will be an empty array.
  */
 export const readFiles =
-	<Schema extends object, const TQuery extends Query<Schema, DirectusFile<Schema>>>(
-		query?: TQuery
+	<Schema, const TQuery extends Query<Schema, DirectusFile<Schema>>>(
+		query?: TQuery,
 	): RestCommand<ReadFileOutput<Schema, TQuery>[], Schema> =>
 	() => ({
 		path: `/files`,
@@ -32,9 +32,9 @@ export const readFiles =
  * @throws Will throw if key is empty
  */
 export const readFile =
-	<Schema extends object, const TQuery extends Query<Schema, DirectusFile<Schema>>>(
+	<Schema, const TQuery extends Query<Schema, DirectusFile<Schema>>>(
 		key: DirectusFile<Schema>['id'],
-		query?: TQuery
+		query?: TQuery,
 	): RestCommand<ReadFileOutput<Schema, TQuery>, Schema> =>
 	() => {
 		throwIfEmpty(String(key), 'Key cannot be empty');

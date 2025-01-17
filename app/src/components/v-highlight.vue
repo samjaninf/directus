@@ -1,12 +1,3 @@
-<template>
-	<span class="v-highlight">
-		<template v-for="(part, index) in parts" :key="index">
-			<mark v-if="part.highlighted" class="highlight">{{ part.text }}</mark>
-			<template v-else>{{ part.text }}</template>
-		</template>
-	</span>
-</template>
-
 <script setup lang="ts">
 import { toArray } from '@directus/utils';
 import { flatten } from 'lodash';
@@ -64,7 +55,7 @@ const parts = computed<HighlightPart[]>(() => {
 			acc.push(indices);
 
 			return acc;
-		}, [])
+		}, []),
 	);
 
 	matches.sort((a, b) => {
@@ -131,9 +122,26 @@ const parts = computed<HighlightPart[]>(() => {
 });
 </script>
 
+<template>
+	<span class="v-highlight">
+		<template v-for="(part, index) in parts" :key="index">
+			<mark v-if="part.highlighted" class="highlight">{{ part.text }}</mark>
+			<template v-else>{{ part.text }}</template>
+		</template>
+	</span>
+</template>
+
 <style scoped>
+/*
+
+	Available Variables:
+
+		--v-highlight-color  [var(--background-mark)]
+
+*/
+
 mark {
-	background-color: var(--background-mark);
+	background-color: var(--v-highlight-color, var(--background-mark));
 	border-radius: 2px;
 }
 </style>

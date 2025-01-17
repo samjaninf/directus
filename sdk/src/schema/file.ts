@@ -1,9 +1,9 @@
 import type { MergeCoreCollection } from '../index.js';
-import type { DirectusUser } from './user.js';
 import type { DirectusFolder } from './folder.js';
+import type { DirectusUser } from './user.js';
 
 // Base type for directus_files
-export type DirectusFile<Schema extends object> = MergeCoreCollection<
+export type DirectusFile<Schema = any> = MergeCoreCollection<
 	Schema,
 	'directus_files',
 	{
@@ -15,9 +15,9 @@ export type DirectusFile<Schema extends object> = MergeCoreCollection<
 		type: string | null;
 		folder: DirectusFolder<Schema> | string | null;
 		uploaded_by: DirectusUser<Schema> | string | null;
-		uploaded_on: string;
+		uploaded_on: 'datetime';
 		modified_by: DirectusUser<Schema> | string | null;
-		modified_on: string;
+		modified_on: 'datetime';
 		charset: string | null;
 		filesize: string | null;
 		width: number | null;
@@ -28,5 +28,7 @@ export type DirectusFile<Schema extends object> = MergeCoreCollection<
 		location: string | null;
 		tags: string[] | null;
 		metadata: Record<string, any> | null;
+		focal_point_x: number | null;
+		focal_point_y: number | null;
 	}
 >;

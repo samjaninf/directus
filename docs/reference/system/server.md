@@ -21,7 +21,7 @@ This OAS spec is based on the read permissions of the currently authenticated us
 
 ### Request
 
-<SnippetToggler :choices="['REST', 'GraphQL', 'SDK']" label="API">
+<SnippetToggler :choices="['REST', 'GraphQL', 'SDK']" group="api">
 <template #rest>
 
 `GET /server/specs/oas`
@@ -57,7 +57,7 @@ Object conforming to [the OpenAPI Specification](https://swagger.io/specificatio
 
 ### Example
 
-<SnippetToggler :choices="['REST', 'GraphQL', 'SDK']" label="API">
+<SnippetToggler :choices="['REST', 'GraphQL', 'SDK']" group="api">
 <template #rest>
 
 `GET /server/specs/oas`
@@ -97,7 +97,7 @@ The SDL is based on the permissions of the currently authenticated user.
 
 ### Request
 
-<SnippetToggler :choices="['REST', 'GraphQL', 'SDK']" label="API">
+<SnippetToggler :choices="['REST', 'GraphQL', 'SDK']" group="api">
 <template #rest>
 
 `GET /server/specs/graphql/`
@@ -157,7 +157,7 @@ type articles {
 
 ### Example
 
-<SnippetToggler :choices="['REST', 'GraphQL', 'SDK']" label="API">
+<SnippetToggler :choices="['REST', 'GraphQL', 'SDK']" group="api">
 <template #rest>
 
 `GET /server/specs/graphql/`
@@ -195,7 +195,7 @@ Ping... pong! 🏓
 
 ### Request
 
-<SnippetToggler :choices="['REST', 'GraphQL', 'SDK']" label="API">
+<SnippetToggler :choices="['REST', 'GraphQL', 'SDK']" group="api">
 <template #rest>
 
 `GET /server/ping`
@@ -231,7 +231,7 @@ Pong.
 
 ### Example
 
-<SnippetToggler :choices="['REST', 'GraphQL', 'SDK']" label="API">
+<SnippetToggler :choices="['REST', 'GraphQL', 'SDK']" group="api">
 <template #rest>
 
 `GET /server/ping`
@@ -273,7 +273,7 @@ The public information is returned for everybody. Admin users get additional inf
 
 ### Request
 
-<SnippetToggler :choices="['REST', 'GraphQL', 'SDK']" label="API">
+<SnippetToggler :choices="['REST', 'GraphQL', 'SDK']" group="api">
 <template #rest>
 
 `GET /server/info`
@@ -306,7 +306,7 @@ const result = await client.request(serverInfo());
 ### Response
 
 `project` **object**\
-Public information about the project. Used to render the Admin App public pages.
+Public information about the project. Used to render the Data Studio public pages.
 
 See [the settings object](/reference/system/settings#the-settings-object) for more information on the individual
 properties of the `project` object.
@@ -330,7 +330,7 @@ The maximum query limit accepted on API requests
 
 ### Example
 
-<SnippetToggler :choices="['REST', 'GraphQL', 'SDK']" label="API">
+<SnippetToggler :choices="['REST', 'GraphQL', 'SDK']" group="api">
 <template #rest>
 
 `GET /server/info`
@@ -392,7 +392,7 @@ return more in-depth information about the current health status of the system.
 {
 	"status": "ok",
 	"releaseId": "10.0.0",
-	"serviceId": "3292c816-ae02-43b4-ba91-f0bb549f040c",
+	"serviceId": "https://directus.example.com",
 	"checks": {
 		"pg:responseTime": [
 			{
@@ -438,7 +438,7 @@ return more in-depth information about the current health status of the system.
 
 ### Request
 
-<SnippetToggler :choices="['REST', 'GraphQL', 'SDK']" label="API">
+<SnippetToggler :choices="['REST', 'GraphQL', 'SDK']" group="api">
 <template #rest>
 
 `GET /server/health`
@@ -479,14 +479,14 @@ Authenticated admin users also get the following information:
 Directus version in use.
 
 `serviceId` **string**\
-UUID of the current Directus instance.
+Public URL of the current Directus instance.
 
 `checks` **array**\
 Array with the status of all individually connected services.
 
 ### Example
 
-<SnippetToggler :choices="['REST', 'GraphQL', 'SDK']" label="API">
+<SnippetToggler :choices="['REST', 'GraphQL', 'SDK']" group="api">
 <template #rest>
 
 `GET /server/health`

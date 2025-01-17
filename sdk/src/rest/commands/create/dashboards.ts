@@ -3,9 +3,9 @@ import type { ApplyQueryFields, Query } from '../../../types/index.js';
 import type { RestCommand } from '../../types.js';
 
 export type CreateDashboardOutput<
-	Schema extends object,
+	Schema,
 	TQuery extends Query<Schema, Item>,
-	Item extends object = DirectusDashboard<Schema>
+	Item extends object = DirectusDashboard<Schema>,
 > = ApplyQueryFields<Schema, Item, TQuery['fields']>;
 
 /**
@@ -17,9 +17,9 @@ export type CreateDashboardOutput<
  * @returns Returns the dashboard object for the created dashboards.
  */
 export const createDashboards =
-	<Schema extends object, const TQuery extends Query<Schema, DirectusDashboard<Schema>>>(
+	<Schema, const TQuery extends Query<Schema, DirectusDashboard<Schema>>>(
 		items: Partial<DirectusDashboard<Schema>>[],
-		query?: TQuery
+		query?: TQuery,
 	): RestCommand<CreateDashboardOutput<Schema, TQuery>[], Schema> =>
 	() => ({
 		path: `/dashboards`,
@@ -37,9 +37,9 @@ export const createDashboards =
  * @returns Returns the dashboard object for the created dashboard.
  */
 export const createDashboard =
-	<Schema extends object, const TQuery extends Query<Schema, DirectusDashboard<Schema>>>(
+	<Schema, const TQuery extends Query<Schema, DirectusDashboard<Schema>>>(
 		item: Partial<DirectusDashboard<Schema>>,
-		query?: TQuery
+		query?: TQuery,
 	): RestCommand<CreateDashboardOutput<Schema, TQuery>, Schema> =>
 	() => ({
 		path: `/dashboards`,

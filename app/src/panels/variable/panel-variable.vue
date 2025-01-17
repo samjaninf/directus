@@ -1,17 +1,3 @@
-<template>
-	<div class="variable" :class="{ 'show-header': showHeader }">
-		<component
-			:is="`interface-${inter}`"
-			v-bind="options"
-			:value="value"
-			:width="fieldWidth"
-			:type="type"
-			:field="field"
-			@input="value = $event"
-		/>
-	</div>
-</template>
-
 <script setup lang="ts">
 import { Type } from '@directus/types';
 import { computed } from 'vue';
@@ -43,18 +29,31 @@ const value = computed({
 });
 </script>
 
+<template>
+	<div class="variable" :class="{ 'show-header': showHeader }">
+		<component
+			:is="`interface-${inter}`"
+			v-bind="options"
+			:value="value"
+			:width="fieldWidth"
+			:type="type"
+			:field="field"
+			@input="value = $event"
+		/>
+	</div>
+</template>
+
 <style lang="scss" scope>
 .variable {
+	display: grid;
+	align-content: center;
+	width: 100%;
+	height: 100%;
 	padding: 12px;
 
 	&.show-header {
 		padding-top: 6px;
 	}
-
-	display: grid;
-	align-content: center;
-	width: 100%;
-	height: 100%;
 
 	> * {
 		grid-row: 1;

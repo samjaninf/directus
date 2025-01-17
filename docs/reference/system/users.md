@@ -6,8 +6,8 @@ pageClass: page-reference
 
 # Users
 
-> Directus Users are the individual accounts that let you authenticate into the API and App. Each user belongs to a Role
-> which defines its granular Permissions. [Learn more about Users](/user-guide/overview/glossary#users).
+> Directus Users are the individual accounts that let you authenticate into the API and App. Each user can belong to a
+> Role and. [Learn more about Users](/user-guide/overview/glossary#users).
 
 ## The User Object
 
@@ -42,11 +42,23 @@ Tags for the user.
 Avatar file. Many-to-one to [files](/reference/files).
 
 `language` **string**\
-Language the Admin App is rendered in. See [our Crowdin page](https://locales.directus.io) for all available languages and
-translations.
+Language the Data Studio is rendered in. See [our Crowdin page](https://locales.directus.io) for all available languages
+and translations.
 
-`theme` **string**\
+`appearance` **string**\
 One of `auto`, `light`, `dark`.
+
+`theme_light` **string**\
+Theme to use in `light` mode.
+
+`theme_dark` **string**\
+Theme to use in `dark` mode.
+
+`theme_light_overrides` **json**\
+Customization for `light` theme in use.
+
+`theme_dark_overrides` **json**\
+Customization for `dark` theme in use.
 
 `tfa_secret` **string**\
 When TFA is enabled, this holds the secret key for it.
@@ -59,6 +71,9 @@ Role of the user. Many-to-one to [roles](/reference/system/roles).
 
 `token` **string**\
 Static access token for the user.
+
+`policies` **many-to-many**\
+The policies associated with this user. Many-to-many to [policies](/reference/system/policies).
 
 `last_access` **date**\
 Last time the user accessed the API.
@@ -91,7 +106,7 @@ When this is enabled, the user will receive emails for notifications.
 	"tags": null,
 	"avatar": null,
 	"language": "en-US",
-	"theme": "auto",
+	"appearance": "auto",
 	"tfa_secret": null,
 	"status": "active",
 	"role": "653925a9-970e-487a-bfc0-ab6c96affcdc",
@@ -107,7 +122,7 @@ List all users that exist in Directus.
 
 ### Request
 
-<SnippetToggler :choices="['REST', 'GraphQL', 'SDK']" label="API">
+<SnippetToggler :choices="['REST', 'GraphQL', 'SDK']" group="api">
 <template #rest>
 
 `GET /users`
@@ -154,7 +169,7 @@ be an empty array.
 
 ### Example
 
-<SnippetToggler :choices="['REST', 'GraphQL', 'SDK']" label="API">
+<SnippetToggler :choices="['REST', 'GraphQL', 'SDK']" group="api">
 <template #rest>
 
 `GET /users`
@@ -198,7 +213,7 @@ List an existing user by primary key.
 
 ### Request
 
-<SnippetToggler :choices="['REST', 'GraphQL', 'SDK']" label="API">
+<SnippetToggler :choices="['REST', 'GraphQL', 'SDK']" group="api">
 <template #rest>
 
 `GET /users/:id`
@@ -238,7 +253,7 @@ Returns the requested [user object](#the-user-object).
 
 ### Example
 
-<SnippetToggler :choices="['REST', 'GraphQL', 'SDK']" label="API">
+<SnippetToggler :choices="['REST', 'GraphQL', 'SDK']" group="api">
 <template #rest>
 
 `GET /users/72a1ce24-4748-47de-a05f-ce9af3033727`
@@ -282,7 +297,7 @@ Retrieve the currently authenticated user.
 
 ### Request
 
-<SnippetToggler :choices="['REST', 'GraphQL', 'SDK']" label="API">
+<SnippetToggler :choices="['REST', 'GraphQL', 'SDK']" group="api">
 <template #rest>
 
 `GET /users/me`
@@ -322,7 +337,7 @@ Returns the [user object](#the-user-object) for the currently authenticated user
 
 ### Example
 
-<SnippetToggler :choices="['REST', 'GraphQL', 'SDK']" label="API">
+<SnippetToggler :choices="['REST', 'GraphQL', 'SDK']" group="api">
 <template #rest>
 
 `GET /users/me`
@@ -362,7 +377,7 @@ Update the authenticated user.
 
 ### Request
 
-<SnippetToggler :choices="['REST', 'GraphQL', 'SDK']" label="API">
+<SnippetToggler :choices="['REST', 'GraphQL', 'SDK']" group="api">
 <template #rest>
 
 `PATCH /users/me`
@@ -404,7 +419,7 @@ Returns the updated [user object](#the-user-object) for the authenticated user.
 
 ### Example
 
-<SnippetToggler :choices="['REST', 'GraphQL', 'SDK']" label="API">
+<SnippetToggler :choices="['REST', 'GraphQL', 'SDK']" group="api">
 <template #rest>
 
 `PATCH /users/me`
@@ -452,7 +467,7 @@ Create a new user
 
 ### Request
 
-<SnippetToggler :choices="['REST', 'GraphQL', 'SDK']" label="API">
+<SnippetToggler :choices="['REST', 'GraphQL', 'SDK']" group="api">
 <template #rest>
 
 `POST /users`
@@ -500,7 +515,7 @@ Returns the [user object](#the-user-object) for the created user.
 
 ### Example
 
-<SnippetToggler :choices="['REST', 'GraphQL', 'SDK']" label="API">
+<SnippetToggler :choices="['REST', 'GraphQL', 'SDK']" group="api">
 <template #rest>
 
 `POST /users`
@@ -566,7 +581,7 @@ Create multiple new users
 
 ### Request
 
-<SnippetToggler :choices="['REST', 'GraphQL', 'SDK']" label="API">
+<SnippetToggler :choices="['REST', 'GraphQL', 'SDK']" group="api">
 <template #rest>
 
 `POST /users`
@@ -614,7 +629,7 @@ Returns the [user objects](#the-user-object) for the created users.
 
 ### Example
 
-<SnippetToggler :choices="['REST', 'GraphQL', 'SDK']" label="API">
+<SnippetToggler :choices="['REST', 'GraphQL', 'SDK']" group="api">
 <template #rest>
 
 `POST /users`
@@ -700,7 +715,7 @@ Update an existing user.
 
 ### Request
 
-<SnippetToggler :choices="['REST', 'GraphQL', 'SDK']" label="API">
+<SnippetToggler :choices="['REST', 'GraphQL', 'SDK']" group="api">
 <template #rest>
 
 `PATCH /users/:id`
@@ -746,7 +761,7 @@ Returns the [user object](#the-user-object) for the updated user.
 
 ### Example
 
-<SnippetToggler :choices="['REST', 'GraphQL', 'SDK']" label="API">
+<SnippetToggler :choices="['REST', 'GraphQL', 'SDK']" group="api">
 <template #rest>
 
 `PATCH /users/72a1ce24-4748-47de-a05f-ce9af3033727`
@@ -795,7 +810,7 @@ Update multiple existing users.
 
 ### Request
 
-<SnippetToggler :choices="['REST', 'GraphQL', 'SDK']" label="API">
+<SnippetToggler :choices="['REST', 'GraphQL', 'SDK']" group="api">
 <template #rest>
 
 `PATCH /users`
@@ -850,7 +865,7 @@ Returns the [user objects](#the-user-object) for the updated users.
 
 ### Example
 
-<SnippetToggler :choices="['REST', 'GraphQL', 'SDK']" label="API">
+<SnippetToggler :choices="['REST', 'GraphQL', 'SDK']" group="api">
 <template #rest>
 
 `PATCH /users`
@@ -905,7 +920,7 @@ Delete an existing user.
 
 ### Request
 
-<SnippetToggler :choices="['REST', 'GraphQL', 'SDK']" label="API">
+<SnippetToggler :choices="['REST', 'GraphQL', 'SDK']" group="api">
 <template #rest>
 
 `DELETE /users/:id`
@@ -941,7 +956,7 @@ Empty body.
 
 ### Example
 
-<SnippetToggler :choices="['REST', 'GraphQL', 'SDK']" label="API">
+<SnippetToggler :choices="['REST', 'GraphQL', 'SDK']" group="api">
 <template #rest>
 
 `DELETE /users/72a1ce24-4748-47de-a05f-ce9af3033727`
@@ -979,7 +994,7 @@ Delete multiple existing users.
 
 ### Request
 
-<SnippetToggler :choices="['REST', 'GraphQL', 'SDK']" label="API">
+<SnippetToggler :choices="['REST', 'GraphQL', 'SDK']" group="api">
 <template #rest>
 
 `DELETE /users`
@@ -1021,7 +1036,7 @@ Empty body.
 
 ### Example
 
-<SnippetToggler :choices="['REST', 'GraphQL', 'SDK']" label="API">
+<SnippetToggler :choices="['REST', 'GraphQL', 'SDK']" group="api">
 <template #rest>
 
 `DELETE /users`
@@ -1032,6 +1047,8 @@ Empty body.
 
 </template>
 <template #graphql>
+
+`POST /graphql/system`
 
 ```graphql
 mutation {
@@ -1057,13 +1074,204 @@ const result = await client.request(
 </template>
 </SnippetToggler>
 
+## Register a new User
+
+Register a new user.
+
+### Request
+
+<SnippetToggler :choices="['REST', 'GraphQL', 'SDK']" group="api">
+<template #rest>
+
+`POST /users/register`
+
+```json
+{
+	"email": user_email,
+	"password": user_password
+}
+```
+
+</template>
+<template #graphql>
+
+`POST /graphql/system`
+
+```graphql
+type Mutation {
+	users_register(email: String!, password: String!): True
+}
+```
+
+Note: This mutation always returns true.
+
+</template>
+<template #sdk>
+
+```js
+import { createDirectus, rest, registerUser } from '@directus/sdk';
+
+const client = createDirectus('directus_project_url').with(rest());
+
+await client.request(registerUser(user_email, user_password));
+```
+
+</template>
+</SnippetToggler>
+
+#### Request Body
+
+`email` **Required**\
+Email for the new user.
+
+`password` **Required**\
+Password for the new user.
+
+`first_name`\
+First name for the new user.
+
+`last_name`\
+Last name for the new user.
+
+`verification_url`\
+Provide a custom verification url which the link in the email will lead to. The verification token will be passed as a parameter.\
+**Note**: You need to configure the
+[`USER_REGISTER_URL_ALLOW_LIST` environment variable](/self-hosted/config-options#security) to enable this feature.
+
+### Response
+
+Empty body.
+
+### Example
+
+<SnippetToggler :choices="['REST', 'GraphQL', 'SDK']" group="api">
+<template #rest>
+
+`POST /users/register`
+
+```json
+{
+	"email": "another@example.com",
+	"password": "d1r3ctus"
+}
+```
+
+</template>
+<template #graphql>
+
+`POST /graphql/system`
+
+```graphql
+mutation {
+	users_register(email: "another@example.com", password: "d1r3ctu5")
+}
+```
+
+Note: This mutation always returns true.
+
+</template>
+<template #sdk>
+
+```js
+import { createDirectus, rest, registerUser } from '@directus/sdk';
+
+const client = createDirectus('https://directus.example.com').with(rest());
+
+await client.request(registerUser('another@example.com', 'd1r3ctu5'));
+```
+
+</template>
+</SnippetToggler>
+
+## Verify Registered Email
+
+Verify the registered email address. The [register user endpoint](#register-a-new-user) sends the email a link for
+verification.
+
+This link includes a token, which is then used to activate the registered user.
+
+### Request
+
+<SnippetToggler :choices="['REST', 'GraphQL', 'SDK']" group="api">
+<template #rest>
+
+`GET /users/register/verify-email?token=token`
+
+</template>
+<template #graphql>
+
+`POST /graphql/system`
+
+```graphql
+type Mutation {
+	users_register_verify(token: String!): True
+}
+```
+
+Note: This mutation always returns true.
+
+</template>
+<template #sdk>
+
+```js
+import { createDirectus, rest, verifyUserEmail } from '@directus/sdk';
+
+const client = createDirectus('directus_project_url').with(rest());
+
+await client.request(registerUserVerify(emailed_token));
+```
+
+</template>
+</SnippetToggler>
+
+#### Query Parameters
+
+`token` **Required**\
+Emailed registration token.
+
+### Response
+
+Empty body.
+
+### Example
+
+<SnippetToggler :choices="['REST', 'GraphQL', 'SDK']" group="api">
+<template #rest>
+
+`GET /users/register/verify-email?token=eyJh...KmUk`
+
+</template>
+<template #graphql>
+
+```graphql
+mutation {
+	users_register_verify(token: "eyJh...KmUk")
+}
+```
+
+Note: This mutation always returns true.
+
+</template>
+<template #sdk>
+
+```js
+import { createDirectus, rest, registerUserVerify } from '@directus/sdk';
+
+const client = createDirectus('directus_project_url').with(rest());
+
+await client.request(registerUserVerify('eyJh...KmUk'));
+```
+
+</template>
+</SnippetToggler>
+
 ## Invite a new User
 
 Invite a new user by email.
 
 ### Request
 
-<SnippetToggler :choices="['REST', 'GraphQL', 'SDK']" label="API">
+<SnippetToggler :choices="['REST', 'GraphQL', 'SDK']" group="api">
 <template #rest>
 
 `POST /users/invite`
@@ -1119,7 +1327,7 @@ Empty body.
 
 ### Example
 
-<SnippetToggler :choices="['REST', 'GraphQL', 'SDK']" label="API">
+<SnippetToggler :choices="['REST', 'GraphQL', 'SDK']" group="api">
 <template #rest>
 
 `POST /users/invite`
@@ -1158,16 +1366,16 @@ const result = await client.request(inviteUser('another@example.com', 'c86c2761-
 
 ## Accept User Invite
 
-Accept your invite. The [invite user endpoint](#invite-a-new-user) sends the email a link to the Admin App.
+Accept your invite. The [invite user endpoint](#invite-a-new-user) sends the email a link to the Data Studio.
 
 This link includes a token, which is then used to activate the invited user.
 
 ### Request
 
-<SnippetToggler :choices="['REST', 'GraphQL', 'SDK']" label="API">
+<SnippetToggler :choices="['REST', 'GraphQL', 'SDK']" group="api">
 <template #rest>
 
-`POST /users/invisponse/accept`
+`POST /users/invite/accept`
 
 ```json
 {
@@ -1215,7 +1423,7 @@ Empty body.
 
 ### Example
 
-<SnippetToggler :choices="['REST', 'GraphQL', 'SDK']" label="API">
+<SnippetToggler :choices="['REST', 'GraphQL', 'SDK']" group="api">
 <template #rest>
 
 `POST /users/invite/accept`
@@ -1256,7 +1464,7 @@ Generates a secret and returns the URL to be used in an authenticator app.
 
 ### Request
 
-<SnippetToggler :choices="['REST', 'GraphQL', 'SDK']" label="API">
+<SnippetToggler :choices="['REST', 'GraphQL', 'SDK']" group="api">
 <template #rest>
 
 `POST /users/me/tfa/generate`
@@ -1307,7 +1515,7 @@ OTP secret to be saved in the authenticator app.
 
 ### Example
 
-<SnippetToggler :choices="['REST', 'GraphQL', 'SDK']" label="API">
+<SnippetToggler :choices="['REST', 'GraphQL', 'SDK']" group="api">
 <template #rest>
 
 `POST /users/me/tfa/generate`
@@ -1352,7 +1560,7 @@ Adds a TFA secret to the user account.
 
 ### Request
 
-<SnippetToggler :choices="['REST', 'GraphQL', 'SDK']" label="API">
+<SnippetToggler :choices="['REST', 'GraphQL', 'SDK']" group="api">
 <template #rest>
 
 `POST /users/me/tfa/enable`
@@ -1403,7 +1611,7 @@ Empty response.
 
 ### Example
 
-<SnippetToggler :choices="['REST', 'GraphQL', 'SDK']" label="API">
+<SnippetToggler :choices="['REST', 'GraphQL', 'SDK']" group="api">
 <template #rest>
 
 `POST /users/me/tfa/enable`
@@ -1446,7 +1654,7 @@ Disables two-factor authentication by removing the OTP secret from the user.
 
 ### Request
 
-<SnippetToggler :choices="['REST', 'GraphQL', 'SDK']" label="API">
+<SnippetToggler :choices="['REST', 'GraphQL', 'SDK']" group="api">
 <template #rest>
 
 `POST /users/me/tfa/disable`
@@ -1493,7 +1701,7 @@ Empty response.
 
 ### Example
 
-<SnippetToggler :choices="['REST', 'GraphQL', 'SDK']" label="API">
+<SnippetToggler :choices="['REST', 'GraphQL', 'SDK']" group="api">
 <template #rest>
 
 `POST /users/me/tfa/disable`

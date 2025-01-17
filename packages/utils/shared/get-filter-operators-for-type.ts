@@ -6,7 +6,7 @@ type GetFilterOperationsForTypeOptions = {
 
 export function getFilterOperatorsForType(
 	type: Type,
-	opts?: GetFilterOperationsForTypeOptions
+	opts?: GetFilterOperationsForTypeOptions,
 ): ClientFilterOperator[] {
 	const validationOnlyStringFilterOperators: ClientFilterOperator[] = opts?.includeValidation ? ['regex'] : [];
 
@@ -38,17 +38,16 @@ export function getFilterOperatorsForType(
 				'nin',
 				...validationOnlyStringFilterOperators,
 			];
-		// Hash
+
 		case 'hash':
 			return ['empty', 'nempty', 'null', 'nnull'];
-		// JSON
-		// UUID
+
 		case 'uuid':
 			return ['eq', 'neq', 'null', 'nnull', 'in', 'nin'];
+
 		case 'json':
 			return ['null', 'nnull'];
 
-		// Boolean
 		case 'boolean':
 			return ['eq', 'neq', 'null', 'nnull'];
 

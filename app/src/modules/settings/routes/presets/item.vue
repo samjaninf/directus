@@ -1,143 +1,4 @@
-<template>
-	<component
-		:is="layoutWrapper"
-		v-slot="{ layoutState }"
-		v-model:layout-options="layoutOptions"
-		v-model:layout-query="layoutQuery"
-		:layout-props="layoutProps"
-		:filter="layoutFilter"
-		:search="search"
-		:collection="values.collection"
-		readonly
-	>
-		<private-view
-			:title="t('editing_preset')"
-			:small-header="currentLayout?.smallHeader"
-			:header-shadow="currentLayout?.headerShadow"
-		>
-			<template #headline>
-				<v-breadcrumb :items="[{ name: t('settings_presets'), to: '/settings/presets' }]" />
-			</template>
-			<template #title-outer:prepend>
-				<v-button class="header-icon" rounded icon exact to="/settings/presets">
-					<v-icon name="arrow_back" />
-				</v-button>
-			</template>
-
-			<template #navigation>
-				<settings-navigation />
-			</template>
-
-			<template #actions>
-				<v-dialog v-model="confirmDelete" @esc="confirmDelete = false">
-					<template #activator="{ on }">
-						<v-button
-							v-tooltip.bottom="t('delete_label')"
-							rounded
-							icon
-							class="action-delete"
-							secondary
-							:disabled="preset === null || id === '+'"
-							@click="on"
-						>
-							<v-icon name="delete" />
-						</v-button>
-					</template>
-
-					<v-card>
-						<v-card-title>{{ t('delete_are_you_sure') }}</v-card-title>
-
-						<v-card-actions>
-							<v-button secondary @click="confirmDelete = false">
-								{{ t('cancel') }}
-							</v-button>
-							<v-button kind="danger" :loading="deleting" @click="deleteAndQuit">
-								{{ t('delete_label') }}
-							</v-button>
-						</v-card-actions>
-					</v-card>
-				</v-dialog>
-
-				<v-button
-					v-tooltip.bottom="t('save')"
-					icon
-					rounded
-					:disabled="hasEdits === false"
-					:loading="saving"
-					@click="save"
-				>
-					<v-icon name="check" />
-				</v-button>
-			</template>
-
-			<div class="preset-item">
-				<v-form v-model="edits" :fields="fields" :loading="loading" :initial-values="initialValues" :primary-key="id" />
-
-				<div class="layout">
-					<component :is="`layout-${values.layout}`" v-if="values.layout && values.collection" v-bind="layoutState">
-						<template #no-results>
-							<v-info :title="t('no_results')" icon="search" center>
-								{{ t('no_results_copy') }}
-							</v-info>
-						</template>
-
-						<template #no-items>
-							<v-info :title="t('item_count', 0)" center>
-								{{ t('no_items_copy') }}
-							</v-info>
-						</template>
-					</component>
-
-					<v-notice v-else>
-						{{ t('no_layout_collection_selected_yet') }}
-					</v-notice>
-				</div>
-			</div>
-
-			<template #sidebar>
-				<sidebar-detail icon="info" :title="t('information')" close>
-					<div v-md="t('page_help_settings_presets_item')" class="page-description" />
-				</sidebar-detail>
-
-				<div class="layout-sidebar">
-					<component
-						:is="`layout-sidebar-${values.layout}`"
-						v-if="values.layout && values.collection"
-						v-bind="layoutState"
-					/>
-
-					<sidebar-detail icon="layers" :title="t('layout_options')">
-						<div class="layout-options">
-							<component
-								:is="`layout-options-${values.layout}`"
-								v-if="values.layout && values.collection"
-								v-bind="layoutState"
-							/>
-						</div>
-					</sidebar-detail>
-				</div>
-			</template>
-
-			<v-dialog v-model="confirmLeave" @esc="confirmLeave = false">
-				<v-card>
-					<v-card-title>{{ t('unsaved_changes') }}</v-card-title>
-					<v-card-text>{{ t('unsaved_changes_copy') }}</v-card-text>
-					<v-card-actions>
-						<v-button secondary @click="discardAndLeave">
-							{{ t('discard_changes') }}
-						</v-button>
-						<v-button @click="confirmLeave = false">{{ t('keep_editing') }}</v-button>
-					</v-card-actions>
-				</v-card>
-			</v-dialog>
-		</private-view>
-	</component>
-</template>
-
 <script setup lang="ts">
-import { computed, ref } from 'vue';
-import { useI18n } from 'vue-i18n';
-
 import api from '@/api';
 import { useEditsGuard } from '@/composables/use-edits-guard';
 import { useExtension } from '@/composables/use-extension';
@@ -147,8 +8,11 @@ import { useCollectionsStore } from '@/stores/collections';
 import { usePresetsStore } from '@/stores/presets';
 import { unexpectedError } from '@/utils/unexpected-error';
 import { useLayout } from '@directus/composables';
-import { Filter, Preset } from '@directus/types';
+import { isSystemCollection } from '@directus/system-data';
+import { DeepPartial, Field, Filter, Preset } from '@directus/types';
 import { isEqual } from 'lodash';
+import { computed, ref } from 'vue';
+import { useI18n } from 'vue-i18n';
 import { useRouter } from 'vue-router';
 import SettingsNavigation from '../../components/navigation.vue';
 
@@ -269,8 +133,8 @@ function useSave() {
 			await presetsStore.hydrate();
 
 			edits.value = {};
-		} catch (err: any) {
-			unexpectedError(err);
+		} catch (error) {
+			unexpectedError(error);
 		} finally {
 			saving.value = false;
 			router.push(`/settings/presets`);
@@ -291,8 +155,8 @@ function useDelete() {
 			await presetsStore.delete([Number(props.id)]);
 			edits.value = {};
 			router.replace(`/settings/presets`);
-		} catch (err: any) {
-			unexpectedError(err);
+		} catch (error) {
+			unexpectedError(error);
 		} finally {
 			deleting.value = false;
 		}
@@ -441,8 +305,8 @@ function usePreset() {
 			const response = await api.get(`/presets/${props.id}`);
 
 			preset.value = response.data.data;
-		} catch (err: any) {
-			unexpectedError(err);
+		} catch (error) {
+			unexpectedError(error);
 		} finally {
 			loading.value = false;
 		}
@@ -452,62 +316,27 @@ function usePreset() {
 function useForm() {
 	const systemCollectionWhiteList = ['directus_users', 'directus_files', 'directus_activity'];
 
-	const fields = computed(() => [
+	const fields = computed<DeepPartial<Field>[]>(() => [
 		{
-			field: 'collection',
-			name: t('collection'),
-			type: 'string',
+			field: 'meta-group',
+			type: 'alias',
 			meta: {
-				interface: 'select-dropdown',
-				options: {
-					choices: collectionsStore.collections
-						.map((collection) => ({
-							text: collection.collection,
-							value: collection.collection,
-						}))
-						.filter((option) => {
-							if (option.value.startsWith('directus_')) return systemCollectionWhiteList.includes(option.value);
-
-							return true;
-						}),
-				},
-				width: 'half',
-			},
-		},
-		{
-			field: 'scope',
-			name: t('scope'),
-			type: 'string',
-			meta: {
-				interface: 'system-scope',
-				width: 'half',
-			},
-		},
-		{
-			field: 'layout',
-			name: t('layout'),
-			type: 'string',
-			meta: {
-				interface: 'select-dropdown',
-				options: {
-					choices: layouts.value.map((layout) => ({
-						text: layout.name,
-						value: layout.id,
-					})),
-				},
-				width: 'half',
+				field: 'meta-group',
+				special: ['alias', 'no-data', 'group'],
+				interface: 'group-raw',
 			},
 		},
 		{
 			field: 'name',
-			name: t('name'),
+			name: '$t:name',
 			type: 'string',
 			meta: {
 				interface: 'system-input-translated-string',
-				width: 'half',
 				options: {
-					placeholder: t('preset_name_placeholder'),
+					placeholder: '$t:preset_name_placeholder',
 				},
+				width: 'half',
+				group: 'meta-group',
 			},
 		},
 		{
@@ -517,6 +346,7 @@ function useForm() {
 			meta: {
 				interface: 'select-icon',
 				width: 'half',
+				group: 'meta-group',
 			},
 			schema: {
 				default_value: 'bookmark',
@@ -529,27 +359,73 @@ function useForm() {
 			meta: {
 				interface: 'select-color',
 				width: 'half',
+				group: 'meta-group',
 			},
 		},
 		{
+			field: 'collection',
+			name: '$t:collection',
+			type: 'string',
+			meta: {
+				interface: 'select-dropdown',
+				options: {
+					choices: collectionsStore.sortedCollections
+						.map((collection) => ({
+							text: collection.collection,
+							value: collection.collection,
+						}))
+						.filter((option) => {
+							if (isSystemCollection(option.value)) return systemCollectionWhiteList.includes(option.value);
+
+							return true;
+						}),
+				},
+				width: 'half',
+			},
+		},
+		{
+			field: 'scope',
+			name: '$t:scope',
+			type: 'string',
+			meta: {
+				interface: 'system-scope',
+				width: 'half',
+			},
+		},
+		{
+			field: 'layout',
+			name: '$t:layout',
+			type: 'string',
+			meta: {
+				interface: 'select-dropdown',
+				options: {
+					choices: layouts.value.map((layout) => ({
+						text: layout.name,
+						value: layout.id,
+					})),
+				},
+				width: 'half',
+			},
+		},
+
+		{
 			field: 'search',
-			name: t('search'),
+			name: '$t:search',
 			type: 'string',
 			meta: {
 				interface: 'input',
 				width: 'half',
 				options: {
-					placeholder: t('search_items'),
+					placeholder: '$t:search_items',
 				},
 			},
 		},
 		{
 			field: 'filter',
-			name: t('filter'),
+			name: '$t:filter',
 			type: 'json',
 			meta: {
 				interface: 'system-filter',
-				width: 'half',
 				options: {
 					collectionField: 'collection',
 					rawFieldNames: true,
@@ -557,14 +433,14 @@ function useForm() {
 			},
 		},
 		{
-			field: 'divider',
-			name: t('divider'),
+			field: 'layout-divider',
+			name: '$t:divider',
 			type: 'alias',
 			meta: {
 				interface: 'presentation-divider',
 				width: 'fill',
 				options: {
-					title: t('layout_preview'),
+					title: '$t:layout_preview',
 					icon: 'visibility',
 				},
 			},
@@ -582,18 +458,154 @@ function discardAndLeave() {
 }
 </script>
 
+<template>
+	<component
+		:is="layoutWrapper"
+		v-slot="{ layoutState }"
+		v-model:layout-options="layoutOptions"
+		v-model:layout-query="layoutQuery"
+		:layout-props="layoutProps"
+		:filter="layoutFilter"
+		:search="search"
+		:collection="values.collection"
+		readonly
+	>
+		<private-view
+			:title="t('editing_preset')"
+			:small-header="currentLayout?.smallHeader"
+			:header-shadow="currentLayout?.headerShadow"
+		>
+			<template #headline>
+				<v-breadcrumb :items="[{ name: t('settings_presets'), to: '/settings/presets' }]" />
+			</template>
+			<template #title-outer:prepend>
+				<v-button class="header-icon" rounded icon exact to="/settings/presets">
+					<v-icon name="arrow_back" />
+				</v-button>
+			</template>
+
+			<template #navigation>
+				<settings-navigation />
+			</template>
+
+			<template #actions>
+				<v-dialog v-model="confirmDelete" @esc="confirmDelete = false">
+					<template #activator="{ on }">
+						<v-button
+							v-tooltip.bottom="t('delete_label')"
+							rounded
+							icon
+							class="action-delete"
+							secondary
+							:disabled="preset === null || id === '+'"
+							@click="on"
+						>
+							<v-icon name="delete" />
+						</v-button>
+					</template>
+
+					<v-card>
+						<v-card-title>{{ t('delete_are_you_sure') }}</v-card-title>
+
+						<v-card-actions>
+							<v-button secondary @click="confirmDelete = false">
+								{{ t('cancel') }}
+							</v-button>
+							<v-button kind="danger" :loading="deleting" @click="deleteAndQuit">
+								{{ t('delete_label') }}
+							</v-button>
+						</v-card-actions>
+					</v-card>
+				</v-dialog>
+
+				<v-button
+					v-tooltip.bottom="t('save')"
+					icon
+					rounded
+					:disabled="hasEdits === false"
+					:loading="saving"
+					@click="save"
+				>
+					<v-icon name="check" />
+				</v-button>
+			</template>
+
+			<div class="preset-item">
+				<v-form v-model="edits" :fields="fields" :loading="loading" :initial-values="initialValues" :primary-key="id" />
+
+				<div class="layout">
+					<component :is="`layout-${values.layout}`" v-if="values.layout && values.collection" v-bind="layoutState">
+						<template #no-results>
+							<v-info :title="t('no_results')" icon="search" center>
+								{{ t('no_results_copy') }}
+							</v-info>
+						</template>
+
+						<template #no-items>
+							<v-info :title="t('item_count', 0)" center>
+								{{ t('no_items_copy') }}
+							</v-info>
+						</template>
+					</component>
+
+					<v-notice v-else>
+						{{ t('no_layout_collection_selected_yet') }}
+					</v-notice>
+				</div>
+			</div>
+
+			<template #sidebar>
+				<sidebar-detail icon="info" :title="t('information')" close>
+					<div v-md="t('page_help_settings_presets_item')" class="page-description" />
+				</sidebar-detail>
+
+				<div class="layout-sidebar">
+					<component
+						:is="`layout-sidebar-${values.layout}`"
+						v-if="values.layout && values.collection"
+						v-bind="layoutState"
+					/>
+
+					<sidebar-detail icon="layers" :title="t('layout_options')">
+						<div class="layout-options">
+							<component
+								:is="`layout-options-${values.layout}`"
+								v-if="values.layout && values.collection"
+								v-bind="layoutState"
+							/>
+						</div>
+					</sidebar-detail>
+				</div>
+			</template>
+
+			<v-dialog v-model="confirmLeave" @esc="confirmLeave = false">
+				<v-card>
+					<v-card-title>{{ t('unsaved_changes') }}</v-card-title>
+					<v-card-text>{{ t('unsaved_changes_copy') }}</v-card-text>
+					<v-card-actions>
+						<v-button secondary @click="discardAndLeave">
+							{{ t('discard_changes') }}
+						</v-button>
+						<v-button @click="confirmLeave = false">{{ t('keep_editing') }}</v-button>
+					</v-card-actions>
+				</v-card>
+			</v-dialog>
+		</private-view>
+	</component>
+</template>
+
 <style lang="scss" scoped>
-@import '@/styles/mixins/form-grid';
+@use '@/styles/mixins';
 
 .header-icon {
-	--v-button-background-color: var(--primary-10);
-	--v-button-color: var(--primary);
-	--v-button-background-color-hover: var(--primary-25);
-	--v-button-color-hover: var(--primary);
+	--v-button-background-color: var(--theme--primary-background);
+	--v-button-color: var(--theme--primary);
+	--v-button-background-color-hover: var(--theme--primary-subdued);
+	--v-button-color-hover: var(--theme--primary);
 }
 
 .action-delete {
-	--v-button-background-color-hover: var(--danger) !important;
+	--v-button-background-color-hover: var(--theme--danger) !important;
 	--v-button-color-hover: var(--white) !important;
 }
 
@@ -616,18 +628,15 @@ function discardAndLeave() {
 }
 
 .layout-sidebar {
-	--sidebar-detail-icon-color: var(--primary);
-	--sidebar-detail-color: var(--primary);
-	--sidebar-detail-color-active: var(--primary);
-	--form-vertical-gap: 24px;
+	--theme--form--row-gap: 24px;
 
 	display: contents;
 }
 
 :deep(.layout-options) {
-	--form-vertical-gap: 24px;
+	--theme--form--row-gap: 24px;
 
-	@include form-grid;
+	@include mixins.form-grid;
 }
 
 :deep(.layout-options .type-label) {
@@ -635,7 +644,7 @@ function discardAndLeave() {
 }
 
 .subdued {
-	color: var(--foreground-subdued);
+	color: var(--theme--foreground-subdued);
 	font-style: italic;
 }
 </style>

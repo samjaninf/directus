@@ -1,3 +1,9 @@
+import type {
+	ApiExtensionType,
+	AppExtensionType,
+	ExtensionOptionsBundleEntry,
+	ExtensionManifest as TExtensionManifest,
+} from '@directus/extensions';
 import {
 	API_SHARED_DEPS,
 	APP_EXTENSION_TYPES,
@@ -7,13 +13,7 @@ import {
 	ExtensionManifest,
 	ExtensionOptionsBundleEntries,
 	HYBRID_EXTENSION_TYPES,
-} from '@directus/constants';
-import type {
-	ApiExtensionType,
-	AppExtensionType,
-	ExtensionOptionsBundleEntry,
-	ExtensionManifest as TExtensionManifest,
-} from '@directus/types';
+} from '@directus/extensions';
 import { isIn, isTypeIn } from '@directus/utils';
 import commonjsDefault from '@rollup/plugin-commonjs';
 import jsonDefault from '@rollup/plugin-json';
@@ -21,16 +21,16 @@ import { nodeResolve } from '@rollup/plugin-node-resolve';
 import replaceDefault from '@rollup/plugin-replace';
 import terserDefault from '@rollup/plugin-terser';
 import virtualDefault from '@rollup/plugin-virtual';
-import vueDefault from '@vitejs/plugin-vue';
+import vue from '@vitejs/plugin-vue';
 import chalk from 'chalk';
 import fse from 'fs-extra';
 import ora from 'ora';
 import path from 'path';
-import type { Plugin, RollupError, RollupOptions, OutputOptions as RollupOutputOptions } from 'rollup';
+import type { RollupError, RollupOptions, OutputOptions as RollupOutputOptions } from 'rollup';
 import { rollup, watch as rollupWatch } from 'rollup';
 import esbuildDefault from 'rollup-plugin-esbuild';
 import stylesDefault from 'rollup-plugin-styles';
-import type { Format, RollupConfig, RollupMode } from '../types.js';
+import type { Config, Format, RollupConfig, RollupMode } from '../types.js';
 import { getFileExt } from '../utils/file.js';
 import { clear, log } from '../utils/logger.js';
 import tryParseJson from '../utils/try-parse-json.js';
@@ -40,7 +40,6 @@ import { validateSplitEntrypointOption } from './helpers/validate-cli-options.js
 
 // Workaround for https://github.com/rollup/plugins/issues/1329
 const virtual = virtualDefault as unknown as typeof virtualDefault.default;
-const vue = vueDefault as unknown as typeof vueDefault.default;
 const esbuild = esbuildDefault as unknown as typeof esbuildDefault.default;
 const styles = stylesDefault as unknown as typeof stylesDefault.default;
 const commonjs = commonjsDefault as unknown as typeof commonjsDefault.default;
@@ -66,16 +65,29 @@ export default async function build(options: BuildOptions): Promise<void> {
 		const packagePath = path.resolve('package.json');
 
 		if (!(await fse.pathExists(packagePath))) {
-			log(`Current directory is not a valid package.`, 'error');
+			log(`Current directory is not a valid Directus extension:`, 'error');
+			log(`Missing "package.json" file.`, 'error');
+			process.exit(1);
+		}
+
+		let extensionManifestFile: string;
+
+		try {
+			extensionManifestFile = await fse.readFile(packagePath, 'utf8');
+		} catch {
+			log(`Failed to read "package.json" file from current directory.`, 'error');
 			process.exit(1);
 		}
 
 		let extensionManifest: TExtensionManifest;
 
 		try {
-			extensionManifest = ExtensionManifest.parse(await fse.readJSON(packagePath));
-		} catch (err) {
-			log(`Current directory is not a valid Directus extension.`, 'error');
+			extensionManifest = JSON.parse(extensionManifestFile);
+			ExtensionManifest.parse(extensionManifest);
+		} catch {
+			log(`Current directory is not a valid Directus extension:`, 'error');
+			log(`Invalid "package.json" file.`, 'error');
+
 			process.exit(1);
 		}
 
@@ -128,9 +140,9 @@ export default async function build(options: BuildOptions): Promise<void> {
 		if (!isIn(type, EXTENSION_TYPES)) {
 			log(
 				`Extension type ${chalk.bold(type)} is not supported. Available extension types: ${EXTENSION_TYPES.map((t) =>
-					chalk.bold.magenta(t)
+					chalk.bold.magenta(t),
 				).join(', ')}.`,
-				'error'
+				'error',
 			);
 
 			process.exit(1);
@@ -144,7 +156,7 @@ export default async function build(options: BuildOptions): Promise<void> {
 		if (!output) {
 			log(
 				`Extension output file has to be specified using the ${chalk.blue('[-o, --output <file>]')} option.`,
-				'error'
+				'error',
 			);
 
 			process.exit(1);
@@ -157,9 +169,9 @@ export default async function build(options: BuildOptions): Promise<void> {
 			if (entries.success === false) {
 				log(
 					`Input option needs to be of the format ${chalk.blue(
-						`[-i '[{"type":"<extension-type>","name":"<extension-name>","source":<entrypoint>}]']`
+						`[-i '[{"type":"<extension-type>","name":"<extension-name>","source":<entrypoint>}]']`,
 					)}.`,
-					'error'
+					'error',
 				);
 
 				process.exit(1);
@@ -168,9 +180,9 @@ export default async function build(options: BuildOptions): Promise<void> {
 			if (!validateSplitEntrypointOption(splitOutput)) {
 				log(
 					`Output option needs to be of the format ${chalk.blue(
-						`[-o '{"app":"<app-entrypoint>","api":"<api-entrypoint>"}']`
+						`[-o '{"app":"<app-entrypoint>","api":"<api-entrypoint>"}']`,
 					)}.`,
-					'error'
+					'error',
 				);
 
 				process.exit(1);
@@ -192,9 +204,9 @@ export default async function build(options: BuildOptions): Promise<void> {
 			if (!validateSplitEntrypointOption(splitInput)) {
 				log(
 					`Input option needs to be of the format ${chalk.blue(
-						`[-i '{"app":"<app-entrypoint>","api":"<api-entrypoint>"}']`
+						`[-i '{"app":"<app-entrypoint>","api":"<api-entrypoint>"}']`,
 					)}.`,
-					'error'
+					'error',
 				);
 
 				process.exit(1);
@@ -203,9 +215,9 @@ export default async function build(options: BuildOptions): Promise<void> {
 			if (!validateSplitEntrypointOption(splitOutput)) {
 				log(
 					`Output option needs to be of the format ${chalk.blue(
-						`[-o '{"app":"<app-entrypoint>","api":"<api-entrypoint>"}']`
+						`[-o '{"app":"<app-entrypoint>","api":"<api-entrypoint>"}']`,
 					)}.`,
-					'error'
+					'error',
 				);
 
 				process.exit(1);
@@ -263,11 +275,10 @@ async function buildAppOrApiExtension({
 	}
 
 	const config = await loadConfig();
-	const plugins = config.plugins ?? [];
 
 	const mode = isIn(type, APP_EXTENSION_TYPES) ? 'browser' : 'node';
 
-	const rollupOptions = getRollupOptions({ mode, input, sourcemap, minify, plugins });
+	const rollupOptions = getRollupOptions({ mode, input, sourcemap, minify, config });
 	const rollupOutputOptions = getRollupOutputOptions({ mode, output, format, sourcemap });
 
 	if (watch) {
@@ -317,14 +328,13 @@ async function buildHybridExtension({
 	}
 
 	const config = await loadConfig();
-	const plugins = config.plugins ?? [];
 
 	const rollupOptionsApp = getRollupOptions({
 		mode: 'browser',
 		input: inputApp,
 		sourcemap,
 		minify,
-		plugins,
+		config,
 	});
 
 	const rollupOptionsApi = getRollupOptions({
@@ -332,7 +342,7 @@ async function buildHybridExtension({
 		input: inputApi,
 		sourcemap,
 		minify,
-		plugins,
+		config,
 	});
 
 	const rollupOutputOptionsApp = getRollupOutputOptions({ mode: 'browser', output: outputApp, format, sourcemap });
@@ -377,8 +387,18 @@ async function buildBundleExtension({
 		process.exit(1);
 	}
 
+	const bundleEntryNames = new Set();
+
+	for (const { name } of entries) {
+		if (bundleEntryNames.has(name)) {
+			log(`Duplicate extension found in bundle for ${chalk.bold(name)}.`, 'error');
+			process.exit(1);
+		}
+
+		bundleEntryNames.add(name);
+	}
+
 	const config = await loadConfig();
-	const plugins = config.plugins ?? [];
 
 	const entrypointApp = generateBundleEntrypoint('app', entries);
 	const entrypointApi = generateBundleEntrypoint('api', entries);
@@ -388,7 +408,7 @@ async function buildBundleExtension({
 		input: { entry: entrypointApp },
 		sourcemap,
 		minify,
-		plugins,
+		config,
 	});
 
 	const rollupOptionsApi = getRollupOptions({
@@ -396,7 +416,7 @@ async function buildBundleExtension({
 		input: { entry: entrypointApi },
 		sourcemap,
 		minify,
-		plugins,
+		config,
 	});
 
 	const rollupOutputOptionsApp = getRollupOutputOptions({ mode: 'browser', output: outputApp, format, sourcemap });
@@ -431,7 +451,7 @@ async function buildExtension(config: RollupConfig | RollupConfig[]) {
 			}
 
 			return null;
-		})
+		}),
 	);
 
 	const resultErrors = result.filter((r) => r !== null);
@@ -449,6 +469,7 @@ async function buildExtension(config: RollupConfig | RollupConfig[]) {
 
 async function watchExtension(config: RollupConfig | RollupConfig[]) {
 	const configs = Array.isArray(config) ? config : [config];
+	const userConfig = await loadConfig();
 
 	const spinner = ora(chalk.bold('Building Directus extension...'));
 
@@ -464,7 +485,10 @@ async function watchExtension(config: RollupConfig | RollupConfig[]) {
 			switch (event.code) {
 				case 'BUNDLE_START':
 					if (buildCount === 0) {
-						clear();
+						if (userConfig?.watch?.clearScreen !== false) {
+							clear();
+						}
+
 						spinner.start();
 					}
 
@@ -504,14 +528,16 @@ function getRollupOptions({
 	input,
 	sourcemap,
 	minify,
-	plugins,
+	config,
 }: {
 	mode: RollupMode;
 	input: string | Record<string, string>;
 	sourcemap: boolean;
 	minify: boolean;
-	plugins: Plugin[];
+	config: Config;
 }): RollupOptions {
+	const plugins = config.plugins ?? [];
+
 	return {
 		input: typeof input !== 'string' ? 'entry' : input,
 		external: mode === 'browser' ? APP_SHARED_DEPS : API_SHARED_DEPS,

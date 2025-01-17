@@ -4,9 +4,9 @@ import { throwIfEmpty } from '../../utils/index.js';
 import type { RestCommand } from '../../types.js';
 
 export type ReadPanelOutput<
-	Schema extends object,
+	Schema,
 	TQuery extends Query<Schema, Item>,
-	Item extends object = DirectusPanel<Schema>
+	Item extends object = DirectusPanel<Schema>,
 > = ApplyQueryFields<Schema, Item, TQuery['fields']>;
 
 /**
@@ -15,8 +15,8 @@ export type ReadPanelOutput<
  * @returns An array of up to limit panel objects. If no items are available, data will be an empty array.
  */
 export const readPanels =
-	<Schema extends object, const TQuery extends Query<Schema, DirectusPanel<Schema>>>(
-		query?: TQuery
+	<Schema, const TQuery extends Query<Schema, DirectusPanel<Schema>>>(
+		query?: TQuery,
 	): RestCommand<ReadPanelOutput<Schema, TQuery>[], Schema> =>
 	() => ({
 		path: `/panels`,
@@ -32,9 +32,9 @@ export const readPanels =
  * @throws Will throw if key is empty
  */
 export const readPanel =
-	<Schema extends object, const TQuery extends Query<Schema, DirectusPanel<Schema>>>(
+	<Schema, const TQuery extends Query<Schema, DirectusPanel<Schema>>>(
 		key: DirectusPanel<Schema>['id'],
-		query?: TQuery
+		query?: TQuery,
 	): RestCommand<ReadPanelOutput<Schema, TQuery>, Schema> =>
 	() => {
 		throwIfEmpty(String(key), 'Key cannot be empty');

@@ -1,32 +1,31 @@
-<template>
-	<LivePreview v-if="previewURL" :url="previewURL" in-popup @new-window="closePopup" />
-</template>
-
 <script setup lang="ts">
+import { useTemplateData } from '@/composables/use-template-data';
+import { useVersions } from '@/composables/use-versions';
+import { renderStringTemplate } from '@/utils/render-string-template';
+import { useCollection } from '@directus/composables';
 import { computed, toRefs } from 'vue';
 import LivePreview from '../components/live-preview.vue';
-import { useCollection } from '@directus/composables';
-import { renderStringTemplate } from '@/utils/render-string-template';
-import { useTemplateData } from '@/composables/use-template-data';
 
-type Props = {
+const props = defineProps<{
 	collection: string;
 	primaryKey: string;
-};
-
-const props = defineProps<Props>();
+}>();
 
 const { collection, primaryKey } = toRefs(props);
 
-const { info: collectionInfo } = useCollection(collection);
+const { info: collectionInfo, isSingleton } = useCollection(collection);
+
+const { currentVersion } = useVersions(collection, isSingleton, primaryKey);
 
 const previewTemplate = computed(() => collectionInfo.value?.meta?.preview_url ?? '');
 
-const { templateData: previewData } = useTemplateData(collectionInfo, primaryKey, previewTemplate);
+const { templateData: previewData } = useTemplateData(collectionInfo, primaryKey, {
+	template: previewTemplate,
+	injectData: computed(() => ({ $version: currentVersion.value?.key ?? 'main' })),
+});
 
-const previewURL = computed(() => {
-	const { displayValue } = renderStringTemplate(previewTemplate.value, previewData);
-
+const previewUrl = computed(() => {
+	const { displayValue } = renderStringTemplate(previewTemplate.value, previewData.value);
 	return displayValue.value || null;
 });
 
@@ -34,3 +33,7 @@ function closePopup() {
 	window.close();
 }
 </script>
+
+<template>
+	<LivePreview v-if="previewUrl" :url="previewUrl" in-popup @new-window="closePopup" />
+</template>

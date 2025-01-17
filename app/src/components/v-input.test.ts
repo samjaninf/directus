@@ -1,8 +1,7 @@
 import { Focus } from '@/__utils__/focus';
+import type { GlobalMountOptions } from '@/__utils__/types';
 import { mount } from '@vue/test-utils';
-import { GlobalMountOptions } from '@vue/test-utils/dist/types';
 import { describe, expect, test } from 'vitest';
-
 import VInput from './v-input.vue';
 
 const global: GlobalMountOptions = {
@@ -34,7 +33,7 @@ test('modelValue prop', async () => {
 
 	await wrapper.find('input').setValue('my value1');
 
-	expect(wrapper.emitted()['update:modelValue'][0]).toEqual(['my value1']);
+	expect(wrapper.emitted()['update:modelValue']?.[0]).toEqual(['my value1']);
 });
 
 test('modelValue trim', async () => {
@@ -48,7 +47,7 @@ test('modelValue trim', async () => {
 
 	await wrapper.find('input').trigger('blur');
 
-	expect(wrapper.emitted()['update:modelValue'][0]).toEqual(['please trim that beard']);
+	expect(wrapper.emitted()['update:modelValue']?.[0]).toEqual(['please trim that beard']);
 });
 
 test('modelValue dbSafe', async () => {
@@ -62,7 +61,7 @@ test('modelValue dbSafe', async () => {
 
 	await wrapper.find('input').trigger('input');
 
-	expect(wrapper.emitted()['update:modelValue'][0]).toEqual(['this_hould_be_D_save']);
+	expect(wrapper.emitted()['update:modelValue']?.[0]).toEqual(['this_hould_be_D_save']);
 });
 
 describe('processValue', () => {
@@ -106,13 +105,11 @@ describe('processValue', () => {
 			global,
 		});
 
-		const inputElement = wrapper.find('input').element;
-		// mock keyboard event
-		const keyboardEvent = new KeyboardEvent('keydown', event);
-		// manually attach the input element as the mocked event's target
-		Object.defineProperty(keyboardEvent, 'target', { value: inputElement });
+		const input = wrapper.find('input');
 
-		wrapper.vm.processValue(keyboardEvent);
+		await input.trigger('keydown', event);
+
+		const keyboardEvent = wrapper.emitted('keydown')?.[0]?.[0] as KeyboardEvent;
 
 		expect(keyboardEvent.defaultPrevented).toBe(shouldDefaultPrevented);
 	});
@@ -137,13 +134,11 @@ describe('processValue', () => {
 			global,
 		});
 
-		const inputElement = wrapper.find('input').element;
-		// mock keyboard event
-		const keyboardEvent = new KeyboardEvent('keydown', event);
-		// manually attach the input element as the mocked event's target
-		Object.defineProperty(keyboardEvent, 'target', { value: inputElement });
+		const input = wrapper.find('input');
 
-		wrapper.vm.processValue(keyboardEvent);
+		await input.trigger('keydown', event);
+
+		const keyboardEvent = wrapper.emitted('keydown')?.[0]?.[0] as KeyboardEvent;
 
 		expect(keyboardEvent.defaultPrevented).toBe(shouldDefaultPrevented);
 	});
@@ -161,7 +156,7 @@ describe('emitValue', () => {
 
 		await wrapper.find('input').trigger('input');
 
-		expect(wrapper.emitted()['update:modelValue'][0]).toEqual([null]);
+		expect(wrapper.emitted()['update:modelValue']?.[0]).toEqual([null]);
 	});
 
 	test('should emit number when type is number', async () => {
@@ -175,7 +170,7 @@ describe('emitValue', () => {
 
 		await wrapper.find('input').trigger('input');
 
-		expect(wrapper.emitted()['update:modelValue'][0]).toEqual([1]);
+		expect(wrapper.emitted()['update:modelValue']?.[0]).toEqual([1]);
 	});
 
 	test('should turn ending space into slug separator for slug input', async () => {
@@ -189,7 +184,7 @@ describe('emitValue', () => {
 
 		await wrapper.find('input').trigger('input');
 
-		expect(wrapper.emitted()['update:modelValue'][0]).toEqual(['test-']);
+		expect(wrapper.emitted()['update:modelValue']?.[0]).toEqual(['test-']);
 	});
 
 	test('should turn space into underscores for dbSafe input', async () => {
@@ -203,7 +198,7 @@ describe('emitValue', () => {
 
 		await wrapper.find('input').trigger('input');
 
-		expect(wrapper.emitted()['update:modelValue'][0]).toEqual(['a_custom_field']);
+		expect(wrapper.emitted()['update:modelValue']?.[0]).toEqual(['a_custom_field']);
 	});
 
 	test('should prevent pasting of non db safe characters for dbSafe input', async () => {
@@ -217,7 +212,7 @@ describe('emitValue', () => {
 
 		await wrapper.find('input').trigger('input');
 
-		expect(wrapper.emitted()['update:modelValue'][0]).toEqual(['test_field']);
+		expect(wrapper.emitted()['update:modelValue']?.[0]).toEqual(['test_field']);
 	});
 
 	test('should normalize accented characters for dbSafe input', async () => {
@@ -231,6 +226,6 @@ describe('emitValue', () => {
 
 		await wrapper.find('input').trigger('input');
 
-		expect(wrapper.emitted()['update:modelValue'][0]).toEqual(['a_test_field']);
+		expect(wrapper.emitted()['update:modelValue']?.[0]).toEqual(['a_test_field']);
 	});
 });

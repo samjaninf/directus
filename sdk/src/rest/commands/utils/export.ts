@@ -9,11 +9,11 @@ export type FileFormat = 'csv' | 'json' | 'xml' | 'yaml';
  * @returns Nothing
  */
 export const utilsExport =
-	<Schema extends object, TQuery extends Query<Schema, Schema[Collection]>, Collection extends keyof Schema>(
+	<Schema, TQuery extends Query<Schema, Schema[Collection]>, Collection extends keyof Schema>(
 		collection: Collection,
 		format: FileFormat,
 		query: TQuery,
-		file: Partial<DirectusFile<Schema>>
+		file: Partial<DirectusFile<Schema>>,
 	): RestCommand<void, Schema> =>
 	() => ({
 		method: 'POST',

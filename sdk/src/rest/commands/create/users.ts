@@ -3,9 +3,9 @@ import type { ApplyQueryFields, Query } from '../../../types/index.js';
 import type { RestCommand } from '../../types.js';
 
 export type CreateUserOutput<
-	Schema extends object,
+	Schema,
 	TQuery extends Query<Schema, Item>,
-	Item extends object = DirectusUser<Schema>
+	Item extends object = DirectusUser<Schema>,
 > = ApplyQueryFields<Schema, Item, TQuery['fields']>;
 
 /**
@@ -17,9 +17,9 @@ export type CreateUserOutput<
  * @returns Returns the user objects for the created users.
  */
 export const createUsers =
-	<Schema extends object, const TQuery extends Query<Schema, DirectusUser<Schema>>>(
+	<Schema, const TQuery extends Query<Schema, DirectusUser<Schema>>>(
 		items: Partial<DirectusUser<Schema>>[],
-		query?: TQuery
+		query?: TQuery,
 	): RestCommand<CreateUserOutput<Schema, TQuery>[], Schema> =>
 	() => ({
 		path: `/users`,
@@ -37,9 +37,9 @@ export const createUsers =
  * @returns Returns the user object for the created user.
  */
 export const createUser =
-	<Schema extends object, const TQuery extends Query<Schema, DirectusUser<Schema>>>(
+	<Schema, const TQuery extends Query<Schema, DirectusUser<Schema>>>(
 		item: Partial<DirectusUser<Schema>>,
-		query?: TQuery
+		query?: TQuery,
 	): RestCommand<CreateUserOutput<Schema, TQuery>, Schema> =>
 	() => ({
 		path: `/users`,

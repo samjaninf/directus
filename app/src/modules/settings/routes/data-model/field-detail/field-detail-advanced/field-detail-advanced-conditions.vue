@@ -1,7 +1,3 @@
-<template>
-	<v-form v-model="conditionsSync" :fields="fields" :loading="loading" />
-</template>
-
 <script setup lang="ts">
 import { useExtension } from '@/composables/use-extension';
 import { DeepPartial, Field } from '@directus/types';
@@ -22,11 +18,11 @@ const interfaceId = computed(() => field.value.meta?.interface ?? null);
 
 const conditionsSync = computed({
 	get() {
-		return conditions.value;
+		return { conditions: conditions.value };
 	},
 	set(value) {
-		if (!value.conditions || value.conditions.length === 0) {
-			conditions.value = null;
+		if (!value.conditions) {
+			conditions.value = value.conditions;
 			return;
 		}
 
@@ -37,9 +33,11 @@ const conditionsSync = computed({
 			return condition;
 		});
 
-		conditions.value = { conditions: conditionsWithDefaults };
+		conditions.value = conditionsWithDefaults;
 	},
 });
+
+const conditionsInitial = conditionsSync.value;
 
 const repeaterFields = computed<DeepPartial<Field>[]>(() => [
 	{
@@ -164,7 +162,7 @@ const optionDefaults = computed(() => {
 		.reduce((result, option) => ({ ...result, [option.field]: option.schema.default_value }), {});
 });
 
-const fields = computed(() => [
+const fields = computed<DeepPartial<Field>[]>(() => [
 	{
 		field: 'conditions',
 		name: t('conditions'),
@@ -179,3 +177,7 @@ const fields = computed(() => [
 	},
 ]);
 </script>
+
+<template>
+	<v-form v-model="conditionsSync" :initial-values="conditionsInitial" :fields="fields" :loading="loading" />
+</template>

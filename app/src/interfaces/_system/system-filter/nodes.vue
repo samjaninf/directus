@@ -1,108 +1,3 @@
-<template>
-	<draggable
-		tag="ul"
-		draggable=".row"
-		handle=".drag-handle"
-		class="group"
-		:list="filterSync"
-		:group="{ name: 'g1' }"
-		:item-key="getIndex"
-		:swap-threshold="0.3"
-		:force-fallback="true"
-		@change="$emit('change')"
-	>
-		<template #item="{ element, index }">
-			<li class="row">
-				<div v-if="filterInfo[index].isField" block class="node field">
-					<div class="header" :class="{ inline, 'raw-field-names': rawFieldNames }">
-						<v-icon name="drag_indicator" class="drag-handle" small></v-icon>
-						<span v-if="field || !isExistingField(element)" class="plain-name">
-							{{ getFieldPreview(element) }}
-						</span>
-						<v-menu v-else placement="bottom-start" show-arrow>
-							<template #activator="{ toggle }">
-								<button class="name" @click="toggle">
-									<span>{{ getFieldPreview(element) }}</span>
-								</button>
-							</template>
-
-							<v-field-list
-								:collection="collection"
-								:field="field"
-								include-functions
-								:include-relations="includeRelations"
-								:relational-field-selectable="relationalFieldSelectable"
-								:allow-select-all="false"
-								:raw-field-names="rawFieldNames"
-								@add="updateField(index, $event[0])"
-							/>
-						</v-menu>
-						<v-select
-							inline
-							class="comparator"
-							placement="bottom-start"
-							:model-value="(filterInfo[index] as FilterInfoField).comparator"
-							:items="getCompareOptions((filterInfo[index] as FilterInfoField).field)"
-							@update:model-value="updateComparator(index, $event)"
-						/>
-						<input-group :field="element" :collection="collection" @update:field="replaceNode(index, $event)" />
-						<span class="delete">
-							<v-icon
-								v-tooltip="t('delete_label')"
-								name="close"
-								small
-								clickable
-								@click="$emit('remove-node', [index])"
-							/>
-						</span>
-					</div>
-				</div>
-
-				<div v-else class="node logic">
-					<div class="header" :class="{ inline }">
-						<v-icon name="drag_indicator" class="drag-handle" small />
-						<div class="logic-type" :class="{ or: filterInfo[index].name === '_or' }">
-							<span class="key" @click="toggleLogic(index)">
-								{{
-									filterInfo[index].name === '_and'
-										? t('interfaces.filter.logic_type_and')
-										: t('interfaces.filter.logic_type_or')
-								}}
-							</span>
-							<span class="text">
-								{{
-									`— ${filterInfo[index].name === '_and' ? t('interfaces.filter.all') : t('interfaces.filter.any')} ${t(
-										'interfaces.filter.of_the_following'
-									)}`
-								}}
-							</span>
-						</div>
-						<span class="delete">
-							<v-icon
-								v-tooltip="t('delete_label')"
-								name="close"
-								small
-								clickable
-								@click="$emit('remove-node', [index])"
-							/>
-						</span>
-					</div>
-					<nodes
-						:filter="element[filterInfo[index].name]"
-						:collection="collection"
-						:depth="depth + 1"
-						:inline="inline"
-						:raw-field-names="rawFieldNames"
-						@change="$emit('change')"
-						@remove-node="$emit('remove-node', [`${index}.${filterInfo[index].name}`, ...$event])"
-						@update:filter="replaceNode(index, { [filterInfo[index].name]: $event })"
-					/>
-				</div>
-			</li>
-		</template>
-	</draggable>
-</template>
-
 <script setup lang="ts">
 import { useFieldsStore } from '@/stores/fields';
 import { useRelationsStore } from '@/stores/relations';
@@ -123,7 +18,7 @@ import { computed, toRefs } from 'vue';
 import { useI18n } from 'vue-i18n';
 import Draggable from 'vuedraggable';
 import InputGroup from './input-group.vue';
-import { fieldToFilter, getComparator, getField, getNodeName } from './utils';
+import { fieldHasFunction, fieldToFilter, getComparator, getField, getNodeName } from './utils';
 
 type FilterInfo = {
 	id: number;
@@ -192,7 +87,7 @@ const filterInfo = computed<(FilterInfo | FilterInfoField)[]>({
 	set(newVal) {
 		emit(
 			'update:filter',
-			newVal.map((val) => val.node)
+			newVal.map((val) => val.node),
 		);
 	},
 });
@@ -203,7 +98,7 @@ function getFieldPreview(node: Record<string, any>) {
 	const fieldParts = fieldKey.split('.');
 
 	const fieldNames = fieldParts.map((fieldKey, index) => {
-		const hasFunction = fieldKey.includes('(') && fieldKey.includes(')');
+		const hasFunction = fieldHasFunction(fieldKey);
 
 		let key = fieldKey;
 		let functionName;
@@ -343,7 +238,7 @@ function replaceNode(index: number, newFilter: Filter) {
 function getCompareOptions(name: string) {
 	let type: Type;
 
-	if (name.includes('(') && name.includes(')')) {
+	if (fieldHasFunction(name)) {
 		const functionName = name.split('(')[0] as FieldFunction;
 		type = getOutputTypeForFunction(functionName);
 	} else {
@@ -368,11 +263,124 @@ function getCompareOptions(name: string) {
 
 function isExistingField(node: Record<string, any>): boolean {
 	if (!props.collection) return false;
-	const fieldKey = getField(node);
+	let fieldKey = getField(node);
+
+	if (fieldHasFunction(fieldKey)) {
+		const keyParts = fieldKey.split('.');
+		// the function is always in the last key part
+		const { field } = extractFieldFromFunction(keyParts.at(-1)!);
+		fieldKey = [...keyParts.slice(0, -1), field].join('.');
+	}
+
 	const field = fieldsStore.getField(props.collection, fieldKey);
 	return !!field;
 }
 </script>
+
+<template>
+	<draggable
+		tag="ul"
+		draggable=".row"
+		handle=".drag-handle"
+		class="group"
+		:list="filterSync"
+		:group="{ name: 'g1' }"
+		:item-key="getIndex"
+		:swap-threshold="0.3"
+		v-bind="{ 'force-fallback': true }"
+		@change="$emit('change')"
+	>
+		<template #item="{ element, index }">
+			<li class="row">
+				<div v-if="filterInfo[index].isField" block class="node field">
+					<div class="header" :class="{ inline, 'raw-field-names': rawFieldNames }">
+						<v-icon name="drag_indicator" class="drag-handle" small></v-icon>
+						<span v-if="field || !isExistingField(element)" class="plain-name">
+							{{ getFieldPreview(element) }}
+						</span>
+						<v-menu v-else placement="bottom-start" show-arrow>
+							<template #activator="{ toggle }">
+								<button class="name" @click="toggle">
+									<span>{{ getFieldPreview(element) }}</span>
+								</button>
+							</template>
+
+							<v-field-list
+								:collection="collection"
+								:field="field"
+								include-functions
+								:include-relations="includeRelations"
+								:relational-field-selectable="relationalFieldSelectable"
+								:allow-select-all="false"
+								:raw-field-names="rawFieldNames"
+								@add="updateField(index, $event[0])"
+							/>
+						</v-menu>
+						<v-select
+							inline
+							class="comparator"
+							placement="bottom-start"
+							:model-value="(filterInfo[index] as FilterInfoField).comparator"
+							:items="getCompareOptions((filterInfo[index] as FilterInfoField).field)"
+							@update:model-value="updateComparator(index, $event)"
+						/>
+						<input-group :field="element" :collection="collection" @update:field="replaceNode(index, $event)" />
+						<span class="delete">
+							<v-icon
+								v-tooltip="t('delete_label')"
+								name="close"
+								small
+								clickable
+								@click="$emit('remove-node', [index])"
+							/>
+						</span>
+					</div>
+				</div>
+
+				<div v-else class="node logic">
+					<div class="header" :class="{ inline }">
+						<v-icon name="drag_indicator" class="drag-handle" small />
+						<div class="logic-type" :class="{ or: filterInfo[index].name === '_or' }">
+							<span class="key" @click="toggleLogic(index)">
+								{{
+									filterInfo[index].name === '_and'
+										? t('interfaces.filter.logic_type_and')
+										: t('interfaces.filter.logic_type_or')
+								}}
+							</span>
+							<span class="text">
+								{{
+									`— ${filterInfo[index].name === '_and' ? t('interfaces.filter.all') : t('interfaces.filter.any')} ${t(
+										'interfaces.filter.of_the_following',
+									)}`
+								}}
+							</span>
+						</div>
+						<span class="delete">
+							<v-icon
+								v-tooltip="t('delete_label')"
+								name="close"
+								small
+								clickable
+								@click="$emit('remove-node', [index])"
+							/>
+						</span>
+					</div>
+					<nodes
+						:filter="element[filterInfo[index].name]"
+						:collection="collection"
+						:depth="depth + 1"
+						:inline="inline"
+						:raw-field-names="rawFieldNames"
+						@change="$emit('change')"
+						@remove-node="$emit('remove-node', [`${index}.${filterInfo[index].name}`, ...$event])"
+						@update:filter="replaceNode(index, { [filterInfo[index].name]: $event })"
+					/>
+				</div>
+			</li>
+		</template>
+	</draggable>
+</template>
 
 <style lang="scss" scoped>
 .header {
@@ -384,31 +392,31 @@ function isExistingField(node: Record<string, any>): boolean {
 	margin-bottom: 8px;
 	padding: 2px 6px;
 	padding-right: 8px;
-	background-color: var(--background-page);
-	border: var(--border-width) solid var(--border-subdued);
+	background-color: var(--theme--form--field--input--background);
+	border: var(--theme--border-width) solid var(--theme--border-color-subdued);
 	border-radius: 100px;
 	transition: border-color var(--fast) var(--transition);
 
 	.logic-type {
-		color: var(--foreground-subdued);
+		color: var(--theme--form--field--input--foreground-subdued);
 
 		.key {
 			margin-right: 4px;
 			padding: 2px 6px;
-			color: var(--primary);
-			background-color: var(--primary-alt);
+			color: var(--theme--primary);
+			background-color: var(--theme--primary-background);
 			border-radius: 6px;
 			cursor: pointer;
 			transition: var(--fast) var(--transition);
 			transition-property: color, background-color;
 
 			&:hover {
-				background-color: var(--primary-25);
+				background-color: var(--theme--primary-subdued);
 			}
 		}
 
 		&.or .key {
-			color: var(--secondary);
+			color: var(--theme--secondary);
 			background-color: var(--secondary-alt);
 
 			&:hover {
@@ -428,6 +436,7 @@ function isExistingField(node: Record<string, any>): boolean {
 	.plain-name {
 		display: inline-block;
 		margin-right: 8px;
+		white-space: nowrap;
 	}
 
 	.name {
@@ -437,7 +446,7 @@ function isExistingField(node: Record<string, any>): boolean {
 	&.raw-field-names {
 		.plain-name,
 		.name {
-			font-family: var(--family-monospace);
+			font-family: var(--theme--fonts--monospace--font-family);
 		}
 	}
 
@@ -455,7 +464,7 @@ function isExistingField(node: Record<string, any>): boolean {
 			z-index: -1;
 			width: calc(100% + 8px);
 			height: 100%;
-			background-color: var(--background-normal);
+			background-color: var(--theme--background-normal);
 			border-radius: 6px;
 			opacity: 0;
 			transition: opacity var(--fast) var(--transition);
@@ -477,8 +486,8 @@ function isExistingField(node: Record<string, any>): boolean {
 	}
 
 	.delete {
-		--v-icon-color: var(--foreground-subdued);
-		--v-icon-color-hover: var(--danger);
+		--v-icon-color: var(--theme--form--field--input--foreground-subdued);
+		--v-icon-color-hover: var(--theme--danger);
 
 		position: absolute;
 		top: 50%;
@@ -490,7 +499,7 @@ function isExistingField(node: Record<string, any>): boolean {
 	}
 
 	&:hover {
-		border-color: var(--border-normal);
+		border-color: var(--theme--form--field--input--border-color);
 
 		.delete,
 		&:hover {
@@ -499,7 +508,7 @@ function isExistingField(node: Record<string, any>): boolean {
 	}
 
 	.drag-handle {
-		--v-icon-color: var(--foreground-subdued);
+		--v-icon-color: var(--theme--form--field--input--foreground-subdued);
 
 		margin-right: 4px;
 		cursor: grab;
@@ -513,7 +522,7 @@ function isExistingField(node: Record<string, any>): boolean {
 		.delete {
 			right: 8px;
 			left: unset;
-			background-color: var(--background-page);
+			background-color: var(--theme--background);
 		}
 	}
 }
@@ -531,8 +540,8 @@ function isExistingField(node: Record<string, any>): boolean {
 
 .group :deep(.sortable-ghost) {
 	.node .header {
-		background-color: var(--primary-alt);
-		border-color: var(--primary);
+		background-color: var(--theme--primary-background);
+		border-color: var(--theme--form--field--input--border-color-focus);
 
 		> * {
 			opacity: 0;

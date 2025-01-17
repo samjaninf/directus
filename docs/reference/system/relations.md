@@ -122,7 +122,7 @@ to a collection that the current user doesn't have access to are stripped out.
 
 ### Request
 
-<SnippetToggler :choices="['REST', 'GraphQL', 'SDK']" label="API">
+<SnippetToggler :choices="['REST', 'GraphQL', 'SDK']" group="api">
 <template #rest>
 
 `GET /relations`
@@ -146,7 +146,7 @@ import { createDirectus, rest, readRelations } from '@directus/sdk';
 
 const client = createDirectus('directus_project_url').with(rest());
 
-const result = await client.request(readRelations(query_object));
+const result = await client.request(readRelations());
 ```
 
 </template>
@@ -162,7 +162,7 @@ Array of [relation objects](#the-relation-object). If no items are available, da
 
 ### Example
 
-<SnippetToggler :choices="['REST', 'GraphQL', 'SDK']" label="API">
+<SnippetToggler :choices="['REST', 'GraphQL', 'SDK']" group="api">
 <template #rest>
 
 `GET /relations`
@@ -189,11 +189,7 @@ import { createDirectus, rest, readRelations } from '@directus/sdk';
 
 const client = createDirectus('https://directus.example.com').with(rest());
 
-const result = await client.request(
-	readRelations({
-		fields: ['*'],
-	})
-);
+const result = await client.request(readRelations());
 ```
 
 </template>
@@ -212,7 +208,7 @@ to a collection that the current user doesn't have access to are stripped out.
 
 ### Request
 
-<SnippetToggler :choices="['REST', 'GraphQL', 'SDK']" label="API">
+<SnippetToggler :choices="['REST', 'GraphQL', 'SDK']" group="api">
 <template #rest>
 
 `GET /relations/:collection`
@@ -236,7 +232,7 @@ import { createDirectus, rest, readRelationByCollection } from '@directus/sdk';
 
 const client = createDirectus('directus_project_url').with(rest());
 
-const result = await client.request(readRelationByCollection(collection_name, query_object));
+const result = await client.request(readRelationByCollection(collection_name));
 ```
 
 </template>
@@ -252,7 +248,7 @@ Array of [relation objects](#the-relation-object). If no items are available, da
 
 ### Example
 
-<SnippetToggler :choices="['REST', 'GraphQL', 'SDK']" label="API">
+<SnippetToggler :choices="['REST', 'GraphQL', 'SDK']" group="api">
 <template #rest>
 
 `GET /relations/articles`
@@ -279,11 +275,7 @@ import { createDirectus, rest, readRelationByCollection } from '@directus/sdk';
 
 const client = createDirectus('https://directus.example.com').with(rest());
 
-const result = await client.request(
-	readRelationByCollection('articles', {
-		fields: ['*'],
-	})
-);
+const result = await client.request(readRelationByCollection('articles'));
 ```
 
 </template>
@@ -295,7 +287,7 @@ List an existing relation by collection/field name.
 
 ### Request
 
-<SnippetToggler :choices="['REST', 'GraphQL', 'SDK']" label="API">
+<SnippetToggler :choices="['REST', 'GraphQL', 'SDK']" group="api">
 <template #rest>
 
 `GET /relations/:collection/:field`
@@ -319,7 +311,7 @@ import { createDirectus, rest, readRelation } from '@directus/sdk';
 
 const client = createDirectus('directus_project_url').with(rest());
 
-const result = await client.request(readRelation(collection_name, field_name, query_object));
+const result = await client.request(readRelation(collection_name, field_name));
 ```
 
 </template>
@@ -335,7 +327,7 @@ Returns the requested [relation object](#the-relation-object).
 
 ### Example
 
-<SnippetToggler :choices="['REST', 'GraphQL', 'SDK']" label="API">
+<SnippetToggler :choices="['REST', 'GraphQL', 'SDK']" group="api">
 <template #rest>
 
 `GET /relations/articles/featured_image`
@@ -363,11 +355,7 @@ import { createDirectus, rest, readRelation } from '@directus/sdk';
 
 const client = createDirectus('https://directus.example.com').with(rest());
 
-const result = await client.request(
-	readRelation('articles', 'authors', {
-		fields: ['*'],
-	})
-);
+const result = await client.request(readRelation('articles', 'authors'));
 ```
 
 </template>
@@ -379,7 +367,7 @@ Create a new relation.
 
 ### Request
 
-<SnippetToggler :choices="['REST', 'GraphQL', 'SDK']" label="API">
+<SnippetToggler :choices="['REST', 'GraphQL', 'SDK']" group="api">
 <template #rest>
 
 `POST /relations`
@@ -425,7 +413,7 @@ Returns the [relation object](#the-relation-object) for the created relation.
 
 ### Example
 
-<SnippetToggler :choices="['REST', 'GraphQL', 'SDK']" label="API">
+<SnippetToggler :choices="['REST', 'GraphQL', 'SDK']" group="api">
 <template #rest>
 
 `POST /relations`
@@ -481,7 +469,7 @@ Update an existing relation.
 
 ### Request
 
-<SnippetToggler :choices="['REST', 'GraphQL', 'SDK']" label="API">
+<SnippetToggler :choices="['REST', 'GraphQL', 'SDK']" group="api">
 <template #rest>
 
 `PATCH /relations/:collection/:field`
@@ -527,7 +515,7 @@ Returns the [relation object](#the-relation-object) for the created relation.
 
 ### Example
 
-<SnippetToggler :choices="['REST', 'GraphQL', 'SDK']" label="API">
+<SnippetToggler :choices="['REST', 'GraphQL', 'SDK']" group="api">
 <template #rest>
 
 `PATCH /relations/articles/author`
@@ -581,7 +569,7 @@ Delete an existing relation.
 
 ### Request
 
-<SnippetToggler :choices="['REST', 'GraphQL', 'SDK']" label="API">
+<SnippetToggler :choices="['REST', 'GraphQL', 'SDK']" group="api">
 <template #rest>
 
 `DELETE /relations/:collection/:field`
@@ -617,7 +605,7 @@ Empty body.
 
 ### Example
 
-<SnippetToggler :choices="['REST', 'GraphQL', 'SDK']" label="API">
+<SnippetToggler :choices="['REST', 'GraphQL', 'SDK']" group="api">
 <template #rest>
 
 `DELETE /relations/articles/author`

@@ -1,19 +1,17 @@
-import { defineStore } from 'pinia';
-import { has, isEmpty, orderBy, cloneDeep } from 'lodash';
-import { InterfaceConfig, DisplayConfig, DeepPartial, Field, Relation, Collection, LocalType } from '@directus/types';
-import { LOCAL_TYPES } from '@directus/constants';
-import { computed } from 'vue';
-import { get, set } from 'lodash';
-import { unexpectedError } from '@/utils/unexpected-error';
+import api from '@/api';
+import { useExtensions } from '@/extensions';
 import { useCollectionsStore } from '@/stores/collections';
 import { useFieldsStore } from '@/stores/fields';
 import { useRelationsStore } from '@/stores/relations';
-
-import * as alterations from './alterations';
 import { getLocalTypeForField } from '@/utils/get-local-type';
-import api from '@/api';
-import { useExtensions } from '@/extensions';
+import { unexpectedError } from '@/utils/unexpected-error';
+import type { DisplayConfig, InterfaceConfig } from '@directus/extensions';
+import type { Collection, DeepPartial, Field, LocalType, Relation } from '@directus/types';
 import { getEndpoint } from '@directus/utils';
+import { cloneDeep, get, has, isEmpty, mergeWith, orderBy, set, sortBy } from 'lodash';
+import { defineStore } from 'pinia';
+import { computed } from 'vue';
+import * as alterations from './alterations';
 
 export function syncFieldDetailStoreProperty(path: string, defaultValue?: any) {
 	const fieldDetailStore = useFieldDetailStore();
@@ -31,16 +29,16 @@ export function syncFieldDetailStoreProperty(path: string, defaultValue?: any) {
 export const useFieldDetailStore = defineStore({
 	id: 'fieldDetailStore',
 	state: () => ({
-		// whether there are additional field metadata being fetched (used in startEditing)
+		/** Whether there are additional field metadata being fetched (used in startEditing) */
 		loading: false,
 
-		// The current collection we're operating in
+		/** The current collection we're operating in */
 		collection: undefined as string | undefined,
 
-		// What field we're currently editing ("+"" for new)
+		/** What field we're currently editing ("+"" for new)  */
 		editing: '+' as string,
 
-		// Field edits
+		/** Full field data with edits */
 		field: {
 			field: undefined,
 			type: undefined,
@@ -48,19 +46,22 @@ export const useFieldDetailStore = defineStore({
 			meta: {},
 		} as DeepPartial<Field>,
 
-		// Relations that will be upserted as part of this change
+		/** Contains only edited properties of the field */
+		fieldUpdates: {} as DeepPartial<Field>,
+
+		/** Relations that will be upserted as part of this change */
 		relations: {
 			m2o: undefined as DeepPartial<Relation> | undefined,
 			o2m: undefined as DeepPartial<Relation> | undefined,
 		},
 
-		// Collections that will be upserted as part of this change
+		/** Collections that will be upserted as part of this change */
 		collections: {
 			junction: undefined as DeepPartial<Collection & { fields: DeepPartial<Field>[] }> | undefined,
 			related: undefined as DeepPartial<Collection & { fields: DeepPartial<Field>[] }> | undefined,
 		},
 
-		// Fields that will be upserted as part of this change
+		/** Fields that will be upserted as part of this change */
 		fields: {
 			corresponding: undefined as DeepPartial<Field> | undefined,
 			junctionCurrent: undefined as DeepPartial<Field> | undefined,
@@ -69,12 +70,16 @@ export const useFieldDetailStore = defineStore({
 			oneCollectionField: undefined as DeepPartial<Field> | undefined,
 		},
 
-		// Any items that need to be injected into any collection
+		/** Any items that need to be injected into any collection */
 		items: {} as Record<string, Record<string, any>[]>,
 
-		// Various flags that alter the operations of watchers and getters
-		localType: 'standard' as (typeof LOCAL_TYPES)[number],
+		/** The local type used for the current field */
+		localType: 'standard' as LocalType,
+
+		/** Whether to auto-fill the field names of the junction relation */
 		autoGenerateJunctionRelation: true,
+
+		/** Whether the field settings are currently being saved */
 		saving: false,
 	}),
 	actions: {
@@ -95,9 +100,9 @@ export const useFieldDetailStore = defineStore({
 
 				const relations = cloneDeep(relationsStore.getRelationsForField(collection, field));
 
-				// o2m relation is the same regardless of type
+				// O2M relation is the same regardless of type
 				this.relations.o2m = relations.find(
-					(relation) => relation.related_collection === collection && relation.meta?.one_field === field
+					(relation) => relation.related_collection === collection && relation.meta?.one_field === field,
 				) as DeepPartial<Relation> | undefined;
 
 				if (['files', 'm2m', 'translations', 'm2a'].includes(this.localType)) {
@@ -107,11 +112,11 @@ export const useFieldDetailStore = defineStore({
 						| undefined;
 				} else {
 					this.relations.m2o = relations.find(
-						(relation) => relation.collection === collection && relation.field === field
+						(relation) => relation.collection === collection && relation.field === field,
 					) as DeepPartial<Relation> | undefined;
 				}
 
-				// re-fetch field meta to get the raw untranslated values
+				// Re-fetch field meta to get the raw untranslated values
 				try {
 					this.loading = true;
 					const response = await api.get(`/fields/${collection}/${field}`);
@@ -142,26 +147,58 @@ export const useFieldDetailStore = defineStore({
 			const hasChanged = (path: string) => has(updates, path) && get(updates, path) !== get(this, path);
 			const getCurrent = (path: string) => (has(updates, path) ? get(updates, path) : get(this, path));
 
-			const helperFn = { hasChanged, getCurrent };
+			this.$patch((state) => {
+				if (hasChanged('field.meta.interface')) {
+					alterations.global.setLocalTypeForInterface(updates);
+					alterations.global.setTypeForInterface(updates, state);
+				}
 
-			if (hasChanged('field.meta.interface')) {
-				alterations.global.setLocalTypeForInterface(updates);
-				alterations.global.setTypeForInterface(updates, this);
-			}
+				if (hasChanged('localType')) {
+					alterations.global.resetSchema(updates, state);
+					alterations.global.resetRelations(updates);
+					alterations.global.setSpecialForLocalType(updates);
+				}
 
-			if (hasChanged('localType')) {
-				alterations.global.resetSchema(updates, this);
-				alterations.global.resetRelations(updates);
-				alterations.global.setSpecialForLocalType(updates);
-			}
+				const localType = getCurrent('localType') as LocalType | undefined;
 
-			const localType = getCurrent('localType') as (typeof LOCAL_TYPES)[number] | undefined;
+				if (localType) {
+					alterations[localType].applyChanges(updates, state, { hasChanged, getCurrent });
+				}
 
-			if (localType) {
-				alterations[localType].applyChanges(updates, this, helperFn);
-			}
+				const { field: fieldUpdates, items: itemUpdates, ...restUpdates } = updates;
 
-			this.$patch(updates);
+				// Handle `field` updates, shallow merge and mirror to `fieldUpdates`
+				if (fieldUpdates) {
+					const { schema: schemaUpdates, meta: metaUpdates, ...restFieldUpdates } = fieldUpdates;
+
+					Object.assign(state.field, restFieldUpdates);
+					Object.assign(state.fieldUpdates, restFieldUpdates);
+
+					if (schemaUpdates) {
+						Object.assign((state.field.schema ??= {}), schemaUpdates);
+						Object.assign((state.fieldUpdates.schema ??= {}), schemaUpdates);
+					}
+
+					if (metaUpdates) {
+						Object.assign((state.field.meta ??= {}), metaUpdates);
+						Object.assign((state.fieldUpdates.meta ??= {}), metaUpdates);
+					}
+				}
+
+				// Handle `item` updates, allowing full replacements
+				if (itemUpdates) {
+					state.items = itemUpdates as (typeof this.$state)['items'];
+				}
+
+				// Handle remaining updates, deep merge
+				mergeWith(state, restUpdates, (_, srcValue, key, object) => {
+					// Override arrays instead of merging
+					if (Array.isArray(srcValue)) return srcValue;
+					// Allow properties to be resettable
+					if (srcValue === undefined) object[key] = undefined;
+					return;
+				});
+			});
 		},
 		async save() {
 			if (!this.collection || !this.field.field) return;
@@ -206,7 +243,9 @@ export const useFieldDetailStore = defineStore({
 			this.saving = true;
 
 			try {
-				await fieldsStore.upsertField(this.collection, this.editing, this.field);
+				if (Object.keys(this.fieldUpdates).length > 0) {
+					await fieldsStore.upsertField(this.collection, this.editing, this.fieldUpdates);
+				}
 
 				for (const collection of Object.values(this.collections)) {
 					if (!collection || !collection.collection) continue;
@@ -227,9 +266,9 @@ export const useFieldDetailStore = defineStore({
 					await api.post(getEndpoint(collection), this.items[collection]);
 				}
 
-				await fieldsStore.hydrate();
-			} catch (err: any) {
-				unexpectedError(err);
+				await fieldsStore.hydrate({ skipTranslation: true });
+			} catch (error) {
+				unexpectedError(error);
 			} finally {
 				this.saving = false;
 			}
@@ -248,7 +287,7 @@ export const useFieldDetailStore = defineStore({
 					'relations.o2m.related_collection',
 					'relations.m2o.collection',
 					'relations.m2o.field',
-					'relations.m2o.related_collection'
+					'relations.m2o.related_collection',
 				);
 			}
 
@@ -268,7 +307,7 @@ export const useFieldDetailStore = defineStore({
 					'relations.m2o.collection',
 					'relations.m2o.field',
 					'relations.m2o.meta.one_allowed_collections',
-					'relations.m2o.meta.one_collection_field'
+					'relations.m2o.meta.one_collection_field',
 				);
 			}
 
@@ -277,9 +316,7 @@ export const useFieldDetailStore = defineStore({
 			});
 		},
 		readyToSave() {
-			// There's a bug in pinia where the other getters don't show up in the types for "this"
-			const missing = (this as typeof this & { missingConfiguration: string[] }).missingConfiguration;
-			return missing.length === 0;
+			return this.missingConfiguration.length === 0;
 		},
 		interfacesForType(): InterfaceConfig[] {
 			const { interfaces } = useExtensions();
@@ -294,7 +331,7 @@ export const useFieldDetailStore = defineStore({
 
 					return matchesType && matchesLocalType;
 				}),
-				['name']
+				['name'],
 			);
 		},
 		displaysForType(): DisplayConfig[] {
@@ -307,7 +344,7 @@ export const useFieldDetailStore = defineStore({
 
 					return matchesType && matchesLocalType;
 				}),
-				['name']
+				['name'],
 			);
 		},
 		generationInfo() {
@@ -331,7 +368,7 @@ export const useFieldDetailStore = defineStore({
 				});
 			}
 
-			return items;
+			return sortBy(items, 'name');
 		},
 	},
 });

@@ -3,9 +3,9 @@ import type { RestCommand } from '../../types.js';
 import { throwIfCoreCollection, throwIfEmpty } from '../../utils/index.js';
 
 export type UpdateSingletonOutput<
-	Schema extends object,
+	Schema,
 	Collection extends SingletonCollections<Schema>,
-	TQuery extends Query<Schema, Schema[Collection]>
+	TQuery extends Query<Schema, Schema[Collection]>,
 > = ApplyQueryFields<Schema, CollectionType<Schema, Collection>, TQuery['fields']>;
 
 /**
@@ -20,14 +20,14 @@ export type UpdateSingletonOutput<
  */
 export const updateSingleton =
 	<
-		Schema extends object,
+		Schema,
 		Collection extends SingletonCollections<Schema>,
 		const TQuery extends Query<Schema, Schema[Collection]>,
-		Item = Schema[Collection]
+		Item = Schema[Collection],
 	>(
 		collection: Collection,
 		item: Partial<Item>,
-		query?: TQuery
+		query?: TQuery,
 	): RestCommand<UpdateSingletonOutput<Schema, Collection, TQuery>, Schema> =>
 	() => {
 		throwIfEmpty(String(collection), 'Collection cannot be empty');

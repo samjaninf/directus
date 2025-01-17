@@ -19,6 +19,7 @@
 #'Int32Array', 'Uint32Array', 'Float32Array', 'Float64Array', 'Map', 'Set', 'WeakMap', 'WeakSet',
 #'SIMD', 'ArrayBuffer', 'DataView', 'JSON', 'Promise', 'Generator', 'GeneratorFunction', 'Reflect',
 #'Proxy', 'Intl'
+about: Quant a
 identifier: Indentificador
 avatar: Foto
 application: Aplicació
@@ -27,9 +28,11 @@ method: Mètode
 published: Publicat
 draft: Esborrany
 archived: Arxivat
+extensions: Extensions
 modules: Mòduls
 module_bar: Barra de mòduls
 logs: Registres
+unknown: Desconegut
 reset_width: Restableix l'amplada
 tile_size: Mida del mosaic
 edit_field: Edita el camp
@@ -46,12 +49,32 @@ duplicate_field: Camp duplicat
 half_width: Mitja amplada
 full_width: Amplada Completa
 group: Grup
+popular: Popular
+recent: Recent
 export_items: Exporta els elements
 and: I
 or: O
 init: Iniciar
 dataset_too_large_currently_showing_n_items: Conjunt de dades massa llarg. Actualment es mostren els primers {n} elements.
 modifier: Modificador
+extension_interface: Interfície
+extension_display: Mostra
+extension_layout: Disposició
+extension_module: Mòdul
+extension_panel: Panell
+extension_theme: Tema
+extension_hook: Ganxo
+extension_endpoint: Endpoint
+extension_operation: Operació
+extension_modules: Mòduls
+n_files: '{n} fitxers'
+github: GitHub
+beta: Beta
+n_downloads: '{n} baixades'
+downloads: Baixades
+compatibility_not_guaranteed: Compatiblitiat no garantida
+enable: Habilita
+disable: Deshabilita
 custom: Personalitzat
 hook: Ganxo
 fill_width: Amplada de l'emplenat
@@ -95,6 +118,8 @@ rename_folder: Renombra carpeta
 delete_folder: Suprimeix carpeta
 prefix: Prefix
 suffix: Sufix
+keep: Manté
+promote_version_preview: Vista prèvia
 reset_bookmark: Reinicia marcador
 update_bookmark: Actualitza marcador
 delete_bookmark: Eliminar marcador
@@ -229,19 +254,15 @@ float: Float
 integer: Integer
 json: JSON
 xml: XML
+yaml: YAML
 string: String
 text: Text
 time: Time
 timestamp: Timestamp
 uuid: UUID
 hash: Hash
-geometry: Geometria (totes)
-geometry.Point: Punt
-geometry.LineString: Cadena Línia
-geometry.Polygon: Polígon
-geometry.MultiPoint: Multipunt
-geometry.MultiLineString: Cadena Línia múltiple
-geometry.MultiPolygon: Multipolígon
+theme_light: Mode clar
+theme_dark: Mode fosc
 not_available_for_type: No disponible per aquest Tipus
 create_translations: Crea traduccions
 auto_refresh: Refrescament automàtic
@@ -317,6 +338,7 @@ clear_items: Netejar elements
 reset_to_default: Restaura als valors per defecte
 undo_changes: Desfes els canvis
 notifications: Notificacions
+archive_all: Arxiva tots
 show_all_activity: Mostra tota l'activitat
 page_not_found: Pàgina no trobada
 page_not_found_body: No hem trobat la pàgina que cerques.
@@ -371,6 +393,7 @@ move: Mou
 system: Sistema
 add_field_related: Afegeix camps a la col·lecció relacionada
 interface_label: Interfície
+display_label: Mostra
 today: Avui
 yesterday: Ahir
 delete_comment: Elimina comentari
@@ -413,6 +436,7 @@ months:
   december: Desembre
 drag_mode: Mode d'arrossegament
 cancel_crop: Cancel·la el retall
+cancel_selection: Cancel·la la selecció
 original: Original
 url: URL
 import_label: Importa
@@ -421,7 +445,6 @@ dimensions: Dimensions
 size: Mida
 created: Creat
 modified: Modificat
-checksum: Checksum
 owner: Propietari
 edited_by: Editat per
 folder: Carpeta
@@ -438,9 +461,9 @@ import_from_url: Importa el fitxer des de la URL
 replace_from_device: Reemplaça el fitxer des del dispositiu
 replace_from_library: Reemplaça el fitxer des de la biblioteca
 replace_from_url: Reemplaça el fitxer des d'una URL
+no_image_selected: Cap imatge seleccionada
 no_file_selected: Cap fitxer seleccionat
 download_file: Descarrega el fitxer
-open_file_in_tab: Obre el fitxer en una nova pestanya
 start_export: Comença l'exportació
 not_available_for_local_downloads: No disponible per a descàrregues locals
 exporting_all_items_in_collection: Exportant tots els {total} elements de {collection}.
@@ -558,39 +581,37 @@ auto_fill: Omple automàticament
 corresponding_field: Camp corresponent
 errors:
   COLLECTION_NOT_FOUND: "La col·lecció no existeix"
+  CONTAINS_NULL_VALUES: El camp conté valors nuls
   FIELD_NOT_FOUND: Camp no trobat
   FORBIDDEN: Prohibit
+  ILLEGAL_ASSET_TRANSFORMATION: La imatge és massa llarg per previsualitzar-la
+  INTERNAL_SERVER_ERROR: Error inesperat
+  INVALID_CONFIG: Configuració invàlida
   INVALID_CREDENTIALS: Identificador o contrasenya incorrectes
+  INVALID_FOREIGN_KEY: Clau forana invàlida
+  INVALID_IP: Adreça IP no permesa
   INVALID_OTP: Contrasenya d'un sol ús errònia
   INVALID_PAYLOAD: Payload invàlid
   INVALID_PROVIDER: Aquest usuari pertany a un proveïdor d'autenticació diferent
   INVALID_QUERY: Consulta invàlida
-  INVALID_CONFIG: Configuració invàlida
   INVALID_TOKEN: Token invàlid
-  INVALID_IP: Adreça IP no permesa
   INVALID_USER: No s’ha pogut autenticar l’usuari
   ITEM_LIMIT_REACHED: Límit d'elements assolit
   ITEM_NOT_FOUND: Element no trobat
-  ROUTE_NOT_FOUND: No trobat
-  RECORD_NOT_UNIQUE: Valor duplicat detectat
-  USER_SUSPENDED: Usuari suspès
-  CONTAINS_NULL_VALUES: El camp conté valors nuls
-  UNPROCESSABLE_ENTITY: Entitat no processable
-  INTERNAL_SERVER_ERROR: Error inesperat
-  NOT_NULL_VIOLATION: El valor no pot ser null
-  ILLEGAL_ASSET_TRANSFORMATION: La imatge és massa llarg per previsualitzar-la
-  VALUE_TOO_LONG: El valor és massa gran
-  VALUE_OUT_OF_RANGE: El valor es troba fora de l'interval
-  INVALID_FOREIGN_KEY: Clau forana invàlida
-  UNKNOWN: Error inesperat
-  GRAPHQL_VALIDATION_EXCEPTION: Excepció de validació de GraphQL
-  SERVICE_UNAVAILABLE: Servei no disponible
-  UNSUPPORTED_MEDIA_TYPE: Tipus de mèdia no suportat
-  UNEXPECTED_RESPONSE: Resposta inesperada
-  TOKEN_EXPIRED: Token expirat
-  RANGE_NOT_SATISFIABLE: Interval no vàlid
   METHOD_NOT_ALLOWED: Mètode no permès
+  NOT_NULL_VIOLATION: El valor no pot ser null
+  RANGE_NOT_SATISFIABLE: Interval no vàlid
+  RECORD_NOT_UNIQUE: Valor duplicat detectat
   REQUESTS_EXCEEDED: Límit de peticions assolit
+  ROUTE_NOT_FOUND: No trobat
+  SERVICE_UNAVAILABLE: Servei no disponible
+  TOKEN_EXPIRED: Token expirat
+  UNEXPECTED_RESPONSE: Resposta inesperada
+  UNKNOWN: Error inesperat
+  UNSUPPORTED_MEDIA_TYPE: Tipus de mèdia no suportat
+  USER_SUSPENDED: Usuari suspès
+  VALUE_OUT_OF_RANGE: El valor es troba fora de l'interval
+  VALUE_TOO_LONG: El valor és massa gran
 security: Seguretat
 value_hashed: Aplicat hash segur al valor
 bookmark_name: Nom del marcador...
@@ -604,7 +625,6 @@ cannot_edit_global_bookmarks: No es pot editar marcadors globals
 bookmarks: Favorits
 presets: Predefinits
 unexpected_error: Error inesperat
-unexpected_error_copy: Hi ha hagut un error inesperat. Si us plau, prova més tard.
 copy_details: Copia detalls
 no_app_access: Sense accés a l'aplicació
 no_app_access_copy: Aquest usuari no pot administrar l'aplicació.
@@ -629,10 +649,6 @@ make_collection_hidden: Amaga la col·lecció
 make_folder_visible: Fes visible la carpeta
 make_folder_hidden: Amaga la carpeta
 goto_collection_content: Mostra el contingut
-start_end_of_count_items: '{start}-{end} de {count} elements'
-start_end_of_count_filtered_items: '{start}-{end} de {count} elements filtrats'
-one_item: '1 element'
-one_filtered_item: '1 element filtrat'
 delete_collection_are_you_sure: >-
   Estàs segur d'eliminar aquesta "{collection}"? Això també eliminarà tots els elements que conté. Aquesta acció és permanent.
 delete_folder_are_you_sure: Estàs segur d'eliminar aquesta "{folder}"? Les carpetes i col·leccions anidades es mouran al nivell més alt.
@@ -710,14 +726,12 @@ layout_options: Opcions de presentació
 rows: Files
 columns: Columnes
 collection_setup: Configuració de la col·lecció
-optional_system_fields: Camps del sistema opcionals
 value_unique: El valor ha de ser únic
 all_activity: Tota l'activitat
 create_item: Crea un element
 display_template: Mostra la plantilla
 language_display_template: Plantilla de visualització d'idioma
 translations_display_template: Plantilla de visualització de traduccions
-n_items_selected: 'No hi han elements seleccionats | Un element seleccionat | {n} Elements seleccionats'
 per_page: Per pàgina
 all_files: Tots els fitxers
 my_files: Els meus fitxers
@@ -803,8 +817,6 @@ tooltip: Consell
 tooltip_placeholder: Introdueix el consell...
 unlimited: Il·limitat
 open_link_in: Obre l'enllaç a
-new_tab: Nova pestanya
-current_tab: Pestanya actual
 save_image: Desa la imatge
 save_media: Desa l'element media
 wysiwyg_options:
@@ -870,11 +882,11 @@ editing_unit: 'Editant {unit}'
 editing_in_batch: 'Editant {count} elements'
 no_options_available: Sense opcions disponibles
 settings_data_model: Model de dades
-settings_permissions: Rols i permisos
-settings_project: Ajustaments del projecte
+settings_project: Configuració
 settings_webhooks: Webhooks
 settings_flows: Fluxes
-settings_presets: Predefinits i Marcadors
+settings_presets: Favorits
+settings_translations: Traduccions
 one_or_more_options_are_missing: Falta una o més opcions
 scope: Abast
 actions: Accions
@@ -909,12 +921,10 @@ page_help_files_collection: >-
   ** Biblioteca de fitxers **: Llista de tots els recursos de fitxers carregats en aquest projecte. Personalitza el disseny, els filtres i l’ordenació per adaptar-la a la teva vista i, fins i tot, desa els marcadors d’aquestes configuracions per accedir-hi ràpidament.
 page_help_files_item: >-
   ** Detall de fitxer **: Formulari per gestionar metadades de fitxers, editar el recurs original i actualitzar la configuració d'accés.
-page_help_settings_project: "** Configuració del projecte **: Opcions de configuració global del vostre projecte."
 page_help_settings_datamodel_collections: >-
   ** Model de dades: Col·leccions **: Llista de totes les col·leccions disponibles. Això inclou col·leccions visibles, ocultes i del sistema, així com taules de bases de dades no gestionades que es poden afegir.
 page_help_settings_datamodel_fields: >-
   ** Model de dades: col·lecció **: Un formulari per gestionar aquesta col·lecció i els seus camps.
-page_help_settings_roles_collection: '** Fons d''exploració **: Llista dels rols Administrador, públic i personalitzats.'
 page_help_settings_roles_item: "** Detalls del rol **: Gestiona els permisos i altres paràmetres d'un rol."
 page_help_settings_presets_collection: >-
   ** Examina predefinits **: Llista tots els predefinits del projecte, incloent marcadors d'usuari, rols, globals, així com la vista predeterminada.
@@ -956,7 +966,6 @@ directus_collection:
   directus_notifications: Notificacions enviades als usuaris
   directus_operations: Operacions que s'executen en fluxes
   directus_panels: Panells individuals dins dels quadres de comandament de la visió
-  directus_permissions: Permisos d'accés per cada rol
   directus_presets: Predefinits per als ajustaments predeterminat de col·leció i marcadors
   directus_relations: Configuració i metadades de la relació
   directus_revisions: Instantània de dades per a totes les activitats
@@ -1030,10 +1039,6 @@ fields:
     tags: Etiquetes
     user_preferences: Preferències de l'usuari
     language: Idioma
-    theme: Tema
-    theme_auto: Automàtic (basat en el sistema)
-    theme_light: Mode clar
-    theme_dark: Mode fosc
     tfa_secret: Autenticació de doble factor
     admin_options: Opcions d'administrador
     status: Estat
@@ -1071,7 +1076,6 @@ fields:
     project_color: Color del projecte
     project_logo: Logotip del projecte
     default_language: Idioma predeterminat
-    branding: Marca i estil
     public_foreground: Primer pla públic
     public_background: Fons públic
     public_note: Anotació de la vista pública
@@ -1109,12 +1113,9 @@ fields:
     name: Nom del Rol
     icon: Icona del rol
     description: Descripció
-    app_access: Accés a l'aplicació
-    admin_access: Accés d'administrador
-    ip_access: Accés per IP
-    enforce_tfa: Requereix 2FA
     users: Usuaris al rol
-    module_list: Navegació dels mòduls
+  directus_policies:
+    description: Descripció
   directus_webhooks:
     name: Nom
     method: Mètode
@@ -1131,7 +1132,6 @@ field_options:
   directus_settings:
     project_name_placeholder: El meu projecte...
     project_color_note: Inici de sessió i Logotip de fons
-    project_logo_note: Blanc 40x40 SVG/PNG
     public_note_placeholder: Un missatge breu i públic que admet el format markdown...
     security_divider_title: Seguretat
     auth_password_policy:
@@ -1455,6 +1455,8 @@ interfaces:
   system-interface-options:
     interface-options: Opcions d'Interfície
     description: Un modal per la selecció de les opcions d'interfície
+  system-display:
+    display: Mostra
   list-m2m:
     many-to-many: Molts a molts
     description: Selecciona múltiples elements d'unió relacionats
@@ -1471,6 +1473,7 @@ interfaces:
     preview: Vista prèvia
     editorFont: Editor de tipografia
     previewFont: Previsualita la tipografia
+    default_view_preview: Vista prèvia
     customSyntax: Blocs personalitzats
     customSyntax_label: Afegeix tipus de sintaxi personalitzats
     customSyntax_add: Afegeix sintaxi personalitzada
@@ -1497,7 +1500,6 @@ interfaces:
     description: Selecciona múltiples elements relacionats
     no_collection: No s'ha trobat la col·lecció
   system-folder:
-    folder: Carpeta
     description: Selecciona una carpeta
     root_name: Arrel de la biblioteca de fitxers
     system_default: Predeterminats del sistema
@@ -1511,6 +1513,7 @@ interfaces:
     add_label: 'Etiqueta "Crea nou"'
     sort: Ordre
     field_note_placeholder: Introdueix una nota sobre el camp...
+    interface_group: Opcions d'Interfície
   slider:
     slider: Lliscador
     description: Selecciona un número utilitzant el lliscador
@@ -1654,10 +1657,14 @@ displays:
     suffix: Sufix
     color: Color
     icon: Icona
+    mask: Enmascarat
+    mask_label: Amaga el valor real
     text: Text
   formatted-json-value:
     formatted-json-value: Valor JSON formatat
     description: Mostra una versió formatada del l'objecte
+  hash:
+    hash: Hash
   icon:
     icon: Icona
     description: Mostra una icona
@@ -1765,3 +1772,12 @@ operations:
     flows: Fluxes
     flow: Fluxe
     data: Dades
+standard: Estàndard
+compact: Compacta
+style: Estil
+fonts:
+  normal: Normal
+  bold: Negreta
+  black: Negre
+  italic: Cursiva
+  auto: Auto

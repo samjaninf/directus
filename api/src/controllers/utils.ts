@@ -1,9 +1,8 @@
+import { InvalidPayloadError, InvalidQueryError, UnsupportedMediaTypeError } from '@directus/errors';
 import argon2 from 'argon2';
 import Busboy from 'busboy';
 import { Router } from 'express';
 import Joi from 'joi';
-import { flushCaches } from '../cache.js';
-import { ForbiddenError, InvalidPayloadError, InvalidQueryError, UnsupportedMediaTypeError } from '../errors/index.js';
 import collectionExists from '../middleware/collection-exists.js';
 import { respond } from '../middleware/respond.js';
 import { ExportService, ImportService } from '../services/import-export.js';
@@ -15,19 +14,21 @@ import { sanitizeQuery } from '../utils/sanitize-query.js';
 
 const router = Router();
 
+const randomStringSchema = Joi.object<{ length: number }>({
+	length: Joi.number().integer().min(1).max(500).default(32),
+});
+
 router.get(
 	'/random/string',
 	asyncHandler(async (req, res) => {
 		const { nanoid } = await import('nanoid');
 
-		if (req.query && req.query['length'] && Number(req.query['length']) > 500) {
-			throw new InvalidQueryError({ reason: `"length" can't be more than 500 characters` });
-		}
+		const { error, value } = randomStringSchema.validate(req.query, { allowUnknown: true });
 
-		const string = nanoid(req.query?.['length'] ? Number(req.query['length']) : 32);
+		if (error) throw new InvalidQueryError({ reason: error.message });
 
-		return res.json({ data: string });
-	})
+		return res.json({ data: nanoid(value.length) });
+	}),
 );
 
 router.post(
@@ -40,7 +41,7 @@ router.post(
 		const hash = await generateHash(req.body.string);
 
 		return res.json({ data: hash });
-	})
+	}),
 );
 
 router.post(
@@ -57,7 +58,7 @@ router.post(
 		const result = await argon2.verify(req.body.hash, req.body.string);
 
 		return res.json({ data: result });
-	})
+	}),
 );
 
 const SortSchema = Joi.object({
@@ -80,7 +81,7 @@ router.post(
 		await service.sort(req.collection, req.body);
 
 		return res.status(200).end();
-	})
+	}),
 );
 
 router.post(
@@ -94,7 +95,7 @@ router.post(
 		await service.revert(req.params['revision']!);
 		next();
 	}),
-	respond
+	respond,
 );
 
 router.post(
@@ -136,7 +137,7 @@ router.post(
 		busboy.on('error', (err: Error) => next(err));
 
 		req.pipe(busboy);
-	})
+	}),
 );
 
 router.post(
@@ -165,20 +166,23 @@ router.post(
 
 		return next();
 	}),
-	respond
+	respond,
 );
 
 router.post(
 	'/cache/clear',
 	asyncHandler(async (req, res) => {
-		if (req.accountability?.admin !== true) {
-			throw new ForbiddenError();
-		}
+		const service = new UtilsService({
+			accountability: req.accountability,
+			schema: req.schema,
+		});
 
-		await flushCaches(true);
+		const clearSystemCache = 'system' in req.query && (req.query['system'] === '' || Boolean(req.query['system']));
+
+		await service.clearCache({ system: clearSystemCache });
 
 		res.status(200).end();
-	})
+	}),
 );
 
 export default router;

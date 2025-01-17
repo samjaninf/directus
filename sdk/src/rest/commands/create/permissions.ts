@@ -3,9 +3,9 @@ import type { ApplyQueryFields, Query } from '../../../types/index.js';
 import type { RestCommand } from '../../types.js';
 
 export type CreatePermissionOutput<
-	Schema extends object,
+	Schema,
 	TQuery extends Query<Schema, Item>,
-	Item extends object = DirectusPermission<Schema>
+	Item extends object = DirectusPermission<Schema>,
 > = ApplyQueryFields<Schema, Item, TQuery['fields']>;
 
 /**
@@ -17,9 +17,9 @@ export type CreatePermissionOutput<
  * @returns Returns the permission objects for the created permissions.
  */
 export const createPermissions =
-	<Schema extends object, const TQuery extends Query<Schema, DirectusPermission<Schema>>>(
+	<Schema, const TQuery extends Query<Schema, DirectusPermission<Schema>>>(
 		items: Partial<DirectusPermission<Schema>>[],
-		query?: TQuery
+		query?: TQuery,
 	): RestCommand<CreatePermissionOutput<Schema, TQuery>[], Schema> =>
 	() => ({
 		path: `/permissions`,
@@ -37,9 +37,9 @@ export const createPermissions =
  * @returns Returns the permission object for the created permission.
  */
 export const createPermission =
-	<Schema extends object, const TQuery extends Query<Schema, DirectusPermission<Schema>>>(
+	<Schema, const TQuery extends Query<Schema, DirectusPermission<Schema>>>(
 		item: Partial<DirectusPermission<Schema>>,
-		query?: TQuery
+		query?: TQuery,
 	): RestCommand<CreatePermissionOutput<Schema, TQuery>, Schema> =>
 	() => ({
 		path: `/permissions`,

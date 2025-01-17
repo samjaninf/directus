@@ -3,6 +3,7 @@ import add from './commands/add.js';
 import build from './commands/build.js';
 import create from './commands/create.js';
 import link from './commands/link.js';
+import validate from './commands/validate.js';
 import getSdkVersion from './utils/get-sdk-version.js';
 
 const program = new Command();
@@ -14,10 +15,15 @@ program
 	.command('create')
 	.arguments('<type> <name>')
 	.description('Scaffold a new Directus extension')
+	.option('--no-install', 'skip dependency installation after creating extension')
 	.option('-l, --language <language>', 'specify the language to use')
 	.action(create);
 
-program.command('add').description('Add entries to an existing Directus extension').action(add);
+program
+	.command('add')
+	.description('Add entries to an existing Directus extension')
+	.option('--no-install', 'skip dependency (re)installation after adding extension')
+	.action(add);
 
 program
 	.command('build')
@@ -37,5 +43,12 @@ program
 	.description('Creates a symlink to the extension in the Directus extensions folder')
 	.argument('<path>', 'path to the extension folder of directus')
 	.action(link);
+
+program
+	.command('validate')
+	.description('Validate the extension against the Directus extensions requirements')
+	.option('-c, --check <check>', 'check a specific extension requirement')
+	.option('-v --verbose', 'print the full validation report')
+	.action(validate);
 
 program.parse(process.argv);

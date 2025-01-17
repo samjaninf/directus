@@ -1,12 +1,12 @@
 import type { MergeCoreCollection } from '../index.js';
 import type { DirectusUser } from './user.js';
 
-export type DirectusNotification<Schema extends object> = MergeCoreCollection<
+export type DirectusNotification<Schema = any> = MergeCoreCollection<
 	Schema,
 	'directus_notifications',
 	{
 		id: string;
-		timestamp: string | null;
+		timestamp: 'datetime' | null;
 		status: string | null;
 		recipient: DirectusUser<Schema> | string;
 		sender: DirectusUser<Schema> | string | null;

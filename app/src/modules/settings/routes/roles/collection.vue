@@ -1,72 +1,23 @@
-<template>
-	<private-view :title="t('settings_permissions')">
-		<template #headline><v-breadcrumb :items="[{ name: t('settings'), to: '/settings' }]" /></template>
-
-		<template #title-outer:prepend>
-			<v-button class="header-icon" rounded icon exact disabled>
-				<v-icon name="admin_panel_settings" />
-			</v-button>
-		</template>
-
-		<template #actions>
-			<v-button v-tooltip.bottom="t('create_role')" rounded icon :to="addNewLink">
-				<v-icon name="add" />
-			</v-button>
-		</template>
-
-		<template #navigation>
-			<settings-navigation />
-		</template>
-
-		<template #sidebar>
-			<sidebar-detail icon="info" :title="t('information')" close>
-				<div v-md="t('page_help_settings_roles_collection')" class="page-description" />
-			</sidebar-detail>
-		</template>
-
-		<div class="roles">
-			<v-table
-				v-model:headers="tableHeaders"
-				show-resize
-				:items="roles"
-				fixed-header
-				item-key="id"
-				:loading="loading"
-				@click:row="navigateToRole"
-			>
-				<template #[`item.icon`]="{ item }">
-					<v-icon class="icon" :name="item.icon" :class="{ public: item.public }" />
-				</template>
-
-				<template #[`item.name`]="{ item }">
-					<v-text-overflow :text="item.name" class="name" :class="{ public: item.public }" />
-				</template>
-
-				<template #[`item.count`]="{ item }">
-					<value-null v-if="item.public" />
-				</template>
-
-				<template #[`item.description`]="{ item }">
-					<v-text-overflow :text="item.description" class="description" />
-				</template>
-			</v-table>
-		</div>
-		<router-view name="add" />
-	</private-view>
-</template>
-
 <script setup lang="ts">
 import { Header as TableHeader } from '@/components/v-table/types';
 import { fetchAll } from '@/utils/fetch-all';
 import { translate } from '@/utils/translate-object-values';
 import { unexpectedError } from '@/utils/unexpected-error';
+import SearchInput from '@/views/private/components/search-input.vue';
 import { Role } from '@directus/types';
 import { computed, ref } from 'vue';
 import { useI18n } from 'vue-i18n';
 import { useRouter } from 'vue-router';
 import SettingsNavigation from '../../components/navigation.vue';
 
-type RoleItem = Partial<Role> & {
+type RoleBaseFields = 'id' | 'name' | 'description' | 'icon';
+
+type RoleResponse = Pick<Role, RoleBaseFields> & {
+	users: [{ count: { id: number } }];
+};
+
+type RoleItem = Pick<Role, RoleBaseFields> & {
+	public?: boolean;
 	count?: number;
 };
 
@@ -77,9 +28,15 @@ const router = useRouter();
 const roles = ref<RoleItem[]>([]);
 const loading = ref(false);
 
-const lastAdminRoleId = computed(() => {
-	const adminRoles = roles.value.filter((role) => role.admin_access === true);
-	return adminRoles.length === 1 ? adminRoles[0].id : null;
+const search = ref<string | null>(null);
+
+const filteredRoles = computed(() => {
+	const normalizedSearch = search.value?.toLowerCase();
+	if (!normalizedSearch) return roles.value;
+	return roles.value.filter(
+		(role) =>
+			role.name?.toLowerCase().includes(normalizedSearch) || role.description?.toLowerCase().includes(normalizedSearch),
+	);
 });
 
 const tableHeaders = ref<TableHeader[]>([
@@ -108,6 +65,20 @@ const tableHeaders = ref<TableHeader[]>([
 		description: null,
 	},
 	{
+		text: t('fields.directus_roles.children'),
+		display: 'related-values',
+		displayOptions: {
+			template: '{{ name }}',
+		},
+		field: 'children',
+		collection: 'directus_roles',
+		value: 'children',
+		sortable: false,
+		width: 140,
+		align: 'left',
+		description: null,
+	},
+	{
 		text: t('description'),
 		value: 'description',
 		sortable: false,
@@ -127,10 +98,10 @@ async function fetchRoles() {
 	loading.value = true;
 
 	try {
-		const response = await fetchAll<any[]>(`/roles`, {
+		const response = await fetchAll<RoleResponse>(`/roles`, {
 			params: {
 				limit: -1,
-				fields: ['id', 'name', 'description', 'icon', 'admin_access', 'users'],
+				fields: ['id', 'name', 'description', 'icon', 'users', 'children.name', 'children.id'],
 				deep: {
 					users: {
 						_aggregate: { count: 'id' },
@@ -145,44 +116,131 @@ async function fetchRoles() {
 
 		roles.value = [
 			{
-				public: true,
-				name: t('public_label'),
-				icon: 'public',
-				description: t('public_description'),
 				id: 'public',
+				name: t('public_label'),
+				description: t('public_description'),
+				icon: 'public',
+				public: true,
 			},
-			...response.map((role: any) => {
+			...response.map((role) => {
 				return {
 					...translate(role),
 					count: role.users[0]?.count.id || 0,
 				};
 			}),
 		];
-	} catch (err: any) {
-		unexpectedError(err);
+	} catch (error) {
+		unexpectedError(error);
 	} finally {
 		loading.value = false;
 	}
 }
 
 function navigateToRole({ item }: { item: Role }) {
-	if (item.id !== 'public' && lastAdminRoleId.value) {
+	if (item.id === 'public') {
+		router.push({ name: 'settings-roles-public-item' });
+		return;
+	} else {
 		router.push({
 			name: 'settings-roles-item',
-			params: { primaryKey: item.id, lastAdminRoleId: lastAdminRoleId.value },
+			params: { primaryKey: item.id },
 		});
-	} else {
-		router.push(`/settings/roles/${item.id}`);
 	}
 }
 </script>
 
+<template>
+	<private-view :title="t('settings_roles')">
+		<template #headline><v-breadcrumb :items="[{ name: t('settings'), to: '/settings' }]" /></template>
+
+		<template #title-outer:prepend>
+			<v-button class="header-icon" rounded icon exact disabled>
+				<v-icon name="group" />
+			</v-button>
+		</template>
+
+		<template #actions>
+			<search-input
+				v-if="!loading"
+				v-model="search"
+				:autofocus="roles.length > 25"
+				:placeholder="t('search_role')"
+				:show-filter="false"
+			/>
+
+			<v-button v-tooltip.bottom="t('create_role')" rounded icon :to="addNewLink">
+				<v-icon name="add" />
+			</v-button>
+		</template>
+
+		<template #navigation>
+			<settings-navigation />
+		</template>
+
+		<template #sidebar>
+			<sidebar-detail icon="info" :title="t('information')" close>
+				<div v-md="t('page_help_settings_roles_collection')" class="page-description" />
+			</sidebar-detail>
+		</template>
+
+		<div v-if="!search || filteredRoles.length > 0" class="roles">
+			<v-table
+				v-model:headers="tableHeaders"
+				show-resize
+				:items="filteredRoles"
+				fixed-header
+				item-key="id"
+				:loading="loading"
+				@click:row="navigateToRole"
+			>
+				<template #[`item.icon`]="{ item }">
+					<v-icon class="icon" :name="item.icon" :class="{ public: item.public }" />
+				</template>
+
+				<template #[`item.name`]="{ item }">
+					<v-text-overflow :text="item.name" class="name" :highlight="search" :class="{ public: item.public }" />
+				</template>
+
+				<template #[`item.count`]="{ item }">
+					<value-null v-if="item.public" />
+				</template>
+
+				<template #[`item.description`]="{ item }">
+					<v-text-overflow :text="item.description" class="description" :highlight="search" />
+				</template>
+
+				<template #[`item.children`]="{ item }">
+					<value-null v-if="item.public || item.children.length === 0" />
+					<render-display
+						v-else
+						:value="item.children"
+						:display="tableHeaders[3]!.display"
+						:options="tableHeaders[3]!.displayOptions"
+						:field="tableHeaders[3]!.field"
+						:collection="tableHeaders[3]!.collection"
+					/>
+				</template>
+			</v-table>
+		</div>
+
+		<v-info v-else icon="search" :title="t('no_results')" center>
+			{{ t('no_results_copy') }}
+
+			<template #append>
+				<v-button @click="search = null">{{ t('clear_filters') }}</v-button>
+			</template>
+		</v-info>
+
+		<router-view name="add" />
+	</private-view>
+</template>
+
 <style lang="scss" scoped>
 .header-icon {
-	--v-button-color-disabled: var(--primary);
-	--v-button-background-color-disabled: var(--primary-10);
-	--v-button-background-color-hover-disabled: var(--primary-25);
-	--v-button-color-hover-disabled: var(--primary);
+	--v-button-color-disabled: var(--theme--primary);
+	--v-button-background-color-disabled: var(--theme--primary-background);
+	--v-button-background-color-hover-disabled: var(--theme--primary-subdued);
+	--v-button-color-hover-disabled: var(--theme--primary);
 }
 
 .roles {
@@ -192,18 +250,20 @@ function navigateToRole({ item }: { item: Role }) {
 }
 
 .system {
-	--v-icon-color: var(--primary);
+	--v-icon-color: var(--theme--primary);
 
-	color: var(--primary);
+	color: var(--theme--primary);
 }
 
 .description {
-	color: var(--foreground-subdued);
+	--v-highlight-color: var(--theme--background-accent);
+
+	color: var(--theme--foreground-subdued);
 }
 
 .public {
-	--v-icon-color: var(--primary);
+	--v-icon-color: var(--theme--primary);
 
-	color: var(--primary);
+	color: var(--theme--primary);
 }
 </style>

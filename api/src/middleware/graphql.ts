@@ -2,10 +2,11 @@ import { parseJSON } from '@directus/utils';
 import type { RequestHandler } from 'express';
 import type { DocumentNode } from 'graphql';
 import { getOperationAST, parse, Source } from 'graphql';
-import { InvalidPayloadError, InvalidQueryError, MethodNotAllowedError } from '../errors/index.js';
+import { InvalidPayloadError, InvalidQueryError, MethodNotAllowedError } from '@directus/errors';
 import { GraphQLValidationError } from '../services/graphql/errors/validation.js';
 import type { GraphQLParams } from '../types/index.js';
 import asyncHandler from '../utils/async-handler.js';
+import { useEnv } from '@directus/env';
 
 export const parseGraphQL: RequestHandler = asyncHandler(async (req, res, next) => {
 	if (req.method !== 'GET' && req.method !== 'POST') {
@@ -42,7 +43,11 @@ export const parseGraphQL: RequestHandler = asyncHandler(async (req, res, next) 
 	}
 
 	try {
-		document = parse(new Source(query));
+		const env = useEnv();
+
+		document = parse(new Source(query), {
+			maxTokens: Number(env['GRAPHQL_QUERY_TOKEN_LIMIT']),
+		});
 	} catch (err: any) {
 		throw new GraphQLValidationError({
 			errors: [err],

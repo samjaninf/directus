@@ -2,7 +2,7 @@ import type { MergeCoreCollection } from '../index.js';
 import type { DirectusUser } from './user.js';
 import type { DirectusOperation } from './operation.js';
 
-export type DirectusFlow<Schema extends object> = MergeCoreCollection<
+export type DirectusFlow<Schema = any> = MergeCoreCollection<
 	Schema,
 	'directus_flows',
 	{
@@ -16,7 +16,7 @@ export type DirectusFlow<Schema extends object> = MergeCoreCollection<
 		accountability: string | null;
 		options: Record<string, any> | null;
 		operation: DirectusOperation<Schema> | string | null;
-		date_created: string | null;
+		date_created: 'datetime' | null;
 		user_created: DirectusUser<Schema> | string | null;
 	}
 >;

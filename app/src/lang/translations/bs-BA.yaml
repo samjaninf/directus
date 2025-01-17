@@ -1,24 +1,4 @@
 ---
-## Be aware:
-#Due to the way this is imported, JavaScript reserved words, including "delete", "private",
-#"void", etc are stripped out. See
-#https://github.com/rollup/plugins/blob/8748b8cd3bbab3c5ac6190556930219f19060e63/packages/pluginutils/src/makeLegalIdentifier.ts#L4
-#and
-#https://github.com/rollup/plugins/blob/8748b8cd3bbab3c5ac6190556930219f19060e63/packages/yaml/src/index.js#L45
-#Illegal words:
-#'break', 'case', 'class', 'catch', 'const', 'continue', 'debugger', 'default', 'delete', 'do',
-#'else', 'export', 'extends', 'finally', 'for', 'function', 'if', 'import', 'in', 'instanceof',
-#'let', 'new', 'return', 'super', 'switch', 'this', 'throw', 'try', 'typeof', 'var', 'void',
-#'while', 'with', 'yield', 'enum', 'await', 'implements', 'package', 'protected', 'static',
-#'interface', 'private', 'public', 'arguments', 'Infinity', 'NaN', 'undefined', 'null', 'true',
-#'false', 'eval', 'uneval', 'isFinite', 'isNaN', 'parseFloat', 'parseInt', 'decodeURI',
-#'decodeURIComponent', 'encodeURI', 'encodeURIComponent', 'escape', 'unescape', 'Object',
-#'Function', 'Boolean', 'Symbol', 'Error', 'EvalError', 'InternalError', 'RangeError',
-#'ReferenceError', 'SyntaxError', 'TypeError', 'URIError', 'Number', 'Math', 'Date', 'String',
-#'RegExp', 'Array', 'Int8Array', 'Uint8Array', 'Uint8ClampedArray', 'Int16Array', 'Uint16Array',
-#'Int32Array', 'Uint32Array', 'Float32Array', 'Float64Array', 'Map', 'Set', 'WeakMap', 'WeakSet',
-#'SIMD', 'ArrayBuffer', 'DataView', 'JSON', 'Promise', 'Generator', 'GeneratorFunction', 'Reflect',
-#'Proxy', 'Intl'
 identifier: Identifikator
 application: Aplikacija
 default_provider: Zadano
@@ -26,6 +6,7 @@ method: Metoda
 published: Objavljeno
 draft: Skica
 archived: Arhivirano
+extensions: Ekstenzije
 modules: Moduli
 module_bar: Bočni meni
 logs: Logovi
@@ -50,6 +31,24 @@ and: I
 or: Ili
 dataset_too_large_currently_showing_n_items: Skup podataka je prevelik. Trenutno prikazuje prvih {n} stavki.
 modifier: Modifikator
+extension_interface: Interfejs
+extension_display: Prikaz
+extension_layout: Raspored
+extension_module: Modul
+extension_panel: Ploča
+extension_theme: Tema
+extension_hook: Kuka
+extension_endpoint: Krajnja tačka
+extension_operation: Operacija
+extension_interfaces: Interfejs
+extension_layouts: Raspored
+extension_modules: Moduli
+extension_panels: Ploča
+extension_themes: Teme
+extension_operations: Operacije
+extension_reload_required: Stranica se mora ponovo učitati
+enable: Omogući
+disable: Onemogući
 custom: Prilagođeno
 hook: Kuka
 fill_width: Širina ispune
@@ -93,6 +92,7 @@ rename_folder: Preimenuj folder
 delete_folder: Izbriši folder
 prefix: Prefiks
 suffix: Sufiks
+promote_version_preview: Pretpregled
 reset_bookmark: Poništi bookmark
 update_bookmark: Ažuriraj bookmark
 delete_bookmark: Obriši bookmark
@@ -224,13 +224,6 @@ string: Niz
 text: Tekst
 time: Vrijeme
 timestamp: Vremenska oznaka
-geometry: Geometrija (sve)
-geometry.Point: Tačka
-geometry.LineString: Linijski niz
-geometry.Polygon: Poligon
-geometry.MultiPoint: Više tačaka
-geometry.MultiLineString: Višelinijski niz
-geometry.MultiPolygon: Višestruki poligon
 not_available_for_type: Nije dostupno za ovu vrstu
 create_translations: Dodaj prijevod
 auto_refresh: Automatsko osvježavanje
@@ -357,6 +350,7 @@ move: Premjesti
 system: Sistem
 add_field_related: Dodaj polje povezanoj kolekciji
 interface_label: Interfejs
+display_label: Prikaz
 today: Danas
 yesterday: Juče
 delete_comment: Obriši komentar
@@ -397,7 +391,6 @@ dimensions: Dimenzije
 size: Veličina
 created: Kreirano
 modified: Izmijenjeno
-checksum: Kontrolni broj
 owner: Vlasnik
 edited_by: Uredio/la
 zoom: Uvećaj
@@ -415,7 +408,6 @@ replace_from_library: Zamijenite fajl iz biblioteke
 replace_from_url: Zamijenite fajl s URL-a
 no_file_selected: Niti jedan fajl nije odabran
 download_file: Preuzmi fajl
-open_file_in_tab: Otvori fajl u novoj kartici
 start_export: Pokreni izvoz
 not_available_for_local_downloads: Nije dostupno za lokalna preuzimanja
 exporting_all_items_in_collection: Izvoz svih {total} stavki unutar {collection}.
@@ -445,6 +437,7 @@ comments: Komentari
 no_comments: Još nema komentara
 select_item: Odaberi stavku
 no_items: Nema stavki
+search_items: Pretraži stavke...
 disabled: Onemogućeno
 information: Informacije
 report_bug: Prijavi grešku
@@ -531,39 +524,37 @@ auto_fill: Automatsko popunjavanje
 corresponding_field: Pripadajuće polje
 errors:
   COLLECTION_NOT_FOUND: "Kolekcija ne postoji"
+  CONTAINS_NULL_VALUES: Polje sadrži null vrijednosti
   FIELD_NOT_FOUND: Polje nije pronađeno
   FORBIDDEN: Zabranjeno
+  ILLEGAL_ASSET_TRANSFORMATION: Izvor slike prevelik za pregled
+  INTERNAL_SERVER_ERROR: Neočekivana greška
+  INVALID_CONFIG: Neispravna konfiguracija
   INVALID_CREDENTIALS: Pogrešno korisničko ime ili lozinka
+  INVALID_FOREIGN_KEY: Neispravan strani ključ
+  INVALID_IP: IP adresa nije dozvoljena
   INVALID_OTP: Pogrešna jednokratna lozinka
   INVALID_PAYLOAD: Neispravan payload
   INVALID_PROVIDER: Korisnik pripada drugom provajderu autorizacije
   INVALID_QUERY: Neispravan upit
-  INVALID_CONFIG: Neispravna konfiguracija
   INVALID_TOKEN: Nevažeći token
-  INVALID_IP: IP adresa nije dozvoljena
   INVALID_USER: Neuspjela autentifikacija korisnika
   ITEM_LIMIT_REACHED: Dostignut je limit stavke
   ITEM_NOT_FOUND: Stavka nije pronađena
-  ROUTE_NOT_FOUND: Nije pronađeno
-  RECORD_NOT_UNIQUE: Otkrivena je dvostruka vrijednost
-  USER_SUSPENDED: Suspendovani korisnik
-  CONTAINS_NULL_VALUES: Polje sadrži null vrijednosti
-  UNPROCESSABLE_ENTITY: Entitet koji se ne može obraditi
-  INTERNAL_SERVER_ERROR: Neočekivana greška
-  NOT_NULL_VIOLATION: Vrijednost ne smije biti null
-  ILLEGAL_ASSET_TRANSFORMATION: Izvor slike prevelik za pregled
-  VALUE_TOO_LONG: Vrijednost je preduga
-  VALUE_OUT_OF_RANGE: Vrijednost je izvan raspona
-  INVALID_FOREIGN_KEY: Neispravan strani ključ
-  UNKNOWN: Neočekivana greška
-  GRAPHQL_VALIDATION_EXCEPTION: GraphQL izuzetak provjere valjanosti
-  SERVICE_UNAVAILABLE: Usluga nije dostupna
-  UNSUPPORTED_MEDIA_TYPE: Nepodržan tip fajla
-  UNEXPECTED_RESPONSE: Neočekivani odgovor
-  TOKEN_EXPIRED: Token je istekao
-  RANGE_NOT_SATISFIABLE: Nevažeći raspon
   METHOD_NOT_ALLOWED: Metoda nije dozvoljena
+  NOT_NULL_VIOLATION: Vrijednost ne smije biti null
+  RANGE_NOT_SATISFIABLE: Nevažeći raspon
+  RECORD_NOT_UNIQUE: Otkrivena je dvostruka vrijednost
   REQUESTS_EXCEEDED: Dostignut je limit zahtjeva
+  ROUTE_NOT_FOUND: Nije pronađeno
+  SERVICE_UNAVAILABLE: Usluga nije dostupna
+  TOKEN_EXPIRED: Token je istekao
+  UNEXPECTED_RESPONSE: Neočekivani odgovor
+  UNKNOWN: Neočekivana greška
+  UNSUPPORTED_MEDIA_TYPE: Nepodržan tip fajla
+  USER_SUSPENDED: Suspendovani korisnik
+  VALUE_OUT_OF_RANGE: Vrijednost je izvan raspona
+  VALUE_TOO_LONG: Vrijednost je preduga
 security: Sigurnost
 value_hashed: Sigurno kriptovana vrijednost
 bookmark_name: Naziv bookmarka...
@@ -576,7 +567,6 @@ cannot_edit_role_bookmarks: Nije moguće uređivati bookmarke rola
 cannot_edit_global_bookmarks: Nije moguće uređivati globalne bookmarke
 presets: Unaprijed postavljene postavke
 unexpected_error: Neočekivana greška
-unexpected_error_copy: Došlo je do neočekivane greške, molimo pokušajte ponovo kasnije.
 copy_details: Kopiraj detalje
 no_app_access: Nema pristupa aplikaciji
 no_app_access_copy: Ovom korisniku nije dopušteno korištenje administratorske aplikacije.
@@ -600,10 +590,6 @@ make_collection_hidden: Učini kolekciju skrivenom
 make_folder_visible: Učini folder vidljivim
 make_folder_hidden: Učini folder skrivenim
 goto_collection_content: Pregledaj sadržaj
-start_end_of_count_items: '{start}-{end} od {count} stavki'
-start_end_of_count_filtered_items: '{start}-{end} od {count} filtriranih stavki'
-one_item: '1 stavka'
-one_filtered_item: '1 filtrirana stavka'
 delete_collection_are_you_sure: >-
   Jeste li sigurni da želite izbrisati kolekciju "{collection}"? Ovo će izbrisati kolekciju i sve stavke u njoj. Ova akcija je trajna.
 delete_folder_are_you_sure: Jeste li sigurni da želite izbrisati folder "{folder}"? Ugniježđeni folderi i kolekcije biće premješteni na najviši nivo.
@@ -677,14 +663,12 @@ layout_options: Mogućnosti izgleda
 rows: Redovi
 columns: Kolone
 collection_setup: Postavljanje kolekcije
-optional_system_fields: Opcionalna sistemska polja
 value_unique: Vrijednost mora biti jedinstvena
 all_activity: Sve aktivnosti
 create_item: Dodaj novu stavku
 display_template: Predložak prikaza
 language_display_template: Predložak prikaza jezika
 translations_display_template: Predložak prikaza prijevoda
-n_items_selected: 'Nema odabranih stavki | 1 stavka odabrana | {n} odabranih stavki'
 per_page: Po stranici
 all_files: Svi fajlovi
 my_files: Moji fajlovi
@@ -812,8 +796,6 @@ interface_group_other: Drugo
 tooltip_placeholder: Unesite tooltip...
 unlimited: Neograničeno
 open_link_in: Otvori link u
-new_tab: Nova kartica
-current_tab: Trenutna kartica
 save_image: Sačuvaj sliku
 save_media: Sačuvaj medijski zapis
 wysiwyg_options:
@@ -877,11 +859,10 @@ editing_unit: 'Uređivanje {unit}'
 editing_in_batch: 'Skupno uređivanje {count} stavki'
 no_options_available: Nema dostupnih opcija
 settings_data_model: Model podataka
-settings_permissions: Role i dozvole
-settings_project: Postavke projekta
+settings_project: Postavke
 settings_webhooks: Web-dojavnici
 settings_flows: Tokovi
-settings_presets: Zadane postavke i oznake
+settings_translations: Prijevodi
 one_or_more_options_are_missing: Nedostaje jedna ili više opcija
 scope: Opseg
 actions: Akcije
@@ -916,12 +897,10 @@ page_help_files_collection: >-
   **Biblioteka fajlova** — Navodi sve fajlove prenesene u ovaj projekat. Prilagodite izgled, filtre i sortiranje kako biste prilagodili svoj prikaz, pa čak i sačuvajte oznake ovih različitih konfiguracija za brzi pristup.
 page_help_files_item: >-
   **Detalji fajla** — Obrazac za upravljanje metapodacima fajla, uređivanje izvornog materijala i ažuriranje postavki pristupa.
-page_help_settings_project: "**Postavke projekta** — Globalne opcije konfiguracije vašeg projekta."
 page_help_settings_datamodel_collections: >-
   **Model podataka: kolekcije** — Navodi sve dostupne kolekcije. To uključuje vidljive, skrivene i sistemske kolekcije, kao i neupravljane tablice baze podataka koje se mogu dodati.
 page_help_settings_datamodel_fields: >-
   **Model podataka: kolekcija** — Obrazac za upravljanje ovom kolekcijom i njezinim poljima.
-page_help_settings_roles_collection: '**Pregledaj role** — Navodi administratorske, javne i prilagođene korisničke role.'
 page_help_settings_roles_item: "**Detalji o roli** — Upravljajte dopuštenjima role i drugim postavkama."
 page_help_settings_presets_collection: >-
   **Pregledaj unaprijed postavljene postavke** — Navodi sve unaprijed postavljene postavke u projektu, uključujući: korisničke, role i globalne oznake, kao i zadane prikaze.
@@ -963,7 +942,6 @@ directus_collection:
   directus_notifications: Obavijesti poslane korisnicima
   directus_operations: Operacije koje se izvode u tokovima
   directus_panels: Pojedinačni paneli unutar kontrolnih panela s uvidima
-  directus_permissions: Dozvole pristupa za svaku rolu
   directus_presets: Unaprijed postavljene postavke za kolekcije i oznake
   directus_relations: Konfiguracija odnosa i metapodaci
   directus_revisions: Snimke podataka za sve aktivnosti
@@ -1034,10 +1012,6 @@ fields:
     tags: Oznake
     user_preferences: Preferencije korisnika
     language: Jezik
-    theme: Tema
-    theme_auto: Automatski (na temelju sistema)
-    theme_light: Svijetli način
-    theme_dark: Tamni način
     tfa_secret: Dvofaktorska autentifikacija
     admin_options: Administratorske opcije
     status_draft: Skica
@@ -1065,7 +1039,6 @@ fields:
     project_color: Boja projekta
     project_logo: Logotip projekta
     default_language: Zadani jezik
-    branding: Brendiranje i stil
     public_foreground: Javni prvi plan
     public_background: Javna pozadina
     public_note: Javna napomena
@@ -1101,12 +1074,9 @@ fields:
     name: Naziv role
     icon: Ikona role
     description: Opis
-    app_access: Pristup aplikaciji
-    admin_access: Administratorski pristup
-    ip_access: IP pristup
-    enforce_tfa: Zahtijevaj 2FA
     users: Korisnici s rolom
-    module_list: Navigacija modula
+  directus_policies:
+    description: Opis
   directus_webhooks:
     name: Ime
     method: Metoda
@@ -1122,7 +1092,6 @@ field_options:
   directus_settings:
     project_name_placeholder: Moj projekat...
     project_color_note: Pozadina i logotip za prijavu
-    project_logo_note: Bijela 40x40 SVG/PNG
     public_note_placeholder: Kratka, javna poruka koja podržava markdown formatiranje...
     security_divider_title: Sigurnost
     auth_password_policy:
@@ -1183,7 +1152,6 @@ field_options:
   directus_roles:
     name: Jedinstveni naziv za ovu rolu...
     description: Opis role...
-    ip_access: Dodajte dopuštene IP adrese, ostavite prazno da dopustite sve...
     fields:
       icon_name: Ikona
       name_name: Naziv
@@ -1232,7 +1200,6 @@ live_preview:
   new_window: Otvori u novom prozoru
 shares: Dijeljenja
 unlimited_usage: Neograničena upotreba
-uses_left: 'Nema više korištenja | Još 1 korištenje | Preostalo korištenja: {n}'
 no_shares: Nema dijeljenja za prikaz
 new_share: Novo dijeljenje
 expired: Isteklo
@@ -1487,6 +1454,8 @@ interfaces:
   system-interface-options:
     interface-options: Opcije interfejsa
     description: Modal za odabir opcija interfejsa
+  system-display:
+    display: Prikaz
   list-m2m:
     description: Odaberite više povezanih spojnih stavki
     columns_configure_notice: Možete konfigurisati predložak prikaza nakon kreiranja ovog polja.
@@ -1500,6 +1469,8 @@ interfaces:
     preview: Pretpregled
     editorFont: Font uređivača
     previewFont: Pregled fonta
+    default_view: Zadani prikaz
+    default_view_preview: Pretpregled
     customSyntax: Prilagođeni blokovi
     customSyntax_label: Dodajte prilagođene vrste sintakse
     customSyntax_add: Dodajte prilagođenu sintaksu
@@ -1543,6 +1514,7 @@ interfaces:
     sort_placeholder: Ručno
     field_note_placeholder: Unesite napomenu o polju...
     incompatible_data: Trenutni podaci nisu kompatibilni sa interfejsom repetitora i biće nadjačani prilikom dodavanja stavki u repetitor
+    interface_group: Opcije interfejsa
   slider:
     slider: Klizač
     description: Odaberite broj pomoću klizača
@@ -1725,6 +1697,8 @@ displays:
     icon: Ikona
     border: Obrub
     border_label: Prikaži rubove
+    mask: Maskirano
+    mask_label: Sakrij prave vrijednosti
     text: Tekst
     text_placeholder: Opcionalno nadjačavanje vrijednosti...
   formatted-json-value:
@@ -1809,7 +1783,6 @@ layouts:
   kanban:
     crop: Izreži
     advanced: Napredno
-    not_all_loaded: Moguće učitati samo prvih 1000 stavki.
 horizontal: Horizontalno
 both: Oboje
 panels:
@@ -1962,3 +1935,12 @@ operations:
     flows: Tokovi
     flow: Tok
     data: Podaci
+standard: Standardno
+compact: Kompaktno
+style: Stil
+fonts:
+  normal: Normalno
+  bold: Podebljano
+  black: Crna
+  italic: Kurziv
+  auto: Automatski

@@ -1,134 +1,18 @@
-<template>
-	<div class="kanban">
-		<draggable
-			:model-value="groupedItems"
-			group="groups"
-			item-key="id"
-			draggable=".draggable"
-			:animation="150"
-			class="draggable"
-			:class="{ sortable: groupsSortField !== null }"
-			@change="changeGroupSort"
-		>
-			<template #item="{ element: group }">
-				<div class="group" :class="{ draggable: group.id !== null }">
-					<div class="header">
-						<div class="title">
-							<div class="title-content">
-								{{ group.id === null ? t('layouts.kanban.no_group') : group.title }}
-							</div>
-							<span class="badge">{{ group.items.length }}</span>
-						</div>
-						<div v-if="group.id !== null" class="actions">
-							<!-- <router-link :to="`${collection}/+`"><v-icon name="add" /></router-link> -->
-							<v-menu show-arrow placement="bottom-end">
-								<template #activator="{ toggle }">
-									<v-icon name="more_horiz" clickable @click="toggle" />
-								</template>
-
-								<v-list>
-									<v-list-item clickable @click="openEditGroup(group)">
-										<v-list-item-icon><v-icon name="edit" /></v-list-item-icon>
-										<v-list-item-content>{{ t('layouts.kanban.edit_group') }}</v-list-item-content>
-									</v-list-item>
-									<v-list-item v-if="isRelational" class="danger" clickable @click="deleteGroup(group.id)">
-										<v-list-item-icon><v-icon name="delete" /></v-list-item-icon>
-										<v-list-item-content>{{ t('layouts.kanban.delete_group') }}</v-list-item-content>
-									</v-list-item>
-								</v-list>
-							</v-menu>
-						</div>
-					</div>
-					<draggable
-						:model-value="group.items"
-						group="items"
-						draggable=".item"
-						:animation="150"
-						:sort="sortField !== null"
-						class="items"
-						item-key="id"
-						@change="change(group, $event)"
-					>
-						<template #item="{ element }">
-							<router-link :to="getItemRoute(collection, element.id)" class="item">
-								<div v-if="element.title" class="title">{{ element.title }}</div>
-								<img v-if="element.image" class="image" :src="element.image" />
-								<render-display
-									v-if="element.text && textFieldConfiguration"
-									:collection="collection"
-									:value="element.text"
-									:type="textFieldConfiguration.type"
-									:field="layoutOptions.textField"
-									:display="textFieldConfiguration.meta?.display"
-									:options="textFieldConfiguration.meta?.options"
-									:interface="textFieldConfiguration.meta?.interface"
-								/>
-								<display-labels
-									v-if="element.tags"
-									:value="element.tags"
-									:type="Array.isArray(element.tags) ? 'csv' : 'json'"
-								/>
-								<div class="bottom">
-									<display-datetime v-if="element.date" format="short" :value="element.date" :type="element.dateType" />
-									<div class="avatars">
-										<span v-if="element.users.length > 3" class="avatar-overflow">+{{ element.users.length - 3 }}</span>
-										<v-avatar
-											v-for="user in element.users.slice(0, 3)"
-											:key="user.id"
-											v-tooltip.bottom="`${user.first_name} ${user.last_name}`"
-											class="avatar"
-										>
-											<v-image v-if="user.avatar && parseAvatar(user.avatar)" :src="parseAvatar(user.avatar)" />
-											<v-icon v-else name="person" />
-										</v-avatar>
-									</div>
-								</div>
-							</router-link>
-						</template>
-					</draggable>
-				</div>
-			</template>
-		</draggable>
-		<!-- <div v-if="isRelational" class="add-group" @click="editDialogOpen = '+'">
-			<v-icon name="add_box" />
-		</div> -->
-
-		<v-dialog :model-value="editDialogOpen !== null" @esc="cancelChanges()">
-			<v-card>
-				<v-card-title>
-					{{ editDialogOpen === '+' ? t('layouts.kanban.add_group') : t('layouts.kanban.edit_group') }}
-				</v-card-title>
-				<v-card-text>
-					<v-input v-model="editTitle" :placeholder="t('layouts.kanban.add_group_placeholder')" />
-				</v-card-text>
-				<v-card-actions>
-					<v-button secondary @click="cancelChanges()">{{ t('cancel') }}</v-button>
-					<v-button @click="saveChanges">{{ editDialogOpen === '+' ? t('create') : t('save') }}</v-button>
-				</v-card-actions>
-			</v-card>
-		</v-dialog>
-	</div>
-</template>
-
-<script lang="ts">
-export default {
-	inheritAttrs: false,
-};
-</script>
-
 <script setup lang="ts">
-import { addTokenToURL } from '@/api';
-import { getItemRoute } from '@/utils/get-route';
-import { getRootPath } from '@/utils/get-root-path';
-import type { Field } from '@directus/types';
+import { getAssetUrl } from '@/utils/get-asset-url';
+import type { Field, PrimaryKey } from '@directus/types';
 import { computed, ref } from 'vue';
 import { useI18n } from 'vue-i18n';
 import Draggable from 'vuedraggable';
 import type { ChangeEvent, Group, Item, LayoutOptions } from './types';
 
+defineOptions({ inheritAttrs: false });
+
 const props = withDefaults(
 	defineProps<{
 		collection?: string | null;
+		totalCount: number | null;
+		limit: number;
 		groupCollection?: string | null;
 		fieldsInCollection?: Field[];
 		primaryKeyField?: Record<string, any> | null;
@@ -141,10 +25,19 @@ const props = withDefaults(
 		editGroup: (id: string | number, title: string) => Promise<void>;
 		deleteGroup: (id: string | number) => Promise<void>;
 		isRelational?: boolean;
+		canReorderGroups: boolean;
+		canReorderItems: boolean;
+		canUpdateGroupTitle: boolean;
+		canDeleteGroups: boolean;
 		sortField?: string | null;
 		userField?: string | null;
 		groupsSortField?: string | null;
-		layoutOptions: LayoutOptions;
+		layoutOptions: LayoutOptions | null;
+		resetPresetAndRefresh: () => Promise<void>;
+		error?: any;
+		selection: PrimaryKey[];
+		selectMode?: boolean;
+		onClick: (options: { item: Item; event: MouseEvent }) => void;
 	}>(),
 	{
 		collection: null,
@@ -158,15 +51,17 @@ const props = withDefaults(
 		sortField: null,
 		userField: null,
 		groupsSortField: null,
-	}
+	},
 );
 
 defineEmits(['update:selection', 'update:limit', 'update:size', 'update:sort', 'update:width']);
 
-const { t } = useI18n();
+const { t, n } = useI18n();
 
 const editDialogOpen = ref<string | number | null>(null);
 const editTitle = ref('');
+
+const atLimit = computed(() => (props.totalCount ?? 0) > props.limit);
 
 function openEditGroup(group: Group) {
 	editDialogOpen.value = group.id;
@@ -177,8 +72,8 @@ function parseAvatar(file: Record<string, any>) {
 	if (!file || !file.type) return;
 	if (file.type.startsWith('image') === false) return;
 
-	const url = getRootPath() + `assets/${file.id}?modified=${file.modified_on}&key=system-small-cover`;
-	return addTokenToURL(url);
+	const url = getAssetUrl(`${file.id}?modified=${file.modified_on}&key=system-small-cover`);
+	return url;
 }
 
 function cancelChanges() {
@@ -197,16 +92,200 @@ function saveChanges() {
 	editTitle.value = '';
 }
 
-const textFieldConfiguration = computed<Field | undefined>(() => {
-	return props.fieldsInCollection.find((field) => field.field === props.layoutOptions.textField);
+const fieldDisplay = computed(() => {
+	return {
+		titleField: getRenderDisplayOptions('titleField'),
+		textField: getRenderDisplayOptions('textField'),
+	};
+
+	function getRenderDisplayOptions(fieldName: keyof LayoutOptions) {
+		const fieldConfiguration = props.fieldsInCollection.find(
+			(field) => field.field === props.layoutOptions?.[fieldName],
+		);
+
+		if (!fieldConfiguration) return;
+		const { field, type, meta } = fieldConfiguration;
+		return {
+			collection: props.collection,
+			field,
+			type,
+			display: meta?.display,
+			options: meta?.display_options,
+			interface: meta?.interface,
+			interfaceOptions: meta?.options,
+		};
+	}
 });
+
+const reorderGroupsDisabled = computed(() => !props.canReorderGroups || props.selectMode);
 </script>
 
+<template>
+	<div class="kanban-layout">
+		<slot v-if="error" name="error" :error="error" :reset="resetPresetAndRefresh" />
+
+		<template v-else>
+			<v-notice v-if="atLimit" type="warning" class="limit">
+				{{ t('dataset_too_large_currently_showing_n_items', { n: n(props.totalCount ?? 0) }) }}
+			</v-notice>
+
+			<div class="kanban">
+				<draggable
+					:model-value="groupedItems"
+					group="groups"
+					item-key="id"
+					draggable=".draggable"
+					:disabled="reorderGroupsDisabled"
+					:animation="150"
+					class="draggable"
+					:class="{ sortable: groupsSortField !== null }"
+					@change="changeGroupSort"
+				>
+					<template #item="{ element: group }">
+						<div class="group" :class="{ draggable: group.id !== null, disabled: reorderGroupsDisabled }">
+							<div class="header">
+								<div class="title">
+									<div class="title-content">
+										{{ group.id === null ? t('layouts.kanban.no_group') : group.title }}
+									</div>
+									<span class="badge">{{ group.items.length }}</span>
+								</div>
+								<div v-if="group.id !== null && !selectMode" class="actions">
+									<v-menu show-arrow placement="bottom-end">
+										<template #activator="{ toggle }">
+											<v-icon name="more_horiz" clickable @click="toggle" />
+										</template>
+
+										<v-list>
+											<v-list-item
+												:disabled="!canUpdateGroupTitle || selectMode"
+												clickable
+												@click="openEditGroup(group)"
+											>
+												<v-list-item-icon><v-icon name="edit" /></v-list-item-icon>
+												<v-list-item-content>{{ t('layouts.kanban.edit_group') }}</v-list-item-content>
+											</v-list-item>
+											<v-list-item
+												v-if="isRelational"
+												:disabled="!canDeleteGroups || selectMode"
+												class="danger"
+												clickable
+												@click="deleteGroup(group.id)"
+											>
+												<v-list-item-icon><v-icon name="delete" /></v-list-item-icon>
+												<v-list-item-content>{{ t('layouts.kanban.delete_group') }}</v-list-item-content>
+											</v-list-item>
+										</v-list>
+									</v-menu>
+								</div>
+							</div>
+							<draggable
+								:model-value="group.items"
+								group="items"
+								draggable=".item"
+								:disabled="!canReorderItems || selectMode"
+								:animation="150"
+								:sort="sortField !== null"
+								class="items"
+								item-key="id"
+								@change="change(group, $event)"
+							>
+								<template #item="{ element }">
+									<div
+										class="item"
+										:class="{ selected: selection.includes(element[primaryKeyField?.field]) }"
+										@click="onClick({ item: element, event: $event })"
+									>
+										<div v-if="element.title" class="title">
+											<render-display
+												v-if="fieldDisplay.titleField"
+												v-bind="fieldDisplay.titleField"
+												:value="element.title"
+											/>
+										</div>
+										<img v-if="element.image" class="image" :src="element.image" draggable="false" />
+										<div v-if="element.text" class="text">
+											<render-display
+												v-if="fieldDisplay.textField"
+												v-bind="fieldDisplay.textField"
+												:value="element.text"
+											/>
+										</div>
+										<display-labels
+											v-if="element.tags"
+											:value="element.tags"
+											:type="Array.isArray(element.tags) ? 'csv' : 'json'"
+										/>
+										<div class="bottom">
+											<display-datetime
+												v-if="element.date"
+												format="short"
+												:value="element.date"
+												:type="element.dateType"
+											/>
+											<div class="avatars">
+												<span v-if="element.users.length > 3" class="avatar-overflow">
+													+{{ element.users.length - 3 }}
+												</span>
+												<v-avatar
+													v-for="user in element.users.slice(0, 3)"
+													:key="user.id"
+													v-tooltip.bottom="`${user.first_name} ${user.last_name}`"
+													class="avatar"
+												>
+													<v-image v-if="user.avatar && parseAvatar(user.avatar)" :src="parseAvatar(user.avatar)" />
+													<v-icon v-else name="person" />
+												</v-avatar>
+											</div>
+										</div>
+									</div>
+								</template>
+							</draggable>
+						</div>
+					</template>
+				</draggable>
+
+				<v-dialog :model-value="editDialogOpen !== null" @esc="cancelChanges()">
+					<v-card>
+						<v-card-title>
+							{{ editDialogOpen === '+' ? t('layouts.kanban.add_group') : t('layouts.kanban.edit_group') }}
+						</v-card-title>
+						<v-card-text>
+							<v-input v-model="editTitle" :placeholder="t('layouts.kanban.add_group_placeholder')" />
+						</v-card-text>
+						<v-card-actions>
+							<v-button secondary @click="cancelChanges()">{{ t('cancel') }}</v-button>
+							<v-button @click="saveChanges">{{ editDialogOpen === '+' ? t('create') : t('save') }}</v-button>
+						</v-card-actions>
+					</v-card>
+				</v-dialog>
+			</div>
+		</template>
+	</div>
+</template>
+
 <style lang="scss" scoped>
+.kanban-layout {
+	--limit-notice-height: 0px;
+	--limit-notice-margin-bottom: 24px;
+	--header-bar-margin: 24px;
+
+	height: calc(100% - calc(var(--header-bar-height) + 2 * var(--header-bar-margin) + var(--limit-notice-height)));
+	padding: var(--content-padding);
+	padding-top: 0;
+
+	&:has(> .limit) {
+		--limit-notice-height: calc(60px + var(--limit-notice-margin-bottom));
+	}
+
+	.limit {
+		margin-bottom: var(--limit-notice-margin-bottom);
+	}
+}
+
 .kanban {
 	display: flex;
-	height: calc(100% - 65px - 2 * 24px);
-	padding: 0px 32px 24px 32px;
+	height: 100%;
 	overflow-x: auto;
 	overflow-y: hidden;
 	--user-spacing: 16px;
@@ -219,14 +298,14 @@ const textFieldConfiguration = computed<Field | undefined>(() => {
 			flex-direction: column;
 			width: 320px;
 			padding: 8px 0;
-			background-color: var(--background-normal);
-			border: var(--border-width) solid var(--border-normal);
-			border-radius: var(--border-radius);
+			background-color: var(--theme--background-normal);
+			border: var(--theme--border-width) solid var(--theme--form--field--input--border-color);
+			border-radius: var(--theme--border-radius);
 			margin-right: 20px;
 			transition: border-color var(--transition) var(--fast);
 
-			&:active {
-				border-color: var(--border-normal-alt);
+			&:not(.disabled).active {
+				border-color: var(--theme--form--field--input--border-color-hover);
 				cursor: move;
 			}
 
@@ -245,7 +324,7 @@ const textFieldConfiguration = computed<Field | undefined>(() => {
 						overflow: hidden;
 						white-space: nowrap;
 						text-overflow: ellipsis;
-						color: var(--foreground-normal-alt);
+						color: var(--theme--foreground-accent);
 						margin-right: 6px;
 					}
 				}
@@ -260,12 +339,12 @@ const textFieldConfiguration = computed<Field | undefined>(() => {
 					text-align: center;
 					font-size: 12px;
 					line-height: 20px;
-					background-color: var(--background-normal-alt);
-					border-radius: 12px; //var(--border-radius);
+					background-color: var(--theme--background-accent);
+					border-radius: 12px; //var(--theme--border-radius);
 				}
 
 				.actions {
-					color: var(--foreground-subdued);
+					color: var(--theme--foreground-subdued);
 
 					.v-icon {
 						margin-left: 4px;
@@ -273,7 +352,7 @@ const textFieldConfiguration = computed<Field | undefined>(() => {
 					}
 
 					.v-icon:hover {
-						color: var(--foreground-normal);
+						color: var(--theme--foreground);
 					}
 				}
 			}
@@ -287,37 +366,49 @@ const textFieldConfiguration = computed<Field | undefined>(() => {
 					display: block;
 					margin: 2px 16px 6px 16px;
 					padding: 12px 16px;
-					background-color: var(--background-page);
-					border-radius: var(--border-radius);
-					box-shadow: 0px 2px 4px 0px rgba(var(--card-shadow-color), 0.1);
+					background-color: var(--theme--background);
+					border-radius: var(--theme--border-radius);
+					cursor: pointer;
 
 					&:hover .title {
-						// color: var(--primary);
 						text-decoration: underline;
+
+						& * {
+							color: var(--theme--primary);
+						}
+					}
+
+					&.selected {
+						outline: 2px solid var(--theme--primary);
 					}
 				}
 
 				.title {
-					color: var(--primary);
+					color: var(--theme--primary);
 					transition: color var(--transition) var(--fast);
 					font-weight: 700;
-					line-height: 1.25;
 					margin-bottom: 4px;
 				}
 
+				.title,
 				.text {
-					font-size: 14px;
-					line-height: 1.4em;
-					-webkit-line-clamp: 4;
-					-webkit-box-orient: vertical;
-					overflow: hidden;
-					display: -webkit-box;
+					line-height: 24px;
+					height: 24px;
+
+					& * {
+						line-height: inherit;
+					}
+
+					// This fixes the broken underline spacing when rendering a related field as title
+					& > :deep(.render-template) > span:not(.vertical-aligner) {
+						vertical-align: baseline;
+					}
 				}
 
 				.image {
 					width: 100%;
 					margin-top: 10px;
-					border-radius: var(--border-radius);
+					border-radius: var(--theme--border-radius);
 					margin-top: 4px;
 					max-height: 300px;
 				}
@@ -329,7 +420,7 @@ const textFieldConfiguration = computed<Field | undefined>(() => {
 
 					:deep(.v-chip) {
 						border: none;
-						background-color: var(--background-normal);
+						background-color: var(--theme--background-normal);
 						font-size: 12px;
 						font-weight: 600;
 						margin-top: 4px;
@@ -349,9 +440,10 @@ const textFieldConfiguration = computed<Field | undefined>(() => {
 					align-items: center;
 					margin-top: 8px;
 					margin-bottom: 2px;
+
 					.datetime {
 						display: inline-block;
-						color: var(--foreground-subdued);
+						color: var(--theme--foreground-subdued);
 						font-size: 13px;
 						font-weight: 600;
 						line-height: 24px;
@@ -364,7 +456,7 @@ const textFieldConfiguration = computed<Field | undefined>(() => {
 						.avatar {
 							margin-left: calc(var(--user-spacing) * -1);
 							border-radius: 24px;
-							border: 4px solid var(--background-page);
+							border: 4px solid var(--theme--background);
 							height: 32px;
 							width: 32px;
 							margin-bottom: -4px;
@@ -373,7 +465,7 @@ const textFieldConfiguration = computed<Field | undefined>(() => {
 
 						.avatar-overflow {
 							align-self: center;
-							color: var(--foreground-subdued);
+							color: var(--theme--foreground-subdued);
 							margin-left: 2px;
 						}
 					}
@@ -385,28 +477,28 @@ const textFieldConfiguration = computed<Field | undefined>(() => {
 	.add-group {
 		cursor: pointer;
 		padding: 8px 8px;
-		border: var(--border-width) dashed var(--border-subdued);
-		border-radius: var(--border-radius);
+		border: var(--theme--border-width) dashed var(--theme--border-color-subdued);
+		border-radius: var(--theme--border-radius);
 		transition: border-color var(--transition) var(--fast);
 
 		.v-icon {
-			color: var(--foreground-subdued);
+			color: var(--theme--foreground-subdued);
 			transition: color var(--transition) var(--fast);
 		}
 
 		&:hover {
-			border-color: var(--primary);
+			border-color: var(--theme--primary);
 
 			.v-icon {
-				color: var(--primary);
+				color: var(--theme--primary);
 			}
 		}
 	}
 }
 
 .v-list-item.danger {
-	--v-list-item-color: var(--danger);
-	--v-list-item-color-hover: var(--danger);
-	--v-list-item-icon-color: var(--danger);
+	--v-list-item-color: var(--theme--danger);
+	--v-list-item-color-hover: var(--theme--danger);
+	--v-list-item-icon-color: var(--theme--danger);
 }
 </style>

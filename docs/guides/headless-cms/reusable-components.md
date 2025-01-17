@@ -171,7 +171,10 @@ To keep things organized, we recommend that you namespace each collection with a
    - Gallery / Cards
    - Article
 
-   c. Save the field. Directus will create a new, hidden
+   c. Enter the Advanced Field Creation Mode. In the Relationship section add a Sort Field (you can just type the word
+   'sort'). This will allow you to sort the blocks in the editor.
+
+   d. Save the field. Directus will create a new, hidden
    [junction collection](/app/data-model/relationships#many-to-any-m2a) for you automatically.
 
 ::: tip
@@ -210,8 +213,7 @@ how to properly fetch nested relational M2A data without over-fetching data that
 **Sample Request**
 
 ```js
-import { createDirectus } from '@directus/sdk';
-import { rest, readItems } from '@directus/sdk/rest';
+import { createDirectus, rest, readItems } from '@directus/sdk';
 
 // Initialize the SDK.
 const directus = createDirectus('https://directus.example.com').with(rest());
@@ -225,11 +227,24 @@ const pages = await directus.request(
 		filter: {
 			slug: { _eq: slug },
 		},
-		fields: ['*', { blocks: ['*', { item: [{ collection_a: ['*'], collection_b: ['*'] }] }] }],
+		fields: [
+			'*',
+			{
+				blocks: [
+					'*',
+					{
+						item: {
+							block_hero: ['*'],
+							block_cardgroup: ['*'],
+							block_richtext: ['*'],
+						},
+					},
+				],
+			},
+		],
 		limit: 1,
 	})
 );
-
 const page = page[0];
 ```
 
@@ -337,9 +352,8 @@ Directus returns for Many To Any (M2A) relationships.
 
 ### Check Your Permissions
 
-If you notice you aren't receiving the data that you expect,
-[check the Permissions settings](/user-guide/user-management/permissions) for your Public or chosen role. You'll have to
-enable Read access for each collection using in the Pages > Blocks Many-To-Any field.
+If you notice you aren't receiving the data that you expect, check the Permissions settings for your Public or chosen
+role. You'll have to enable Read access for each collection using in the Pages > Blocks Many-To-Any field.
 
 ### Use Typescript
 

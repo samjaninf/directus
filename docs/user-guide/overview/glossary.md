@@ -95,6 +95,8 @@ out-of-the-box, below are the some key examples:
 - **Related Values** — Displays relational display titles
 - **User** — Avatar and name of a system user
 
+![Displays](https://marketing.directus.app/assets/533af564-7400-409f-a98c-19c4452b41db.png)
+
 In addition to the included core displays, custom displays allow for creating new and/or proprietary ways to view or
 represent field data. For example, you could create progress indicators, tooltips for relational data, specific
 formatting styles, or anything else.
@@ -110,10 +112,10 @@ migrations to promote data between them.
 
 ## Extensions
 
-The platform has been built to be modular and extensible. This helps keep the core codebase simple and clean (see the
-[80/20 Rule](/contributing/introduction#feature-requests)), while allowing the flexibility needed to satisfy all
-use-cases... no matter how complex. There are many different types of supported extensions, each offering a way to
-deeply customize, override, or extend the core platform. [Learn more about Extensions](/extensions/introduction).
+The platform has been built to be modular and extensible. This helps keep the core codebase simple and clean, while
+allowing the flexibility needed to satisfy all use-cases... no matter how complex. There are many different types of
+supported extensions, each offering a way to deeply customize, override, or extend the core platform.
+[Learn more about Extensions](/extensions/introduction).
 
 ## Fields
 
@@ -156,6 +158,8 @@ Interfaces determine how you view or interact with a field. In most cases, they 
 managing data of a specific type, but can also be used exclusively for presentation. Examples include text inputs,
 toggles, WYSIWYG editors, dropdowns, sliders, image galleries, and more.
 
+![Interfaces](https://marketing.directus.app/assets/8c8d1da9-9e8a-4698-91c3-02d4a3cdefef.png)
+
 In addition to the many core interfaces included out-of-the-box, _custom_ interfaces allow for creating more tailored or
 proprietary options, such as seating charts, QR codes, or Stripe customer info.
 
@@ -165,8 +169,8 @@ proprietary options, such as seating charts, QR codes, or Stripe customer info.
 
 ## Items
 
-Items are objects within a Collection which contain values for one or more fields. Each collection represents a
-**record** in your database.
+Items are objects within a Collection which contain values for one or more fields. Each item represents a **record** in
+your database.
 
 Items are the primary building blocks of your project content. Similar to a "row" within a spreadsheet, all data within
 the platform is accessed via these "atomic" data units. Items themselves are fairly straightforward, however their real
@@ -200,6 +204,8 @@ out-of-the-box, each with different features and configuration options.
 - **Calendar** — Ideal for "temporal" data that is sorted by date or datetime.
 - **Map** — Ideal for "geospatial" data that is shown on a world map.
 
+![Layouts](https://marketing.directus.app/assets/75900b67-a908-42fa-9bd3-de259c797cac.png)
+
 In addition to these core layouts, custom layouts allow for creating more tailored or proprietary ways to experience
 data within the App, such as Gantt charts, seating maps, or spreadsheets.
 
@@ -224,6 +230,8 @@ functionality within the App can be bucketed into one of the following modules:
   reference
 - [Project Settings](/user-guide/settings/project-settings) — An admin-only section for configuring the project and
   system settings
+
+![Modules](https://marketing.directus.app/assets/f761a496-f49b-4fcc-a09e-d074b6cbf8a5.png)
 
 In addition to these core modules, custom modules offer a _blank canvas_ for creating altogether new/different
 experiences within the App, such as proprietary dashboards, compound datasets, or third-party integrations (e.g., a
@@ -250,14 +258,16 @@ two main ways to achieve multitenancy:
 Panels are modular units of data visualization that exist within the [Insights module](/user-guide/insights/dashboards).
 Each panel exists within a [Dashboard](#dashboards) and can be positioned and resized as needed.
 
-### Relevant Guides
-
-- [Creating a Custom Panel](/extensions/panels)
+![Panels](https://marketing.directus.app/assets/2af5a9ce-ddfb-44ca-a8fc-afa18018841f.png)
 
 ## Permissions
 
-Permissions are attached directly to a Role, defining what a user can create, read, update, and delete within the
+Permissions are attached directly to a Policy, defining what a user can create, read, update, and delete within the
 platform. Extremely granular, these filter-based permissions control access for the entire system.
+
+## Policies
+
+Policies define a specific set of access permissions, and can be attached directly to users or to roles.
 
 ## Presets
 
@@ -284,7 +294,7 @@ file, asset storage, and any custom extensions. Projects are the highest level o
 
 - [Creating a Project](/self-hosted/quickstart)
 - [Configuring a Project](/self-hosted/config-options)
-- [Adjusting Project Settings](/user-guide/cloud/project-settings)
+- [Adjusting Project Settings](/user-guide/settings/project-settings)
 - [Upgrading a Project](/self-hosted/upgrades-migrations)
 - [Backing-up a Project](/self-hosted/upgrades-migrations#backing-up-a-project)
 - [Migrating a Project](/self-hosted/upgrades-migrations#migrating-a-project)
@@ -306,22 +316,16 @@ to the activity event where it was created.
 
 ## Roles
 
-Roles define a specific set of access permissions, and are the primary organizational structure for Users within the
-platform. You can create an unlimited number of roles, so organize your users in whatever way feels most appropriate.
+Roles define a specific set of Policies, and are the primary organizational structure for Users within the platform. You
+can create an unlimited number of roles, so organize your users in whatever way feels most appropriate.
+
+Roles can also contain any number of additional roles, each containing their own set of Policies.
 
 During the installation process, Directus automatically creates an "Administrators" Role, which is used to provide the
 initial admin user with full platform access. However this is just a _normal_ role, and so it can still be updated,
 renamed, or even deleted. Keep in mind that your project must maintain at least one role with Admin Access at all times.
 
 There is also a "Public" role that determines access for unauthenticated access.
-
-### Relevant Guides
-
-- [Creating a Role](/user-guide/user-management/users-roles-permissions#creating-a-role)
-- [Configuring a Role](/user-guide/user-management/users-roles-permissions#configure-a-role)
-- [Configuring Role Permissions](/user-guide/user-management/users-roles-permissions#configure-permissions)
-- [Configuring System Permissions](/user-guide/user-management/users-roles-permissions#configure-system-permissions)
-- [Deleting a Role](/user-guide/user-management/users-roles-permissions#deleting-a-role)
 
 ## Singleton
 
@@ -343,13 +347,12 @@ following drivers:
 ## Title Formatter
 
 Special Casing — If you are trying to update the specific casing (uppercase/lowercase) for a word (e.g., `Dna` to `DNA`)
-you will want to add the edge-case to the [Format Title package](https://github.com/directus/format-title). If you feel
-the case passes our [80/20 rule](https://docs.directus.io/contributing/introduction#feature-requests) you should submit
-a Pull Request to the codebase, otherwise you can update this in your instance.
+you will want to add the edge-case to the [Format Title package](https://github.com/directus/format-title) in a Pull
+Request.
 
 ## Translations
 
-The platform supports internationalization across its entire Admin App. Many languages are currently supported, with
+The platform supports internationalization across its entire Data Studio. Many languages are currently supported, with
 more being added all the time. Anyone can add or refine any languages through the integration with
 [Crowdin](https://locales.directus.io).
 
@@ -398,6 +401,6 @@ For **SQLite**, the **Timestamp** type is stored as a **DateTime**.
 
 ## Users
 
-An active User is required to access a project. Each user is assigned to a [Role](#roles) that determines what they have
-access to see and do. This means that the experience of users may vary significantly depending on their role's
-permissions.
+An active User is required to access a project. Each user is assigned to a [Role](#roles) that determines their policies
+what they have access to see and do. This means that the experience of users may vary significantly depending on their
+role's permissions. Users can also have policies directly attached to them.

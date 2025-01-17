@@ -51,6 +51,7 @@ describe('applySnapshot', () => {
 					note: null,
 					singleton: false,
 					translations: {},
+					versioning: false,
 				},
 				schema: { name: 'test_table_2' },
 				fields: [
@@ -101,7 +102,7 @@ describe('applySnapshot', () => {
 
 			// Stop call to db later on in apply-snapshot
 			vi.spyOn(getSchema, 'getSchema').mockReturnValue(Promise.resolve(snapshotApplyTestSchema));
-			// We are not actually testing that createOne works, just that is is called correctly
+			// We are not actually testing that createOne works, just that it is called correctly
 			const createOneCollectionSpy = vi.spyOn(CollectionsService.prototype, 'createOne').mockResolvedValue('test');
 			const createFieldSpy = vi.spyOn(FieldsService.prototype, 'createField').mockResolvedValue();
 
@@ -132,6 +133,7 @@ describe('applySnapshot', () => {
 					note: null,
 					singleton: false,
 					translations: {},
+					versioning: false,
 				},
 				schema: { name: 'test_table_2' },
 				fields: [
@@ -236,13 +238,14 @@ describe('applySnapshot', () => {
 					note: null,
 					singleton: false,
 					translations: {},
+					versioning: false,
 				},
 				schema: { name: 'test_table_3' },
 			};
 
 			// Stop call to db later on in apply-snapshot
 			vi.spyOn(getSchema, 'getSchema').mockReturnValue(Promise.resolve(snapshotApplyTestSchema));
-			// We are not actually testing that createOne works, just that is is called correctly
+			// We are not actually testing that createOne works, just that it is called correctly
 			const createOneCollectionSpy = vi.spyOn(CollectionsService.prototype, 'createOne').mockResolvedValue('test');
 			const createFieldSpy = vi.spyOn(FieldsService.prototype, 'createField').mockResolvedValue();
 
@@ -399,7 +402,7 @@ describe('applySnapshot', () => {
 
 				// Stop call to db later on in apply-snapshot
 				vi.spyOn(getSchema, 'getSchema').mockReturnValue(Promise.resolve(snapshotApplyTestSchema));
-				// We are not actually testing that createOne works, just that is is called with the right data type
+				// We are not actually testing that createOne works, just that it is called with the right data type
 				const createOneCollectionSpy = vi.spyOn(CollectionsService.prototype, 'createOne').mockResolvedValue('test');
 				vi.spyOn(FieldsService.prototype, 'createField').mockResolvedValue();
 
@@ -417,7 +420,7 @@ describe('applySnapshot', () => {
 
 				expect(createOneCollectionSpy).toHaveBeenCalledOnce();
 				expect(createOneCollectionSpy).toHaveBeenCalledWith(expected, mutationOptions);
-			}
+			},
 		);
 	});
 
@@ -433,7 +436,7 @@ describe('applySnapshot', () => {
 
 			// Stop call to db later on in apply-snapshot
 			vi.spyOn(getSchema, 'getSchema').mockReturnValue(Promise.resolve(snapshotApplyTestSchema));
-			// We are not actually testing that deleteOne works, just that is is called correctly
+			// We are not actually testing that deleteOne works, just that it is called correctly
 			const deleteOneCollectionSpy = vi.spyOn(CollectionsService.prototype, 'deleteOne').mockResolvedValue('test');
 
 			await applySnapshot(snapshotToApply, {

@@ -1,18 +1,18 @@
+import { AppUser } from '@/types/user';
 import { createTestingPinia } from '@pinia/testing';
 import { setActivePinia } from 'pinia';
 import { beforeEach, expect, test, vi } from 'vitest';
+import { useFlowsStore } from './flows';
+import { useUserStore } from './user';
 
 beforeEach(() => {
 	setActivePinia(
 		createTestingPinia({
 			createSpy: vi.fn,
 			stubActions: false,
-		})
+		}),
 	);
 });
-
-import { useFlowsStore } from './flows';
-import { useUserStore } from './user';
 
 const mockFlows = [
 	{
@@ -55,9 +55,8 @@ const mockFlows = [
 	},
 ];
 
-const mockAdminUser = { role: { admin_access: true } } as any;
-
-const mockNonAdminUser = { role: { admin_access: false } } as any;
+const mockAdminUser = { admin_access: true } as AppUser;
+const mockNonAdminUser = { admin_access: false } as AppUser;
 
 vi.mock('@/api', () => {
 	return {
@@ -120,7 +119,7 @@ test('getManualFlowsForCollection action returns active manual flows of specifie
 	expect(flowsStore.getManualFlowsForCollection(testCollection)).toEqual(
 		mockFlows.filter(
 			(flow) =>
-				flow.trigger === 'manual' && flow.status === 'active' && flow.options?.collections?.includes(testCollection)
-		)
+				flow.trigger === 'manual' && flow.status === 'active' && flow.options?.collections?.includes(testCollection),
+		),
 	);
 });

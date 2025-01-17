@@ -1,79 +1,12 @@
-<template>
-	<div class="input-container" :class="{ collapsed }">
-		<v-menu v-model="showMentionDropDown" attached>
-			<template #activator>
-				<v-template-input
-					ref="commentElement"
-					v-model="newCommentContent"
-					capture-group="(@[0-9A-F]{8}-[0-9A-F]{4}-4[0-9A-F]{3}-[89AB][0-9A-F]{3}-[0-9A-F]{12})"
-					multiline
-					trigger-character="@"
-					:items="userPreviews"
-					:placeholder="t('leave_comment')"
-					@trigger="triggerSearch"
-					@deactivate="showMentionDropDown = false"
-					@up="pressedUp"
-					@down="pressedDown"
-					@enter="pressedEnter"
-					@focus="focused = true"
-				/>
-			</template>
-
-			<v-list>
-				<v-list-item
-					v-for="(user, index) in searchResult"
-					id="suggestions"
-					:key="user.id"
-					clickable
-					:active="index === selectedKeyboardIndex"
-					@click="insertUser(user)"
-				>
-					<v-list-item-icon>
-						<v-avatar x-small>
-							<v-image v-if="user.avatar" :src="avatarSource(user.avatar.id)" />
-							<v-icon v-else name="person_outline" />
-						</v-avatar>
-					</v-list-item-icon>
-
-					<v-list-item-content>{{ userName(user) }}</v-list-item-content>
-				</v-list-item>
-			</v-list>
-		</v-menu>
-
-		<div class="buttons">
-			<v-button x-small secondary icon class="mention" @click="insertAt">
-				<v-icon name="alternate_email" />
-			</v-button>
-
-			<v-emoji-picker @click="saveCursorPosition" @emoji-selected="insertText($event)" />
-
-			<div class="spacer"></div>
-
-			<v-button class="cancel" x-small secondary @click="cancel">
-				{{ t('cancel') }}
-			</v-button>
-			<v-button
-				:disabled="!newCommentContent || newCommentContent.length === 0 || newCommentContent.trim() === ''"
-				:loading="saving"
-				class="post-comment"
-				x-small
-				@click="postComment"
-			>
-				{{ t('submit') }}
-			</v-button>
-		</div>
-	</div>
-</template>
-
 <script setup lang="ts">
 import api from '@/api';
 import { useShortcut } from '@/composables/use-shortcut';
-import { Activity } from '@/types/activity';
+import { getAssetUrl } from '@/utils/get-asset-url';
 import { md } from '@/utils/md';
 import { notify } from '@/utils/notify';
 import { unexpectedError } from '@/utils/unexpected-error';
 import { userName } from '@/utils/user-name';
-import { User } from '@directus/types';
+import { Comment, User } from '@directus/types';
 import axios, { CancelTokenSource } from 'axios';
 import { cloneDeep, throttle } from 'lodash';
 import { ComponentPublicInstance, computed, ref, watch } from 'vue';
@@ -81,16 +14,16 @@ import { useI18n } from 'vue-i18n';
 
 const props = withDefaults(
 	defineProps<{
-		refresh: () => void;
+		refresh: () => Promise<void>;
 		collection: string;
 		primaryKey: string | number;
-		existingComment?: Activity | null;
+		existingComment?: Comment | null;
 		previews?: Record<string, string> | null;
 	}>(),
 	{
-		existingComment: () => null,
-		previews: () => null,
-	}
+		existingComment: null,
+		previews: null,
+	},
 );
 
 const emit = defineEmits(['cancel']);
@@ -113,7 +46,7 @@ watch(
 			newCommentContent.value = md(props.existingComment.comment);
 		}
 	},
-	{ immediate: true }
+	{ immediate: true },
 );
 
 const saving = ref(false);
@@ -132,7 +65,7 @@ watch(
 			};
 		}
 	},
-	{ immediate: true }
+	{ immediate: true },
 );
 
 let triggerCaretPosition = 0;
@@ -140,7 +73,7 @@ const selectedKeyboardIndex = ref<number>(0);
 
 let cancelToken: CancelTokenSource | null = null;
 
-const loadUsers = throttle(async (name: string) => {
+const loadUsers = throttle(async (name: string): Promise<any> => {
 	if (cancelToken !== null) {
 		cancelToken.cancel();
 	}
@@ -181,7 +114,7 @@ const loadUsers = throttle(async (name: string) => {
 		const result = await api.get('/users', {
 			params: {
 				filter: name === '' || !name ? undefined : filter,
-				fields: ['first_name', 'last_name', 'email', 'id', 'avatar'],
+				fields: ['first_name', 'last_name', 'email', 'id', 'avatar.id'],
 			},
 			cancelToken: cancelToken.token,
 		});
@@ -195,8 +128,8 @@ const loadUsers = throttle(async (name: string) => {
 		userPreviews.value = newUsers;
 
 		searchResult.value = result.data.data;
-	} catch (e) {
-		return e;
+	} catch (error) {
+		return error;
 	}
 }, 200);
 
@@ -209,7 +142,6 @@ function cancel() {
 	}
 }
 
-// Why are selections so weird?
 function saveCursorPosition() {
 	if (document.getSelection) {
 		const selection = document.getSelection();
@@ -286,7 +218,7 @@ function triggerSearch({ searchQuery, caretPosition }: { searchQuery: string; ca
 
 function avatarSource(url: string) {
 	if (url === null) return '';
-	return `/assets/${url}?key=system-small-cover`;
+	return getAssetUrl(`${url}?key=system-small-cover`);
 }
 
 async function postComment() {
@@ -295,11 +227,11 @@ async function postComment() {
 
 	try {
 		if (props.existingComment) {
-			await api.patch(`/activity/comment/${props.existingComment.id}`, {
+			await api.patch(`/comments/${props.existingComment.id}`, {
 				comment: newCommentContent.value,
 			});
 		} else {
-			await api.post(`/activity/comment`, {
+			await api.post(`/comments`, {
 				collection: props.collection,
 				item: props.primaryKey,
 				comment: newCommentContent.value,
@@ -313,8 +245,8 @@ async function postComment() {
 		notify({
 			title: props.existingComment ? t('post_comment_updated') : t('post_comment_success'),
 		});
-	} catch (err: any) {
-		unexpectedError(err);
+	} catch (error) {
+		unexpectedError(error);
 	} finally {
 		saving.value = false;
 	}
@@ -333,10 +265,78 @@ function pressedDown() {
 }
 
 function pressedEnter() {
-	insertUser(searchResult.value[selectedKeyboardIndex.value]);
+	const user = searchResult.value[selectedKeyboardIndex.value];
+	if (user) insertUser(user);
 	showMentionDropDown.value = false;
 }
 </script>
+
+<template>
+	<div class="input-container" :class="{ collapsed }">
+		<v-menu v-model="showMentionDropDown" attached>
+			<template #activator>
+				<v-template-input
+					ref="commentElement"
+					v-model="newCommentContent"
+					capture-group="(@[0-9A-F]{8}-[0-9A-F]{4}-4[0-9A-F]{3}-[89AB][0-9A-F]{3}-[0-9A-F]{12})"
+					multiline
+					trigger-character="@"
+					:items="userPreviews"
+					:placeholder="t('leave_comment')"
+					@trigger="triggerSearch"
+					@deactivate="showMentionDropDown = false"
+					@up="pressedUp"
+					@down="pressedDown"
+					@enter="pressedEnter"
+					@focus="focused = true"
+				/>
+			</template>
+
+			<v-list>
+				<v-list-item
+					v-for="(user, index) in searchResult"
+					id="suggestions"
+					:key="user.id"
+					clickable
+					:active="index === selectedKeyboardIndex"
+					@click="insertUser(user)"
+				>
+					<v-list-item-icon>
+						<v-avatar x-small>
+							<v-image v-if="user.avatar" :src="avatarSource(user.avatar.id)" />
+							<v-icon v-else name="person_outline" />
+						</v-avatar>
+					</v-list-item-icon>
+
+					<v-list-item-content>{{ userName(user) }}</v-list-item-content>
+				</v-list-item>
+			</v-list>
+		</v-menu>
+
+		<div class="buttons">
+			<v-button x-small secondary icon class="mention" @click="insertAt">
+				<v-icon name="alternate_email" />
+			</v-button>
+
+			<v-emoji-picker @click="saveCursorPosition" @emoji-selected="insertText($event)" />
+
+			<div class="spacer"></div>
+
+			<v-button class="cancel" x-small secondary @click="cancel">
+				{{ t('cancel') }}
+			</v-button>
+			<v-button
+				:disabled="!newCommentContent || newCommentContent.length === 0 || newCommentContent.trim() === ''"
+				:loading="saving"
+				class="post-comment"
+				x-small
+				@click="postComment"
+			>
+				{{ t('submit') }}
+			</v-button>
+		</div>
+	</div>
+</template>
 
 <style scoped lang="scss">
 .input-container {
@@ -345,7 +345,9 @@ function pressedEnter() {
 }
 
 .v-template-input {
-	transition: height var(--fast) var(--transition), padding var(--fast) var(--transition);
+	transition:
+		height var(--fast) var(--transition),
+		padding var(--fast) var(--transition);
 }
 
 .collapsed .v-template-input {
@@ -358,21 +360,21 @@ function pressedEnter() {
 	flex-grow: 1;
 	width: 100%;
 	height: 100%;
-	height: var(--input-height);
+	height: var(--theme--form--field--input--height);
 	min-height: 100px;
 	padding: 5px;
 	overflow: scroll;
 	white-space: pre;
-	background-color: var(--background-input);
-	border: var(--border-width) solid var(--border-normal);
-	border-radius: var(--border-radius);
+	background-color: var(--theme--form--field--input--background);
+	border: var(--theme--border-width) solid var(--theme--form--field--input--border-color);
+	border-radius: var(--theme--border-radius);
 	transition: border-color var(--fast) var(--transition);
 }
 
 .new-comment:focus {
 	position: relative;
 	overflow: scroll;
-	border-color: var(--primary);
+	border-color: var(--theme--form--field--input--border-color-focus);
 	transition: margin-bottom var(--fast) var(--transition);
 }
 
@@ -396,7 +398,7 @@ function pressedEnter() {
 	position: absolute;
 	bottom: 8px;
 	left: 8px;
-	color: var(--foreground-subdued);
+	color: var(--theme--foreground-subdued);
 	cursor: pointer;
 	transition: color var(--fast) var(--transition);
 }
@@ -405,14 +407,14 @@ function pressedEnter() {
 	position: absolute;
 	bottom: 8px;
 	left: 36px;
-	color: var(--foreground-subdued);
+	color: var(--theme--foreground-subdued);
 	cursor: pointer;
 	transition: color var(--fast) var(--transition);
 }
 
 .new-comment .add-mention:hover,
 .new-comment .add-emoji:hover {
-	color: var(--primary);
+	color: var(--theme--primary);
 }
 
 .buttons {
@@ -423,16 +425,16 @@ function pressedEnter() {
 	.mention,
 	.emoji-button {
 		--v-button-background-color: transparent;
-		--v-button-color: var(--foreground-subdued);
-		--v-button-color-hover: var(--primary);
+		--v-button-color: var(--theme--foreground-subdued);
+		--v-button-color-hover: var(--theme--primary);
 	}
 
 	.cancel {
-		--v-button-color: var(--foreground-subdued);
+		--v-button-color: var(--theme--foreground-subdued);
 	}
 
 	.post-comment {
-		--v-button-background-color-disabled: var(--background-normal-alt);
+		--v-button-background-color-disabled: var(--theme--background-accent);
 	}
 }
 

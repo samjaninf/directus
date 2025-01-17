@@ -4,9 +4,9 @@ import { throwIfEmpty } from '../../utils/index.js';
 import type { RestCommand } from '../../types.js';
 
 export type ReadRevisionOutput<
-	Schema extends object,
+	Schema,
 	TQuery extends Query<Schema, Item>,
-	Item extends object = DirectusRevision<Schema>
+	Item extends object = DirectusRevision<Schema>,
 > = ApplyQueryFields<Schema, Item, TQuery['fields']>;
 
 /**
@@ -15,8 +15,8 @@ export type ReadRevisionOutput<
  * @returns An array of up to limit Revision objects. If no items are available, data will be an empty array.
  */
 export const readRevisions =
-	<Schema extends object, const TQuery extends Query<Schema, DirectusRevision<Schema>>>(
-		query?: TQuery
+	<Schema, const TQuery extends Query<Schema, DirectusRevision<Schema>>>(
+		query?: TQuery,
 	): RestCommand<ReadRevisionOutput<Schema, TQuery>[], Schema> =>
 	() => ({
 		path: `/revisions`,
@@ -32,9 +32,9 @@ export const readRevisions =
  * @throws Will throw if key is empty
  */
 export const readRevision =
-	<Schema extends object, const TQuery extends Query<Schema, DirectusRevision<Schema>>>(
+	<Schema, const TQuery extends Query<Schema, DirectusRevision<Schema>>>(
 		key: DirectusRevision<Schema>['id'],
-		query?: TQuery
+		query?: TQuery,
 	): RestCommand<ReadRevisionOutput<Schema, TQuery>, Schema> =>
 	() => {
 		throwIfEmpty(String(key), 'Key cannot be empty');

@@ -1,10 +1,6 @@
-<template>
-	<v-notice v-if="!field.field">{{ t('configure_field_key_to_continue') }}</v-notice>
-
-	<v-form v-else v-model="validationSync" :fields="fields" :loading="loading" />
-</template>
-
 <script setup lang="ts">
+import { DeepPartial, Field } from '@directus/types';
+import { isEqual } from 'lodash';
 import { storeToRefs } from 'pinia';
 import { computed } from 'vue';
 import { useI18n } from 'vue-i18n';
@@ -22,17 +18,19 @@ const validationMessage = syncFieldDetailStoreProperty('field.meta.validation_me
 const validationSync = computed({
 	get() {
 		return {
-			...(validation.value && { validation: validation.value }),
-			...(validationMessage.value && { validationMessage: validationMessage.value }),
+			validation: validation.value,
+			validationMessage: validationMessage.value,
 		};
 	},
 	set(value) {
-		validation.value = value.validation ?? null;
-		validationMessage.value = value.validationMessage ?? null;
+		if (!isEqual(value.validation, validation.value)) validation.value = value.validation;
+		if (!isEqual(value.validationMessage, validationMessage.value)) validationMessage.value = value.validationMessage;
 	},
 });
 
-const fields = computed(() => [
+const validationInitial = validationSync.value;
+
+const fields = computed<DeepPartial<Field>[]>(() => [
 	{
 		field: 'validation',
 		name: t('validation'),
@@ -58,22 +56,28 @@ const fields = computed(() => [
 ]);
 </script>
 
+<template>
+	<v-notice v-if="!field.field">{{ t('configure_field_key_to_continue') }}</v-notice>
+
+	<v-form v-else v-model="validationSync" :initial-values="validationInitial" :fields="fields" :loading="loading" />
+</template>
+
 <style lang="scss" scoped>
-@import '@/styles/mixins/form-grid';
+@use '@/styles/mixins';
 
 .form {
-	--form-vertical-gap: 32px;
-	--form-horizontal-gap: 32px;
-	@include form-grid;
+	--theme--form--row-gap: 32px;
+	--theme--form--column-gap: 32px;
+	@include mixins.form-grid;
 }
 
 .monospace {
-	--v-input-font-family: var(--family-monospace);
-	--v-select-font-family: var(--family-monospace);
+	--v-input-font-family: var(--theme--fonts--monospace--font-family);
+	--v-select-font-family: var(--theme--fonts--monospace--font-family);
 }
 
 .required {
-	--v-icon-color: var(--primary);
+	--v-icon-color: var(--theme--primary);
 }
 
 .v-notice {

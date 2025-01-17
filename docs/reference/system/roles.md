@@ -6,8 +6,8 @@ pageClass: page-reference
 
 # Roles
 
-> Roles define a specific set of access permissions, and are the primary organizational structure for Users within the
-> platform. [Learn more about Roles](/user-guide/overview/glossary#roles).
+> Roles are the primary organizational structure for Users within the platform.
+> [Learn more about Roles](/user-guide/overview/glossary#roles).
 
 ## The Role Object
 
@@ -18,25 +18,22 @@ Primary key of the role.
 Name of the role.
 
 `icon` **string**\
-Icon for the role. Displayed in the Admin App.
+Icon for the role. Displayed in the Data Studio.
 
 `description` **string**\
-Description for the role. Displayed in the Admin App.
-
-`ip_access` **csv**\
-A CSV of IP addresses that have access to this role. Allows you to configure an allowlist of IP addresses.
-
-`enforce_tfa` **boolean**\
-Whether or not Two-Factor Authentication is required for users in this role.
-
-`admin_access` **boolean**\
-If this role is considered an admin role. This means that users in this role have full permissions to everything.
-
-`app_access` **boolean**\
-Whether or not users in this role have access to use the Admin App.
+Description for the role. Displayed in the Data Studio.
 
 `users` **one-to-many**\
 The users in this role. One-to-many to [users](/reference/system/users).
+
+`policies` **many-to-many**\
+The policies in this role. Many-to-many to [policies](/reference/system/policies).
+
+`parent` **many-to-one**\
+The parent for this role. Many-to-one to roles.
+
+`children` **one-to-many**\
+The roles in this role. One-to-many to roles.
 
 ```json
 {
@@ -44,10 +41,9 @@ The users in this role. One-to-many to [users](/reference/system/users).
 	"name": "Admin",
 	"icon": "supervised_user_circle",
 	"description": null,
-	"ip_access": null,
-	"enforce_tfa": false,
-	"admin_access": true,
-	"app_access": true,
+	"policies": ["3a4b131d-34f8-46e8-b128-5212aa9b7f72"],
+	"parent": "7fdbad2a-890d-4d8a-ad1d-97ff86bc254d",
+	"children": ["1d5cba05-2d9e-47a2-9594-e00b55ffdb3e"],
 	"users": ["0bc7b36a-9ba9-4ce0-83f0-0a526f354e07"]
 }
 ```
@@ -58,7 +54,7 @@ List all roles that exist in Directus.
 
 ### Request
 
-<SnippetToggler :choices="['REST', 'GraphQL', 'SDK']" label="API">
+<SnippetToggler :choices="['REST', 'GraphQL', 'SDK']" group="api">
 <template #rest>
 
 `GET /roles`
@@ -105,7 +101,7 @@ be an empty array.
 
 ### Example
 
-<SnippetToggler :choices="['REST', 'GraphQL', 'SDK']" label="API">
+<SnippetToggler :choices="['REST', 'GraphQL', 'SDK']" group="api">
 <template #rest>
 
 `GET /roles`
@@ -151,7 +147,7 @@ const result = await client.request(
 
 List an existing role by primary key.
 
-<SnippetToggler :choices="['REST', 'GraphQL', 'SDK']" label="API">
+<SnippetToggler :choices="['REST', 'GraphQL', 'SDK']" group="api">
 <template #rest>
 
 `GET /roles/:id`
@@ -191,7 +187,7 @@ Returns the requested [role object](#the-role-object).
 
 ### Example
 
-<SnippetToggler :choices="['REST', 'GraphQL', 'SDK']" label="API">
+<SnippetToggler :choices="['REST', 'GraphQL', 'SDK']" group="api">
 <template #rest>
 
 `GET /roles/b4cb3b64-8580-4ad9-a099-eade6da24302`
@@ -237,7 +233,7 @@ Create a new role.
 
 ### Request
 
-<SnippetToggler :choices="['REST', 'GraphQL', 'SDK']" label="API">
+<SnippetToggler :choices="['REST', 'GraphQL', 'SDK']" group="api">
 <template #rest>
 
 `POST /roles`
@@ -283,7 +279,7 @@ Returns the [role object](#the-role-object) for the created role.
 
 ### Example
 
-<SnippetToggler :choices="['REST', 'GraphQL', 'SDK']" label="API">
+<SnippetToggler :choices="['REST', 'GraphQL', 'SDK']" group="api">
 <template #rest>
 
 `POST /roles`
@@ -292,9 +288,7 @@ Returns the [role object](#the-role-object) for the created role.
 {
 	"name": "Interns",
 	"icon": "verified_user",
-	"description": null,
-	"admin_access": false,
-	"app_access": true
+	"description": null
 }
 ```
 
@@ -306,7 +300,7 @@ Returns the [role object](#the-role-object) for the created role.
 ```graphql
 mutation {
 	create_roles_item(
-		data: { name: "Interns", icon: "verified_user", description: null, admin_access: false, app_access: true }
+		data: { name: "Interns", icon: "verified_user", description: null }
 	) {
 		id
 		name
@@ -329,9 +323,7 @@ const result = await client.request(
 	createRole({
 		name: 'Interns',
 		icon: 'verified_user',
-		description: null,
-		admin_access: false,
-		app_access: true,
+		description: null
 	})
 );
 ```
@@ -345,7 +337,7 @@ Create multiple new roles.
 
 ### Request
 
-<SnippetToggler :choices="['REST', 'GraphQL', 'SDK']" label="API">
+<SnippetToggler :choices="['REST', 'GraphQL', 'SDK']" group="api">
 <template #rest>
 
 `POST /roles`
@@ -391,7 +383,7 @@ Returns the [role objects](#the-role-object) for the created roles.
 
 ### Example
 
-<SnippetToggler :choices="['REST', 'GraphQL', 'SDK']" label="API">
+<SnippetToggler :choices="['REST', 'GraphQL', 'SDK']" group="api">
 <template #rest>
 
 `POST /roles`
@@ -401,16 +393,12 @@ Returns the [role objects](#the-role-object) for the created roles.
 	{
 		"name": "Interns",
 		"icon": "verified_user",
-		"description": null,
-		"admin_access": false,
-		"app_access": true
+		"description": null
 	},
 	{
 		"name": "Customers",
 		"icon": "person",
-		"description": null,
-		"admin_access": false,
-		"app_access": false
+		"description": null
 	}
 ]
 ```
@@ -424,8 +412,8 @@ Returns the [role objects](#the-role-object) for the created roles.
 mutation {
 	create_roles_items(
 		data: [
-			{ name: "Interns", icon: "verified_user", description: null, admin_access: false, app_access: true }
-			{ name: "Customers", icon: "person", description: null, admin_access: false, app_access: false }
+			{ name: "Interns", icon: "verified_user", description: null }
+			{ name: "Customers", icon: "person", description: null }
 		]
 	) {
 		id
@@ -450,16 +438,12 @@ const result = await client.request(
 		{
 			name: 'Interns',
 			icon: 'verified_user',
-			description: null,
-			admin_access: false,
-			app_access: true,
+			description: null
 		},
 		{
 			name: 'Customers',
 			icon: 'person',
-			description: null,
-			admin_access: false,
-			app_access: false,
+			description: null
 		},
 	])
 );
@@ -474,7 +458,7 @@ Update an existing role.
 
 ### Request
 
-<SnippetToggler :choices="['REST', 'GraphQL', 'SDK']" label="API">
+<SnippetToggler :choices="['REST', 'GraphQL', 'SDK']" group="api">
 <template #rest>
 
 `PATCH /roles/:id`
@@ -520,7 +504,7 @@ Returns the [role object](#the-role-object) for the updated role.
 
 ### Example
 
-<SnippetToggler :choices="['REST', 'GraphQL', 'SDK']" label="API">
+<SnippetToggler :choices="['REST', 'GraphQL', 'SDK']" group="api">
 <template #rest>
 
 `PATCH /roles/c86c2761-65d3-43c3-897f-6f74ad6a5bd7`
@@ -558,7 +542,7 @@ const client = createDirectus('https://directus.example.com').with(rest());
 
 const result = await client.request(
 	updateRole('a262a7f6-9ed4-423d-8cd2-3ee3b2d2a658', {
-		admin_access: true,
+		icon: "attractions",
 	})
 );
 ```
@@ -572,7 +556,7 @@ Update multiple existing roles.
 
 ### Request
 
-<SnippetToggler :choices="['REST', 'GraphQL', 'SDK']" label="API">
+<SnippetToggler :choices="['REST', 'GraphQL', 'SDK']" group="api">
 <template #rest>
 
 `PATCH /roles`
@@ -627,7 +611,7 @@ Returns the [role objects](#the-role-object) for the updated roles.
 
 ### Example
 
-<SnippetToggler :choices="['REST', 'GraphQL', 'SDK']" label="API">
+<SnippetToggler :choices="['REST', 'GraphQL', 'SDK']" group="api">
 <template #rest>
 
 `PATCH /roles`
@@ -671,7 +655,7 @@ const client = createDirectus('https://directus.example.com').with(rest());
 
 const result = await client.request(
 	updateRoles(['a262a7f6-9ed4-423d-8cd2-3ee3b2d2a658', '1792dc2c-6142-4723-ae40-698d082ddc5e'], {
-		admin_access: true,
+		icon: "attractions"
 	})
 );
 ```
@@ -685,7 +669,7 @@ Delete an existing role.
 
 ### Request
 
-<SnippetToggler :choices="['REST', 'GraphQL', 'SDK']" label="API">
+<SnippetToggler :choices="['REST', 'GraphQL', 'SDK']" group="api">
 <template #rest>
 
 `DELETE /roles/:id`
@@ -721,7 +705,7 @@ Empty body.
 
 ### Example
 
-<SnippetToggler :choices="['REST', 'GraphQL', 'SDK']" label="API">
+<SnippetToggler :choices="['REST', 'GraphQL', 'SDK']" group="api">
 <template #rest>
 
 `DELETE /roles/c86c2761-65d3-43c3-897f-6f74ad6a5bd7`
@@ -759,7 +743,7 @@ Delete multiple existing roles.
 
 ### Request
 
-<SnippetToggler :choices="['REST', 'GraphQL', 'SDK']" label="API">
+<SnippetToggler :choices="['REST', 'GraphQL', 'SDK']" group="api">
 <template #rest>
 
 `DELETE /roles`
@@ -801,7 +785,7 @@ Empty body.
 
 ### Example
 
-<SnippetToggler :choices="['REST', 'GraphQL', 'SDK']" label="API">
+<SnippetToggler :choices="['REST', 'GraphQL', 'SDK']" group="api">
 <template #rest>
 
 `DELETE /roles`

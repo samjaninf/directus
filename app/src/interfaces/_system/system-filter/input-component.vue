@@ -1,82 +1,6 @@
-<template>
-	<v-icon
-		v-if="type === 'boolean'"
-		:name="value === null ? 'indeterminate_check_box' : value ? 'check_box' : 'check_box_outline_blank'"
-		clickable
-		class="preview"
-		small
-		@click="$emit('input', !value)"
-	/>
-	<input
-		v-else-if="is === 'interface-input'"
-		ref="inputEl"
-		type="text"
-		:pattern="inputPattern"
-		:value="value"
-		:style="{ width }"
-		placeholder="--"
-		@input="emitValue(($event.target as HTMLInputElement).value)"
-	/>
-	<v-select
-		v-else-if="is === 'select'"
-		inline
-		:items="choices"
-		:model-value="value"
-		:placeholder="t('select')"
-		allow-other
-		group-selectable
-		@update:model-value="emitValue($event)"
-	/>
-	<template v-else-if="is === 'interface-datetime'">
-		<input
-			ref="inputEl"
-			type="text"
-			:pattern="inputPattern"
-			:value="value"
-			:style="{ width }"
-			placeholder="--"
-			@input="emitValue(($event.target as HTMLInputElement).value)"
-		/>
-		<v-menu
-			ref="dateTimeMenu"
-			:close-on-content-click="false"
-			:show-arrow="true"
-			placement="bottom-start"
-			seamless
-			full-height
-		>
-			<template #activator="{ toggle }">
-				<v-icon class="preview" name="event" small @click="toggle" />
-			</template>
-			<div class="date-input">
-				<v-date-picker
-					:type="type"
-					:model-value="value"
-					@update:model-value="emitValue"
-					@close="dateTimeMenu?.deactivate"
-				/>
-			</div>
-		</v-menu>
-	</template>
-	<v-menu v-else :close-on-content-click="false" :show-arrow="true" placement="bottom-start">
-		<template #activator="{ toggle }">
-			<v-icon
-				v-if="type.startsWith('geometry') || type === 'json'"
-				class="preview"
-				:name="type === 'json' ? 'integration_instructions' : 'map'"
-				small
-				@click="toggle"
-			/>
-			<div v-else class="preview" @click="toggle">{{ displayValue }}</div>
-		</template>
-		<div class="input" :class="type">
-			<component :is="is" class="input-component" small :type="type" :value="value" @input="emitValue($event)" />
-		</div>
-	</v-menu>
-</template>
-
 <script setup lang="ts">
-import { computed, onMounted, ref } from 'vue';
+import { isDynamicVariable } from '@directus/utils';
+import { computed, onMounted, onUpdated, ref, watch } from 'vue';
 import { useI18n } from 'vue-i18n';
 
 type Choice = {
@@ -90,20 +14,25 @@ const props = withDefaults(
 		is: string;
 		type: string;
 		value: string | number | Record<string, unknown> | boolean | null;
+		commaAllowed?: boolean;
 		focus?: boolean;
 		choices?: Choice[];
 	}>(),
-	{ focus: true, choices: () => [] }
+	{
+		focus: true,
+		choices: () => [],
+	},
 );
 
 const emit = defineEmits<{
-	(e: 'input', value: string | number | Record<string, unknown> | boolean | null): void;
+	input: [value: string | number | Record<string, unknown> | boolean | null];
 }>();
 
-const inputEl = ref<HTMLElement>();
 const { t } = useI18n();
-
 const dateTimeMenu = ref();
+const inputEl = ref<HTMLInputElement | null>(null);
+const isInputValid = ref(true);
+const inputBorderColor = computed(() => (isInputValid.value ? 'none' : 'var(--theme--danger)'));
 
 const displayValue = computed(() => {
 	if (props.value === null) return null;
@@ -116,22 +45,18 @@ const displayValue = computed(() => {
 	return props.value;
 });
 
-const width = computed(() => {
-	return (props.value?.toString().length || 2) + 1 + 'ch';
-});
-
 const inputPattern = computed(() => {
 	switch (props.type) {
 		case 'integer':
 		case 'bigInteger':
-			return '[+-]?[0-9]+';
+			return '^[+\\-]?[0-9]+$';
 		case 'decimal':
 		case 'float':
-			return '[+-]?[0-9]+\\.?[0-9]*';
+			return '^[+\\-]?[0-9]+\\.?[0-9]*$';
 		case 'uuid':
-			return '[a-fA-F0-9]{8}-[a-fA-F0-9]{4}-[a-fA-F0-9]{4}-[a-fA-F0-9]{4}-[a-fA-F0-9]{12}';
+			return '^[a-fA-F0-9]{8}-[a-fA-F0-9]{4}-[a-fA-F0-9]{4}-[a-fA-F0-9]{4}-[a-fA-F0-9]{12}$';
 		default:
-			return '';
+			return undefined;
 	}
 });
 
@@ -139,38 +64,133 @@ onMounted(() => {
 	if (props.focus) inputEl.value?.focus();
 });
 
-function emitValue(val: string) {
-	if (val === '') {
-		return emit('input', null);
-	}
+/*
+ * Because there's currently (2024-01-09) no way to uniquely identify filters
+ * we run into rendering issues when dragging and reordering input-groups/input-components.
+ * By listening for the DOM changes via `onUpdated` we can keep this component updated
+ * without having a `key` for each input-group in nodes.
+ */
+onUpdated(() => onEffect(props.value));
 
+watch(
+	() => props.value,
+	(value) => onEffect(value),
+	{ immediate: true },
+);
+
+function isValueValid(value: any): boolean {
 	if (
-		typeof val === 'string' &&
-		(['$NOW', '$CURRENT_USER', '$CURRENT_ROLE'].some((prefix) => val.startsWith(prefix)) ||
-			/^{{\s*?\S+?\s*?}}$/.test(val))
+		value === '' ||
+		typeof value !== 'string' ||
+		(props.commaAllowed && value.includes(',')) ||
+		!inputPattern.value ||
+		new RegExp(inputPattern.value).test(value)
 	) {
-		return emit('input', val);
+		return true;
 	}
 
-	if (typeof val !== 'string' || new RegExp(inputPattern.value).test(val)) {
-		return emit('input', val);
+	if (isDynamicVariable(value) || /^{{\s*?\S+?\s*?}}$/.test(value)) {
+		return true;
+	}
+
+	return false;
+}
+
+function onEffect(value: typeof props.value) {
+	isInputValid.value = isValueValid(value);
+}
+
+function onInput(value: string | null) {
+	isInputValid.value = isValueValid(value);
+
+	if (isInputValid.value) {
+		emit('input', value === '' ? null : value);
 	}
 }
 </script>
+
+<template>
+	<v-icon
+		v-if="type === 'boolean'"
+		:name="value === null ? 'indeterminate_check_box' : value ? 'check_box' : 'check_box_outline_blank'"
+		clickable
+		class="preview"
+		small
+		@click="$emit('input', !value)"
+	/>
+	<input
+		v-else-if="is === 'interface-input'"
+		ref="inputEl"
+		v-input-auto-width
+		type="text"
+		:pattern="inputPattern"
+		:value="value"
+		placeholder="--"
+		@input="onInput(($event.target as HTMLInputElement).value)"
+	/>
+	<v-select
+		v-else-if="is === 'select'"
+		inline
+		:items="choices"
+		:model-value="value"
+		:placeholder="t('select')"
+		allow-other
+		group-selectable
+		@update:model-value="onInput($event)"
+	/>
+	<template v-else-if="is === 'interface-datetime'">
+		<input
+			ref="inputEl"
+			v-input-auto-width
+			type="text"
+			:value="value"
+			placeholder="--"
+			@input="onInput(($event.target as HTMLInputElement).value)"
+		/>
+		<v-menu ref="dateTimeMenu" :close-on-content-click="false" show-arrow placement="bottom-start" seamless full-height>
+			<template #activator="{ toggle }">
+				<v-icon class="preview" name="event" small @click="toggle" />
+			</template>
+			<div class="date-input">
+				<v-date-picker
+					:type="type"
+					:model-value="value"
+					@update:model-value="onInput"
+					@close="dateTimeMenu?.deactivate"
+				/>
+			</div>
+		</v-menu>
+	</template>
+	<v-menu v-else :close-on-content-click="false" show-arrow placement="bottom-start">
+		<template #activator="{ toggle }">
+			<v-icon
+				v-if="type.startsWith('geometry') || type === 'json'"
+				class="preview"
+				:name="type === 'json' ? 'integration_instructions' : 'map'"
+				small
+				@click="toggle"
+			/>
+			<div v-else class="preview" @click="toggle">{{ displayValue }}</div>
+		</template>
+		<div class="input" :class="type">
+			<component :is="is" class="input-component" small :type="type" :value="value" @input="onInput($event)" />
+		</div>
+	</v-menu>
+</template>
 
 <style lang="scss" scoped>
 .preview {
 	display: flex;
 	justify-content: center;
-	color: var(--primary);
-	font-family: var(--family-monospace);
+	color: var(--theme--primary);
+	font-family: var(--theme--fonts--monospace--font-family);
 	white-space: nowrap;
 	text-overflow: ellipsis;
 	cursor: pointer;
 
 	&:empty {
 		&::after {
-			color: var(--foreground-subdued);
+			color: var(--theme--form--field--input--foreground-subdued);
 			content: '--';
 		}
 	}
@@ -193,16 +213,18 @@ function emitValue(val: string) {
 }
 
 input {
-	color: var(--primary);
-	font-family: var(--family-monospace);
+	color: var(--theme--primary);
+	font-family: var(--theme--fonts--monospace--font-family);
 	line-height: 1em;
-	background-color: var(--background-page);
+	background-color: var(--theme--form--field--input--background);
 	border: none;
+	max-width: 40ch;
+	box-shadow: 0 4px 0 -2px v-bind(inputBorderColor);
 
 	&::placeholder {
-		color: var(--foreground-subdued);
+		color: var(--theme--form--field--input--foreground-subdued);
 		font-weight: 500;
-		font-family: var(--family-monospace);
+		font-family: var(--theme--fonts--monospace--font-family);
 	}
 }
 

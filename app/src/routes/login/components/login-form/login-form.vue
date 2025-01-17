@@ -1,24 +1,3 @@
-<template>
-	<form @submit.prevent="onSubmit">
-		<v-input v-model="email" autofocus autocomplete="username" type="email" :placeholder="t('email')" />
-		<v-input v-model="password" type="password" autocomplete="current-password" :placeholder="t('password')" />
-
-		<transition-expand>
-			<v-input v-if="requiresTFA" v-model="otp" type="text" :placeholder="t('otp')" autofocus />
-		</transition-expand>
-
-		<v-notice v-if="error" type="warning">
-			{{ errorFormatted }}
-		</v-notice>
-		<div class="buttons">
-			<v-button type="submit" :loading="loggingIn" large>{{ t('sign_in') }}</v-button>
-			<router-link to="/reset-password" class="forgot-password">
-				{{ t('forgot_password') }}
-			</router-link>
-		</div>
-	</form>
-</template>
-
 <script setup lang="ts">
 import { RequestError } from '@/api';
 import { login } from '@/auth';
@@ -77,7 +56,13 @@ const errorFormatted = computed(() => {
 });
 
 async function onSubmit() {
-	if (email.value === null || password.value === null) return;
+	// Simple RegEx, not for validation, but to prevent unnecessary login requests when the value is clearly invalid
+	const emailRegex = /^\S+@\S+$/;
+
+	if (email.value === null || !emailRegex.test(email.value) || password.value === null) {
+		error.value = 'INVALID_PAYLOAD';
+		return;
+	}
 
 	try {
 		loggingIn.value = true;
@@ -95,7 +80,7 @@ async function onSubmit() {
 
 		const redirectQuery = router.currentRoute.value.query.redirect as string;
 
-		let lastPage: string | undefined;
+		let lastPage: string | null = null;
 
 		if (userStore.currentUser && 'last_page' in userStore.currentUser) {
 			lastPage = userStore.currentUser.last_page;
@@ -103,16 +88,47 @@ async function onSubmit() {
 
 		router.push(redirectQuery || lastPage || '/content');
 	} catch (err: any) {
-		if (err.response?.data?.errors?.[0]?.extensions?.code === 'INVALID_OTP' && requiresTFA.value === false) {
+		if (err.errors?.[0]?.extensions?.code === 'INVALID_OTP' && requiresTFA.value === false) {
 			requiresTFA.value = true;
+			error.value = null;
 		} else {
-			error.value = err.response?.data?.errors?.[0]?.extensions?.code || err;
+			error.value = err.errors?.[0]?.extensions?.code || err;
 		}
 	} finally {
 		loggingIn.value = false;
 	}
 }
 </script>
+
+<template>
+	<form novalidate @submit.prevent="onSubmit">
+		<v-input v-model="email" autofocus autocomplete="username" type="email" :placeholder="t('email')" />
+		<interface-system-input-password :value="password" autocomplete="current-password" @input="password = $event" />
+
+		<transition-expand>
+			<v-input
+				v-if="requiresTFA"
+				v-model="otp"
+				type="text"
+				autocomplete="one-time-code"
+				:placeholder="t('otp')"
+				autofocus
+			/>
+		</transition-expand>
+
+		<v-notice v-if="error" type="warning">
+			{{ errorFormatted }}
+		</v-notice>
+		<div class="buttons">
+			<v-button class="sign-in" type="submit" :loading="loggingIn" large>
+				<v-text-overflow :text="t('sign_in')" />
+			</v-button>
+			<router-link to="/reset-password" class="forgot-password">
+				{{ t('forgot_password') }}
+			</router-link>
+		</div>
+	</form>
+</template>
 
 <style lang="scss" scoped>
 .v-input,
@@ -127,11 +143,15 @@ async function onSubmit() {
 }
 
 .forgot-password {
-	color: var(--foreground-subdued);
+	color: var(--theme--foreground-subdued);
 	transition: color var(--fast) var(--transition);
 
 	&:hover {
-		color: var(--foreground-normal);
+		color: var(--theme--foreground);
 	}
+}
+
+.sign-in {
+	max-width: 50%;
 }
 </style>

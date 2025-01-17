@@ -52,7 +52,6 @@ fields:
     title: სათაური
     description: აღწერა
     tags: იარლიყები
-    theme: ვიზუალური თემა
     tfa_secret: ორფაქტორიანი იდენტიფიკაცია
     status: სტატუსი
     role: როლი
@@ -60,6 +59,8 @@ fields:
     role: როლი
     password: პაროლი
   directus_roles:
+    description: აღწერა
+  directus_policies:
     description: აღწერა
   directus_webhooks:
     status: სტატუსი
@@ -94,3 +95,4 @@ layouts:
     comfortable: კომფორტული
     compact: კომპაქტური
 both: ორივე
+compact: კომპაქტური

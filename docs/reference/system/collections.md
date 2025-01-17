@@ -16,28 +16,28 @@ Name of the collection. This matches the table name in the database.
 
 #### Meta
 
-Directus metadata, primarily used in the Admin App.
+Directus metadata, primarily used in the Data Studio.
 
 `collection` **string**\
 Name of the collection. This matches the table name in the database.
 
 `icon` **string**\
-Icon displayed in the Admin App when working with this collection.
+Icon displayed in the Data Studio when working with this collection.
 
 `note` **string**\
-Short description displayed in the Admin App.
+Short description displayed in the Data Studio.
 
 `display_template` **string**\
-How items in this collection should be displayed when viewed relationally in the Admin App.
+How items in this collection should be displayed when viewed relationally in the Data Studio.
 
 `hidden` **boolean**\
-Whether or not this collection is hidden in the Admin App.
+Whether or not this collection is hidden in the Data Studio.
 
 `singleton` **boolean**\
 Whether or not this collection is treated as a singleton.
 
 `translations` **array**\
-How this collection's name is displayed in the different languages in the Admin App.
+How this collection's name is displayed in the different languages in the Data Studio.
 
 `archive_field` **string**\
 What field in the collection holds the archived state.
@@ -49,10 +49,10 @@ What value the archive field should be set to when archiving an item.
 What value the archive field should be set to when unarchiving an item.
 
 `archive_app_filter` **boolean**\
-Whether or not the Admin App should allow the user to view archived items.
+Whether or not the Data Studio should allow the user to view archived items.
 
 `sort_field` **boolean**\
-What field holds the sort value on the collection. The Admin App uses this to allow drag-and-drop manual sorting.
+What field holds the sort value on the collection. The Data Studio uses this to allow drag-and-drop manual sorting.
 
 `accountability` **string**\
 What data is tracked. One of `all`, `activity`. See [Accountability](/app/data-model#accountability) for more information.
@@ -70,6 +70,9 @@ What sort order of the collection relative to other collections of the same leve
 `collapse` **string**\
 What is the default behavior of this collection or "folder" collection when it has nested collections. One of `open`, `closed`,
 `locked`.
+
+`versioning` **boolean**\
+Whether or not Content Versioning is enabled for this collection.
 
 #### Schema
 
@@ -148,16 +151,12 @@ List the available collections.
 
 ### Request
 
-<SnippetToggler :choices="['REST', 'GraphQL', 'SDK']" label="API">
+<SnippetToggler :choices="['REST', 'GraphQL', 'SDK']" group="api">
 <template #rest>
 
 `GET /collections`
 
 `SEARCH /collections`
-
-If using SEARCH you can provide a [query object](/reference/query) as the body of your request.
-
-[Learn more about SEARCH ->](/reference/introduction#search-http-method)
 
 </template>
 <template #graphql>
@@ -194,7 +193,7 @@ An array of [collection objects](#the-collection-object).
 
 ### Example
 
-<SnippetToggler :choices="['REST', 'GraphQL', 'SDK']" label="API">
+<SnippetToggler :choices="['REST', 'GraphQL', 'SDK']" group="api">
 <template #rest>
 
 `GET /collections`
@@ -234,7 +233,7 @@ Retrieve a single collection by table name.
 
 ### Request
 
-<SnippetToggler :choices="['REST', 'GraphQL', 'SDK']" label="API">
+<SnippetToggler :choices="['REST', 'GraphQL', 'SDK']" group="api">
 <template #rest>
 
 `GET /collections/:collection`
@@ -274,7 +273,7 @@ A [collection object](#the-collection-object).
 
 ### Example
 
-<SnippetToggler :choices="['REST', 'GraphQL', 'SDK']" label="API">
+<SnippetToggler :choices="['REST', 'GraphQL', 'SDK']" group="api">
 <template #rest>
 
 `GET /collections/articles`
@@ -312,7 +311,7 @@ Create a new Collection. This will create a new table in the database as well.
 
 ### Request
 
-<SnippetToggler :choices="['REST', 'GraphQL', 'SDK']" label="API">
+<SnippetToggler :choices="['REST', 'GraphQL', 'SDK']" group="api">
 <template #rest>
 
 `POST /collections`
@@ -340,12 +339,7 @@ import { createDirectus, rest, createCollection } from '@directus/sdk';
 const client = createDirectus('directus_project_url').with(rest());
 
 const result = await client.request(
-	createCollection({
-		collection: 'collection_name',
-		field: {
-			sub_field: 'value',
-		},
-	})
+	createCollection(collection_object)
 );
 ```
 
@@ -371,7 +365,7 @@ The [collection object](#the-collection-object) for the collection created in th
 
 ### Example
 
-<SnippetToggler :choices="['REST', 'GraphQL', 'SDK']" label="API">
+<SnippetToggler :choices="['REST', 'GraphQL', 'SDK']" group="api">
 <template #rest>
 
 `POST /collections`
@@ -425,7 +419,7 @@ Update the metadata for an existing collection.
 
 ### Request
 
-<SnippetToggler :choices="['REST', 'GraphQL', 'SDK']" label="API">
+<SnippetToggler :choices="['REST', 'GraphQL', 'SDK']" group="api">
 <template #rest>
 
 `PATCH /collections/:collection`
@@ -472,7 +466,7 @@ The [collection object](#the-collection-object) for the updated collection in th
 
 ### Example
 
-<SnippetToggler :choices="['REST', 'GraphQL', 'SDK']" label="API">
+<SnippetToggler :choices="['REST', 'GraphQL', 'SDK']" group="api">
 <template #rest>
 
 `PATCH /collections/testimonials`
@@ -530,7 +524,7 @@ Be aware, this will delete the table from the database, including all items in i
 
 ### Request
 
-<SnippetToggler :choices="['REST', 'GraphQL', 'SDK']" label="API">
+<SnippetToggler :choices="['REST', 'GraphQL', 'SDK']" group="api">
 <template #rest>
 
 `DELETE /collections/:collection`
@@ -562,7 +556,7 @@ const result = await client.request(deleteCollection(collection_name));
 
 ### Example
 
-<SnippetToggler :choices="['REST', 'GraphQL', 'SDK']" label="API">
+<SnippetToggler :choices="['REST', 'GraphQL', 'SDK']" group="api">
 <template #rest>
 
 `DELETE /collections/articles`

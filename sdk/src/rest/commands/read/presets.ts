@@ -4,9 +4,9 @@ import { throwIfEmpty } from '../../utils/index.js';
 import type { RestCommand } from '../../types.js';
 
 export type ReadPresetOutput<
-	Schema extends object,
+	Schema,
 	TQuery extends Query<Schema, Item>,
-	Item extends object = DirectusPreset<Schema>
+	Item extends object = DirectusPreset<Schema>,
 > = ApplyQueryFields<Schema, Item, TQuery['fields']>;
 
 /**
@@ -15,8 +15,8 @@ export type ReadPresetOutput<
  * @returns An array of up to limit Preset objects. If no items are available, data will be an empty array.
  */
 export const readPresets =
-	<Schema extends object, const TQuery extends Query<Schema, DirectusPreset<Schema>>>(
-		query?: TQuery
+	<Schema, const TQuery extends Query<Schema, DirectusPreset<Schema>>>(
+		query?: TQuery,
 	): RestCommand<ReadPresetOutput<Schema, TQuery>[], Schema> =>
 	() => ({
 		path: `/presets`,
@@ -32,9 +32,9 @@ export const readPresets =
  * @throws Will throw if key is empty
  */
 export const readPreset =
-	<Schema extends object, const TQuery extends Query<Schema, DirectusPreset<Schema>>>(
+	<Schema, const TQuery extends Query<Schema, DirectusPreset<Schema>>>(
 		key: DirectusPreset<Schema>['id'],
-		query?: TQuery
+		query?: TQuery,
 	): RestCommand<ReadPresetOutput<Schema, TQuery>, Schema> =>
 	() => {
 		throwIfEmpty(String(key), 'Key cannot be empty');

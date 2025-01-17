@@ -1,8 +1,8 @@
 import type { RestCommand } from '../types.js';
 
-export function withToken<Schema extends object, Output>(
+export function withToken<Schema, Output>(
 	token: string,
-	getOptions: RestCommand<Output, Schema>
+	getOptions: RestCommand<Output, Schema>,
 ): RestCommand<Output, Schema> {
 	return () => {
 		const options = getOptions();

@@ -145,19 +145,19 @@ describe('#read', () => {
 	});
 
 	test('Calls createReadStream with optional start range', async () => {
-		await driver.read(sample.path.input, { start: sample.range.start });
+		await driver.read(sample.path.input, { range: { start: sample.range.start } });
 
 		expect(createReadStream).toHaveBeenCalledWith(sample.path.inputFull, { start: sample.range.start });
 	});
 
 	test('Calls createReadStream with optional end range', async () => {
-		await driver.read(sample.path.input, { end: sample.range.end });
+		await driver.read(sample.path.input, { range: { end: sample.range.end } });
 
 		expect(createReadStream).toHaveBeenCalledWith(sample.path.inputFull, { end: sample.range.end });
 	});
 
 	test('Calls createReadStream with optional start and end range', async () => {
-		await driver.read(sample.path.input, sample.range);
+		await driver.read(sample.path.input, { range: sample.range });
 
 		expect(createReadStream).toHaveBeenCalledWith(sample.path.inputFull, sample.range);
 	});
@@ -316,7 +316,7 @@ describe('#listGenerator', () => {
 				for (const mockFile of mockFiles) {
 					yield { name: mockFile, isFile: () => true, isDirectory: () => false };
 				}
-			})() as unknown as Dir
+			})() as unknown as Dir,
 		);
 
 		vi.mocked(join).mockImplementation((_, filepath) => filepath);
@@ -350,7 +350,7 @@ describe('#listGenerator', () => {
 				for (const mockFile of mockFiles) {
 					yield { name: `/right-prefix/${mockFile}`, isFile: () => true, isDirectory: () => false };
 				}
-			})() as unknown as Dir
+			})() as unknown as Dir,
 		);
 
 		vi.mocked(join).mockImplementation((_, filepath) => filepath);
@@ -389,14 +389,14 @@ describe('#listGenerator', () => {
 		vi.mocked(opendir).mockResolvedValueOnce(
 			(function* () {
 				yield { name: mockDirectory, isFile: () => false, isDirectory: () => true };
-			})() as unknown as Dir
+			})() as unknown as Dir,
 		);
 
 		// Nested second call
 		vi.mocked(opendir).mockResolvedValueOnce(
 			(function* () {
 				yield { name: mockFile, isFile: () => true, isDirectory: () => false };
-			})() as unknown as Dir
+			})() as unknown as Dir,
 		);
 
 		const iterator = driver['listGenerator']('');

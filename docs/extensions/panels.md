@@ -3,11 +3,11 @@ description: A guide on how to build custom Panels in Directus.
 readTime: 3 min read
 ---
 
-# Custom Panels <small></small>
+# Custom Panels
 
 > Panels are modular units of data visualization that exist within the
 > [Insights module](/user-guide/insights/dashboards). Each panel exists within a Dashboard and can be positioned and
-> resized as needed. [Learn more about Panels](/user-guide/overview/glossary#panels).
+> resized as needed. They are developed using Vue.js. [Learn more about Panels](/user-guide/overview/glossary#panels).
 
 ## Extension Entrypoint
 
@@ -100,6 +100,7 @@ export default {
 - `showHeader` **boolean** — Whether the header is shown. Useful for alternative styling based on the extra/reduced
   space.
 - `dashboard` **uuid** - The UUID string of the dashboard containing the panel.
+- `id` **uuid** - The UUID string of the panel.
 - `height` **number** - The current configured height of the panel.
 - `width` **number** - The current configured width of the panel.
 - `now` **Date** - The Date object as of the moment of viewing the dashboard containing the panel.
@@ -143,5 +144,5 @@ Learn how to build panels with our official guides:
 <GuidesListExtensions type="Panels" />
 
 <script setup>
-import GuidesListExtensions from '../.vitepress/components/guides/GuidesListExtensions.vue'
+import GuidesListExtensions from '@/components/guides/GuidesListExtensions.vue';
 </script>

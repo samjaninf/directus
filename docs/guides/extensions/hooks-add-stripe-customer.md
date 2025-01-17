@@ -13,8 +13,8 @@ account when an item is created in Directus and write the customer ID back to th
 Open a console to your preferred working directory and initialize a new extension, which will create the boilerplate
 code for your display.
 
-```
-npx create-directus-extension
+```shell
+npx create-directus-extension@latest
 ```
 
 A list of options will appear (choose hook), and type a name for your extension (for example,
@@ -95,13 +95,13 @@ stripe.customers
 If successful, update the record with the new customer id from stripe. The API call returns the customer object into the
 `customer` variable, be sure to look up what other data is included in this response.
 
-Use the `ItemService` to update the customer record. Initialize the service and perform the API query:
+Use the `ItemsService` to update the customer record. Initialize the service and perform the API query:
 
 ```js
 stripe.customers
 	.create({})
 	.then((customer) => {
-		const customers = new ItemsService(collection, { schema: schema }); // [!code ++]
+		const customers = new ItemsService(collection, { schema }); // [!code ++]
 		customers.updateByQuery({ filter: { id: key } }, { stripe_id: customer.id }, { emitEvents: false }); // [!code ++]
 	})
 	.catch((error) => {});
@@ -117,6 +117,7 @@ stripe.customers
 	.create({})
 	.then((customer) => {})
 	.catch((error) => {
+		const mailService = new MailService({ schema });
 		mailService.send({ // [!code ++]
 			to: 'sharedmailbox@directus.io', // [!code ++]
 			from: 'noreply@directus.io', // [!code ++]
@@ -166,7 +167,7 @@ other endpoints that Stripe has to offer.
 import Stripe from 'stripe';
 
 export default ({ action }, { env, services }) => {
-	const { MailService, ItemService } = services;
+	const { MailService, ItemsService } = services;
 
 	action('items.create', async ({ key, collection, payload }, { schema }) => {
 		if (collection !== 'customers') return;
@@ -178,10 +179,11 @@ export default ({ action }, { env, services }) => {
 				email: payload.email_address,
 			})
 			.then((customer) => {
-				const customers = new ItemsService(collection, { schema: schema });
+				const customers = new ItemsService(collection, { schema });
 				customers.updateByQuery({ filter: { id: key } }, { stripe_id: customer.id }, { emitEvents: false });
 			})
 			.catch((error) => {
+				const mailService = new MailService({ schema });
 				mailService.send({
 					to: 'sharedmailbox@directus.io',
 					from: 'noreply@directus.io',

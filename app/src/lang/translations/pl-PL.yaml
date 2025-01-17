@@ -19,6 +19,7 @@
 #'Int32Array', 'Uint32Array', 'Float32Array', 'Float64Array', 'Map', 'Set', 'WeakMap', 'WeakSet',
 #'SIMD', 'ArrayBuffer', 'DataView', 'JSON', 'Promise', 'Generator', 'GeneratorFunction', 'Reflect',
 #'Proxy', 'Intl'
+about: O aplikacji
 identifier: Identyfikator
 avatar: Awatar
 application: Aplikacja
@@ -27,9 +28,12 @@ method: Metoda
 published: Opublikowany
 draft: Szkic
 archived: Zarchiwizowany
+marketplace: Marketplace
+extensions: Rozszerzenia
 modules: Moduły
 module_bar: Pasek modułu
 logs: Logi
+unknown: Nieznane
 reset_width: Zresetuj szerokość
 tile_size: Rozmiar kafelków
 edit_field: Edytuj pole
@@ -47,12 +51,58 @@ duplicate_field: Duplikuj pole
 half_width: Połowa szerokości
 full_width: Pełna szerokość
 group: Grupa
+popular: Popularne
+recent: Najnowsze
 export_items: Eksportuj elementy
 and: I
 or: Lub
 init: Rozpocznij
 dataset_too_large_currently_showing_n_items: Zbiór danych jest zbyt duży. Obecnie wyświetlane są pierwsze {n} elementów.
 modifier: Modyfikator
+extension_interface: Interfejs
+extension_display: Pokaż
+extension_layout: Układ
+extension_module: Moduł
+extension_panel: Panel
+extension_theme: Motyw
+extension_hook: Hook
+extension_endpoint: Punkt końcowy
+extension_operation: Operacja
+extension_bundle: Pakiet
+extension_interfaces: Interfejsy
+extension_displays: Wyświetlanie
+extension_layouts: Szablony
+extension_modules: Moduły
+extension_panels: Panele
+extension_themes: Motywy
+extension_hooks: Hooki
+extension_endpoints: Punkty końcowe
+extension_operations: Operacje
+extension_bundles: Pakiety
+extension_missing: Brakujące
+extension_reload_required: Wymagane przeładowanie strony
+extension_reload_required_copy: Aby zobaczyć zmiany po włączeniu lub wyłączeniu rozszerzeń aplikacji, wymagane jest przeładowanie strony.
+extension_reload_now: Załaduj ponownie teraz
+published_relative: Opublikowano {relativeTime}
+compatible_with_your_project: Kompatybilne z Twoim projektem
+compatible_with_your_project_copy: Autor wskazał kompatybilność tego rozszerzenia dla wersji {hostVersion}, która jest zgodna z wersją Twojego projektu ({currentVersion})
+last_updated_relative: Ostatnia aktualizacja {relativeTime}
+n_files: '{n} plików'
+verified: Zweryfikowano
+homepage: Strona główna
+repository: Repozytorium
+reload_page: Przeładuj Stronę
+reload_required: Wymagane ponowne załadowanie
+report_an_issue: Zgłoś problem
+website: Strona internetowa
+github: GitHub
+beta: Beta
+n_downloads: '{n} pobrań'
+downloads: Pobrania
+compatibility_not_guaranteed: Kompatybilność nie jest gwarantowana
+compatibility_not_guaranteed_copy: Autor wskazał kompatybilność tego rozszerzenia dla wersji {hostVersion}, która nie jest zgodna z wersją Twojego projektu ({currentVersion})
+enable: Włącz
+disable: Wyłącz
 custom: Własny
 hook: Hook
 fill_width: Szerokość wypełnienia
@@ -60,6 +110,7 @@ field_name_translations: Tłumaczenie nazwy pola
 enter_password_to_enable_tfa: Wprowadź hasło, aby włączyć uwierzytelnianie dwuetapowe
 add_field: Dodaj pole
 role_name: Nazwa roli
+policy_name: Nazwa polityki
 branch: Gałąź
 leaf: Arkusz
 indeterminate: Nieokreślony
@@ -77,6 +128,7 @@ requires_value: Wymaga wartości
 create_preset: Utwórz predefiniowane ustawienia
 create_panel: Utwórz panel
 create_role: Stwórz rolę
+create_policy: Utwórz Politykę
 create_user: Utwórz użytkownika
 message: Wiadomość
 delete_panel: Usuń panel
@@ -100,6 +152,31 @@ rename_folder: Zmień nazwę folderu
 delete_folder: Usuń folder
 prefix: Przedrostek
 suffix: Przyrostek
+keep: Zachowaj
+version: Wersja
+version_key: Klucz wersji
+version_name: Nazwa wersji
+main_version: Główny
+switch_version: Przełącz wersję
+switch_version_copy: Czy na pewno chcesz przełączyć się na wersję "{version}"? Niezapisane zmiany zostaną utracone.
+create_version: Utwórz wersję
+rename_version: Zmień nazwę wersji
+compare_version: Porównaj wersję
+save_version: Zapisz wersję
+promote_version: Promuj wersję
+promote_version_disabled: Brak zmian
+promote_version_drawer_title: Promuj {version} do Głównej
+promote_version_changes: Zmiany
+promote_version_preview: Podgląd
+outdated_notice: >-
+  Główny element został zaktualizowany od czasu utworzenia tej wersji. Przejrzyj wszystkie wartości pól poniżej i potwierdź, która wersja powinna być użyta podczas promowania tej wersji w głównym elemencie.
+promote_notice: >-
+  Przejrzyj wszystkie wartości pól poniżej i potwierdź, która wersja powinna być użyta podczas promowania tej wersji w głównym elemencie.
+delete_version: Usuń wersję
+delete_version_copy: >-
+  Czy na pewno chcesz usunąć wersję "{version}"? Tej akcji nie można cofnąć.
+delete_on_promote_copy: >-
+  Czy chcesz usunąć lub zachować wersję "{version}" po promowaniu?
 reset_bookmark: Zresetuj zakładkę
 update_bookmark: Aktualizuj zakładkę
 delete_bookmark: Usuń zakładkę
@@ -113,7 +190,12 @@ logoutReason:
   SESSION_EXPIRED: Sesja wygasła
 public_label: Publiczny
 public_description: Kontroluje dostępność danych API bez uwierzytelniania.
+public_role_info: >-
+  Publiczna rola kontroluje jakie dane API są dostępne dla nieuwierzytelnionych użytkowników lub użytkowników bez roli. Żądania o publicznej roli nie mogą mieć dostępu do aplikacji lub administratora. Jeśli aplikacja lub administrator mają dostęp do zasad przypisanych do roli publicznej, zostaną one zignorowane.
 admin_description: Początkowa rola administracyjna z nieograniczonym dostępem App/API.
+admin_policy_description: Wstępna polityka administracyjna z nieograniczonym dostępem App/API.
+no_description: Brak opisu...
+reached_maximum_number_of_extensions: Osiągnięto maksymalną liczbę rozszerzeń dla tego projektu ({n}). Skontaktuj się z administratorem systemu, aby uzyskać więcej informacji.
 not_allowed: Niedozwolone
 archive: Archiwum
 archive_confirm: Jesteś pewien, że chcesz zarchiwizować ten element?
@@ -145,6 +227,7 @@ validationError:
   nnull: Wartość nie może być pusta
   required: Wartość jest wymagana
   unique: Wartość musi być unikalna
+  email: Wartość musi być prawidłowym adresem e-mail
   regex: Wartość nie ma poprawnego formatu
   starts_with: Wartość musi zaczynać się od {substring}
   istarts_with: Wartość musi zaczynać się od {substring}
@@ -177,9 +260,13 @@ field_permissions: Uprawnienia pola
 field_validation: Walidacja pola
 field_presets: Ustawienia pól
 permissions_for_role: 'Przedmioty roli {role} mogą {action}.'
+permissions_for_policy: 'Przedmioty polityki {policy} mogą {action}.'
 fields_for_role: 'Pola roli {role} mogą {action}.'
+fields_for_policy: 'Pola polityki {policy} mogą {action}.'
 validation_for_role: 'Pole {action} zasad roli {role} musi być przestrzegane.'
+validation_for_policy: 'Pole {action} reguluje, że polityka {policy} musi być przestrzegana.'
 presets_for_role: 'Wartość domyślna dla roli {role}.'
+presets_for_policy: 'Wartość pola domyślna dla polityki {policy}.'
 presets_field_warning: 'Presety relacji dla pola "{field}" powinny być skonfigurowane ze składnią "detailed".'
 presentation_and_aliases: Prezentacja i aliasy
 revision_post_create: Oto jak wyglądał ten przedmiot podczas jego tworzenia.
@@ -252,13 +339,20 @@ time: Czas
 timestamp: Sygnatura czasowa
 uuid: UUID
 hash: Hash
-geometry: Geometria (wszystkie)
-geometry.Point: Punkt
-geometry.LineString: Ciąg linii
-geometry.Polygon: Wielokąt
-geometry.MultiPoint: Wielopunktowy
-geometry.MultiLineString: Ciąg multilinii
-geometry.MultiPolygon: Wielokąt
+geometry:
+  All: Geometria (wszystkie)
+  Point: Point (punkt)
+  LineString: LineString (krzywa)
+  Polygon: Polygon (wielokąt)
+  MultiPoint: MultiPoint (wiele punktów)
+  MultiLineString: MultiLineString (wiele krzywych)
+  MultiPolygon: MultiPolygon (wielokąt złożony)
+theme_auto: Automatyczne (Oparte na systemie)
+theme_light: Tryb jasny
+theme_dark: Tryb ciemny
+theme_directus_default: Domyślny Directus
+theme_directus_minimal: Minimalny Directus
+theme_directus_colormatch: Dopasowanie kolorów Directus
 not_available_for_type: Niedostępne dla tego typu
 create_translations: Utwórz tłumaczenia
 auto_refresh: Automatyczne odświeżanie
@@ -270,12 +364,15 @@ auto_generate: Automatycznie generuj
 this_will_auto_setup_fields_relations: Spowoduje to automatyczne ustawienie wszystkich wymaganych pól i relacji.
 click_here: Kliknij tutaj
 to_manually_setup_translations: aby ręcznie ustawić tłumaczenia.
+manage: Zarządzaj
 click_to_manage_translated_fields: >-
   Nie ma jeszcze przetłumaczonych pól. Kliknij tutaj, aby je stworzyć. | Istnieje jedno przetłumaczone pole. Kliknij tutaj, aby nim zarządzać. | Ilość przetłumaczonych pół: {count}. Kliknij tutaj, aby nimi zarządzać.
 fields_group: Grupa pól
 no_collections_found: Nie znaleziono żadnych kolekcji.
 new_data_alert: 'W modelu danych zostaną utworzone następujące elementy:'
 search_collection: Przeszukaj kolekcje...
+search_role: Szukaj roli...
+search_policy: Wyszukaj Politykę...
 search_field: Pole wyszukiwania...
 new_field: 'Nowe pole'
 new_collection: 'Nowa kolekcja'
@@ -316,6 +413,7 @@ soft_length: Limit miękki
 precision_scale: Precyzja i Skala
 readonly: Tylko do odczytu
 unique: Unikalne
+index: Indeks
 updated_on: Edytowane
 updated_by: Aktualizowany przez
 primary_key: Klucz podstawowy
@@ -341,6 +439,7 @@ clear_items: Wyczyść elementy
 reset_to_default: Przywróć domyślne
 undo_changes: Cofnij zmiany
 notifications: Powiadomienia
+archive_all: Zarchiwizuj wszystko
 show_all_activity: Pokaż wszystkie aktywności
 page_not_found: Nie odnaleziono strony
 page_not_found_body: Strona, której poszukujesz, nie istnieje.
@@ -353,12 +452,14 @@ revision_delta_created: Utworzony
 revision_delta_created_externally: Utworzono zewnętrznie
 revision_delta_updated: 'Zaktualizowano 1 pole | Zaktualizowano {count} pól'
 revision_delta_deleted: Usunięty
+revision_delta_version_saved: 'Zapisywanie wersji (zaktualizowane 1 pola) | Zapisywanie wersji (zaktualizowane pola {count})'
 revision_delta_reverted: Odwrócony
 revision_delta_update_message: To pole zostało zaktualizowane, ale jego wartość jest ukrywana ze względów bezpieczeństwa.
 revision_delta_other: Rewizja
 revision_delta_by: '{date} przez {user}'
 presentation_text_values_cannot_be_reimported: 'Używa tekstu prezentacji, wartości nie mogą być ponownie zaimportowane.'
 download_page_as_csv: 'Pobierz stronę jako CSV'
+download_page_as_csv_unsupported: Ten układ nie obsługuje pobierania bieżącej strony.
 private_user: Prywatny Użytkownik
 creation_preview: Podgląd tworzenia
 revision_preview: Podgląd wersji
@@ -395,6 +496,7 @@ move: Przenieś
 system: System
 add_field_related: Dodaj pole do powiązanej kolekcji
 interface_label: Interfejs
+display_label: Pokaż
 today: Dziś
 yesterday: Wczoraj
 delete_comment: Usuń komentarz
@@ -422,6 +524,11 @@ hours: Godziny
 month: Miesiąc
 year: Rok
 select_all: Wybierz wszystkie
+permissionsLevel:
+  all: Pełny dostęp {action}
+  partial: Częściowy dostęp {action}
+  custom: Częściowy dostęp {action}
+  none: Brak dostępu {action}
 months:
   january: Styczeń
   february: Luty
@@ -436,7 +543,11 @@ months:
   november: Listopad
   december: Grudzień
 drag_mode: Tryb przeciągania
+move_tool: Narzędzie przesuwania
+crop_tool: Narzędzie przycinania
+focal_point_tool: Narzędzie punktu skupienia
 cancel_crop: Anuluj przycinanie
+cancel_selection: Anuluj wybór
 original: Oryginalny
 url: Adres URL
 import_label: Importuj
@@ -444,8 +555,8 @@ file_details: Szczegóły pliku
 dimensions: Wymiary
 size: Wielkość
 created: Utworzony
+uploaded: Przesłano
 modified: Zmodyfikowane
-checksum: Suma kontrolna
 owner: Właściciel
 edited_by: Edytowane przez
 folder: Folder
@@ -463,6 +574,7 @@ import_from_url: Załaduj za pośrednictwem adresu URL
 replace_from_device: Zastąp plik z urządzenia
 replace_from_library: Zastąp plik z biblioteki
 replace_from_url: Zastąp plik z URL
+no_image_selected: Nie wybrano obrazu
 no_file_selected: Nie wybrano pliku
 download_file: Pobierz plik
 open_file_in_tab: Otwórz plik w nowej karcie
@@ -489,6 +601,7 @@ generated_uuid: Wygenerowane UUID
 manual_string: Wprowadzony ręcznie ciąg znaków
 save_and_create_new: Zapisz i utwórz nowy
 save_and_stay: Zapisz i zostań
+save_and_quit: Zapisz i wyjdź
 save_as_copy: Zapisz jako kopię
 add_existing: Dodaj istniejący
 creating_items: Tworzenie elementów
@@ -499,9 +612,13 @@ allow_duplicates: Zezwalaj na duplikaty
 comments: Komentarze
 no_comments: Brak komentarzy
 expand: Rozwiń
+expand_all: Rozwiń wszystko
 collapse: Zwiń
+collapse_all: Zwiń wszystko
 select_item: Wybierz element
 no_items: Brak elementów
+search_items: Szukaj elementów...
+search_extensions: Szukaj rozszerzeń...
 disabled: Wyłączony
 information: Informacja
 report_bug: Zgłoś błąd
@@ -514,12 +631,17 @@ display_not_found: 'Wyświetlanie "{display}" nie zostało znalezione.'
 reset_display: Resetuj wyświetlanie
 list-m2a: Konstruktor (M2A)
 item_count: 'Brak elementów | Jeden element | {count} elementy/ów'
+filtered_item_count: 'Brak filtrowanych elementów | Jeden filtrowany element | {count} filtrowanych elementów'
 no_items_copy: Nie ma jeszcze żadnych elementów w tej kolekcji.
 file_count: 'Brak plików | Jeden plik | {count} plików'
 no_files_copy: Brak plików.
 user_count: 'Brak użytkowników | Jeden użytkownik | {count} użytkowników'
 no_users_copy: Nie ma jeszcze użytkowników w tej roli.
 webhooks_count: 'Brak webhooków | Jeden Webhook | {count} Webhooków'
+webhooks_deprecation_notice: |
+  Webhooki są przestarzałe i ich dalsze używanie jest odradzane.
+
+  Zamiast tego użyj **Flows** z operacją [Webhook / Request URL](https://docs.directus.io/app/flows/operations.html#webhook-request-url).
 no_webhooks_copy: Nie skonfigurowano jeszcze żadnych webhooków. Zacznij od utworzenia jednego poniżej.
 no_notifications: Brak powiadomień
 no_notifications_copy: Jesteś na bieżąco z wiadomościami!
@@ -544,6 +666,7 @@ copy_to: Kopiuj do...
 no_other_dashboards_copy: Nie masz jeszcze żadnych innych Panelów.
 inactive: Nieaktywny
 users: Użytkownicy
+roles: Role
 activity: Aktywność
 activity_item: Element Aktywności
 action: Czynność
@@ -581,7 +704,12 @@ bookmark_doesnt_exist_copy: Nie znaleziono zakładki, którą próbujesz otworzy
 bookmark_doesnt_exist_cta: Wróć do kolekcji
 select_an_item: Wybierz element...
 edit: Edytuj
+edit_item: Edytuj element
 enabled: Włączone
+partially_enabled: Częściowo włączone
+enable_all: Włącz wszystko
+disable_all: Wyłącz wszystko
+enabled_dev_tooltip: Rozszerzenia aplikacji są zawsze włączone w trybie deweloperskim
 disable_tfa: Wyłącz weryfikację dwuetapową
 admin_disable_tfa_text: Czy na pewno chcesz wyłączyć 2FA dla tego użytkownika?
 tfa_setup: Konfiguracja 2FA
@@ -593,40 +721,41 @@ auto_fill: Automatyczne wypełnianie
 corresponding_field: Odpowiednie pole
 errors:
   COLLECTION_NOT_FOUND: "Kolekcja nie istnieje"
+  CONTAINS_NULL_VALUES: Pole zawiera pustą wartość (Null)
+  CONTENT_TOO_LARGE: Przedłożony element/plik jest zbyt duży
   FIELD_NOT_FOUND: Nie znaleziono pola
   FORBIDDEN: Zabronione
+  GRAPHQL_VALIDATION: Walidacja GraphQL
+  ILLEGAL_ASSET_TRANSFORMATION: Źródło obrazu jest zbyt duże, aby wyświetlić podgląd
+  INTERNAL_SERVER_ERROR: Nieoczekiwany błąd
+  INVALID_CONFIG: Nieprawidłowa konfiguracja
   INVALID_CREDENTIALS: Nieprawidłowa nazwa użytkownika lub hasło
+  INVALID_FOREIGN_KEY: Nieprawidłowy klucz
+  INVALID_IP: Adres IP niedozwolony
   INVALID_OTP: Złe hasło jednorazowe
   INVALID_PAYLOAD: Błędny payload
   INVALID_PROVIDER: Użytkownik należy do innego dostawcy autoryzacji
   INVALID_QUERY: Nieprawidłowe zapytanie
-  INVALID_CONFIG: Nieprawidłowa konfiguracja
   INVALID_TOKEN: Nieprawidłowy token
-  INVALID_IP: Adres IP niedozwolony
   INVALID_USER: Błąd uwierzytelniania użytkownika
   ITEM_LIMIT_REACHED: Osiągnięto limit przedmiotów
   ITEM_NOT_FOUND: Nie znaleziono elementu
-  ROUTE_NOT_FOUND: Nie znaleziono
-  RECORD_NOT_UNIQUE: Wykryto zduplikowaną wartość
-  USER_SUSPENDED: Użytkownik zawieszony
-  CONTAINS_NULL_VALUES: Pole zawiera pustą wartość (Null)
-  UNPROCESSABLE_ENTITY: Jednostka niemożliwa do przetworzenia
-  INTERNAL_SERVER_ERROR: Nieoczekiwany błąd
-  NOT_NULL_VIOLATION: Wartość nie może być pusta
-  ILLEGAL_ASSET_TRANSFORMATION: Źródło obrazu jest zbyt duże, aby wyświetlić podgląd
-  VALUE_TOO_LONG: Wartość jest zbyt długa
-  VALUE_OUT_OF_RANGE: Wartość jest poza zakresem
-  INVALID_FOREIGN_KEY: Nieprawidłowy klucz
-  UNKNOWN: Nieoczekiwany błąd
-  GRAPHQL_VALIDATION_EXCEPTION: Wyjątek sprawdzania poprawności grafiki
-  SERVICE_UNAVAILABLE: Serwis niedostępny
-  UNSUPPORTED_MEDIA_TYPE: Nie wspierany typ mediów
-  UNEXPECTED_RESPONSE: Nieoczekiwana odpowiedź
-  TOKEN_EXPIRED: Token wygasł
-  RANGE_NOT_SATISFIABLE: Błędny zakres
+  LIMIT_EXCEEDED: 'Przekroczony limit'
   METHOD_NOT_ALLOWED: Metoda niedozwolona
+  NOT_NULL_VIOLATION: Wartość nie może być pusta
+  RANGE_NOT_SATISFIABLE: Błędny zakres
+  RECORD_NOT_UNIQUE: Wykryto zduplikowaną wartość
   REQUESTS_EXCEEDED: Osiągnięto limit żądań
-  CONTENT_TOO_LARGE: Przedłożony element/plik jest zbyt duży
+  ROUTE_NOT_FOUND: Nie znaleziono
+  SERVICE_UNAVAILABLE: Serwis niedostępny
+  TOKEN_EXPIRED: Token wygasł
+  UNEXPECTED_RESPONSE: Nieoczekiwana odpowiedź
+  UNKNOWN: Nieoczekiwany błąd
+  UNPROCESSABLE_CONTENT: Zawartość niemożliwa do przetworzenia
+  UNSUPPORTED_MEDIA_TYPE: Nie wspierany typ mediów
+  USER_SUSPENDED: Użytkownik zawieszony
+  VALUE_OUT_OF_RANGE: Wartość jest poza zakresem
+  VALUE_TOO_LONG: Wartość jest zbyt długa
 security: Bezpieczeństwo
 value_hashed: Wartość bezpiecznie zakodowana
 bookmark_name: Nazwa zakładki...
@@ -640,7 +769,7 @@ cannot_edit_global_bookmarks: Nie można edytować globalnych zakładek
 bookmarks: Zakładki
 presets: Ustawienia
 unexpected_error: Nieoczekiwany błąd
-unexpected_error_copy: Wystąpił nieoczekiwany błąd. Spróbuj ponownie później.
+unexpected_error_copy: Wystąpił nieoczekiwany błąd. Proszę spróbować ponownie.
 copy_details: Kopiuj szczegóły
 no_app_access: Brak dostępu do aplikacji
 no_app_access_copy: Ten użytkownik nie może używać aplikacji administracyjnej.
@@ -665,10 +794,7 @@ make_collection_hidden: Spraw, aby kolekcja była ukryta
 make_folder_visible: Uwidocznij folder
 make_folder_hidden: Ukryj folder
 goto_collection_content: Zobacz zawartość
-start_end_of_count_items: '{start}-{end} z {count} elementów'
-start_end_of_count_filtered_items: '{start}-{end} z {count} przefiltrowanych przedmiotów'
-one_item: '1 element'
-one_filtered_item: '1 przefiltrowany element'
+count_of_total_items: '{count} z {total} elementów'
 delete_collection_are_you_sure: >-
   Czy na pewno chcesz usunąć kolekcję "{collection}"? Spowoduje to usunięcie kolekcji i wszystkich jej elementów. To działanie jest nieodwracalne.
 delete_folder_are_you_sure: Czy na pewno chcesz usunąć folder "{folder}"? Zagnieżdżone foldery i kolekcje zostaną przeniesione do najwyższego poziomu.
@@ -735,6 +861,7 @@ operators:
   regex: Wyrażenie dopasowania
 custom_validation_message: Niestandardowy komunikat walidacyjny
 loading: Wczytywanie...
+extension_readme_missing: To rozszerzenie nie posiada pliku README.
 drop_to_upload: Upuść, aby przesłać
 item: Element
 items: Elementy
@@ -747,12 +874,14 @@ upload_pending: Prześlij oczekujące
 drag_file_here: Przeciągnij i upuść plik tutaj
 click_to_browse: Kliknij, aby przeglądać
 interface_options: Opcje interfejsu
+display_options: Opcje wyświetlania
 layout_options: Opcje Układu
 rows: Wiersze
 columns: Kolumny
 collection_setup: Ustawienia kolekcji
-optional_system_fields: Opcjonalne pola systemu
+optional_system_fields: Pola opcjonalne
 value_unique: Wartość musi być unikalna
+value_index: Pole jest indeksowane
 all_activity: Wszystkie aktywności
 create_item: Utwórz element
 display_template: Wyświetl szablon
@@ -870,6 +999,15 @@ no_data_in_flow: Żadne dane nie zostały wygenerowane lub dostępne w tym przep
 accountability: Odpowiedzialność
 payload: Ładunek
 details: Szczegóły
+resume_streaming_logs: Wznów streaming logów
+pause_streaming_logs: Wstrzymaj streaming logów
+logs_session_resumed: Sesja logów wznowiona...
+logs_waiting: 'Oczekiwanie na więcej logów...'
+clear_logs: Wyczyść logi
+search_logs: Szukaj logi...
+all_instances: Wszystkie instancje
+instance_count: 'Brak instancji | Jedna instancja | {count} Instancje'
+all_log_levels: Wszystkie poziomy logów
 full_screen: Pełny ekran
 full_text_search: Wyszukiwanie pełnotekstowe
 edit_panels: Edytuj pulpit
@@ -898,8 +1036,6 @@ tooltip: Podpowiedź
 tooltip_placeholder: Wprowadź podpowiedź...
 unlimited: Nielimitowany
 open_link_in: Otwórz link w
-new_tab: Nowa karta
-current_tab: Aktualna karta
 save_image: Zapisz obraz
 save_media: Zapisz media
 wysiwyg_options:
@@ -956,6 +1092,12 @@ choices: Opcje
 choices_option_configured_incorrectly: Wybór skonfigurowany nieprawidłowo
 deselect: Odznacz
 deselect_all: Odznacz Wszystko
+theme: Motyw
+select_a_theme: Wybierz motyw
+default_sync_with_project: Domyślny (synchronizacja z projektem)
+appearance_auto: Automatyczny (synchronizacja z systemem)
+appearance_light: Jasny
+appearance_dark: Ciemny
 other: Inne...
 adding_user: Dodawanie użytkownika
 unknown_user: Nieznany użytkownik
@@ -967,12 +1109,15 @@ editing_unit: 'Edycja {unit}'
 editing_in_batch: 'Grupowa edycja {count} elementów'
 no_options_available: Brak dostępnych opcji
 settings_data_model: Model danych
-settings_permissions: Role i uprawnienia
-settings_project: Ustawienia projektu
+settings_roles: Role użytkownika
+settings_permissions: Polityki dostępu
+settings_project: Ustawienia
+settings_appearance: Wygląd
 settings_webhooks: Webhooki
 settings_flows: Przepływy
-settings_presets: Szablony i zakładki
-settings_translations: Własne tłumaczenia
+settings_system_logs: Dzienniki systemowe
+settings_presets: Zakładki
+settings_translations: Tłumaczenia
 one_or_more_options_are_missing: Brakuje jednej lub więcej opcji
 configure_field_key_to_continue: Skonfiguruj klucz pola, aby kontynuować
 scope: Zakres
@@ -987,6 +1132,7 @@ editing_preset: Edycja szablonu
 layout_preview: Podgląd układu
 layout_setup: Ustawienia układu
 data: Dane
+theme-overrides: Nadpisywanie motywu
 unsaved_changes: Niezapisane zmiany
 unsaved_changes_copy: Czy na pewno chcesz opuścić tę stronę?
 discard_changes: Odrzuć zmiany.
@@ -1008,12 +1154,13 @@ page_help_files_collection: >-
   **Biblioteka plików** — Lista wszystkich zasobów plików przesłanych do tego projektu. Dostosuj układ, filtry i sortowanie w celu dostosowania widoku, a nawet zapisz zakładki z tych różnych konfiguracji, aby uzyskać szybki dostęp.
 page_help_files_item: >-
   **Szczegóły pliku** — Formularz do zarządzania metadanymi plików, edycji oryginalnego zasobu i aktualizacji ustawień dostępu.
-page_help_settings_project: "**Ustawienia projektu** — globalne opcje konfiguracji projektu."
+page_help_settings_project: "**Ustawienia** — Ogólne opcje konfiguracji Twojego projektu."
+page_help_settings_appearance: "**Wygląd** — wygląd Twojego projektu i opcje motywów."
+page_help_settings_extensions: '**Rozszerzenia** — Rozszerzenia zainstalowane w Twoim projekcie.'
 page_help_settings_datamodel_collections: >-
   **Model danych: Kolekcje** — Lista wszystkich dostępnych kolekcji. Obejmuje to widoczne, ukryte i systemowe kolekcje, jak również niezarządzane tabele bazy danych, które mogą być dodane.
 page_help_settings_datamodel_fields: >-
   **Model danych: Zbieranie** — Formularz do zarządzania tą kolekcją i jej polami.
-page_help_settings_roles_collection: '**Przeglądaj role** — Wyświetla role administratora, publiczne i niestandardowe role użytkowników.'
 page_help_settings_roles_item: "**Szczegóły roli** - Zarządzaj uprawnieniami ról i innymi ustawieniami."
 page_help_settings_presets_collection: >-
   **Przeglądaj ustawienia** — wyświetla wszystkie ustawienia predefiniowane w projekcie, w tym: użytkownik, role, globalne zakładki, a także widoki domyślne.
@@ -1030,6 +1177,9 @@ page_help_users_item: >-
   **Szczegóły użytkownika** — Zarządzaj informacjami o koncie lub zobacz szczegóły innych użytkowników.
 page_help_insights_overview: '**Insights** - Lista pulpitów, do których masz dostęp.'
 page_help_insights_dashboard: '**Pulpit** - Obszar roboczy do zarządzania jednym lub kilkoma panelami'
+page_help_marketplace_account: '**Konto** — Wydawca lub zarządzający opublikowanym rozszerzeniem.'
+page_help_marketplace_registry: '**Rejestr** — Rozszerzenia dostępne w Directus Marketplace.'
+page_help_marketplace_extension: '**Rozszerzenie** — Rozszerzenie w Directus Marketplace.'
 activity_feed: Kanał aktywności
 add_new: Dodaj nowy
 create_new: Utwórz nowy
@@ -1040,6 +1190,17 @@ batch_delete_confirm: >-
   Żaden element nie został zaznaczony | Na pewno chcesz usunąć ten element? Tej akcji nie będzie można cofnąć. | Na pewno chcesz usunąć {count} elementów? Tej akcji nie będzie można cofnąć.
 cancel: Anuluj
 no_upscale: Nie skaluj obrazów
+no_extensions: Brak rozszerzeń
+no_extensions_copy: Nie zainstalowano jeszcze żadnych rozszerzeń.
+install_extension: Zainstaluj rozszerzenie
+uninstall_locked: Nie można odinstalować rozszerzeń, które nie zostały zainstalowane za pośrednictwem Marketplace
+uninstall: Odinstaluj
+installed: Zainstalowany
+reinstall: Zainstaluj ponownie
+open_in_marketplace: Otwórz w Marketplace
+source_registry: Marketplace
+source_local: Lokalny
+source_module: Moduł Node
 collection: Kolekcja
 collections: Kolekcje
 content: Zawartość
@@ -1058,7 +1219,6 @@ directus_collection:
   directus_notifications: Powiadomienia wysłane do użytkowników
   directus_operations: Operacje prowadzone w przepływach
   directus_panels: Pojedyncze panele w panelu Insights
-  directus_permissions: Uprawnienia dostępu do każdej roli
   directus_presets: Ustawienia domyślne kolekcji i zakładek
   directus_relations: Konfiguracja relacji i metadane
   directus_revisions: Zrzuty danych dla wszystkich działań
@@ -1069,6 +1229,8 @@ directus_collection:
   directus_users: Użytkownicy systemu dla platformy
   directus_webhooks: Konfiguracja dla żądań HTTP opartych na zdarzeniach
   directus_translations: Własne tłumaczenia
+  directus_versions: Wersje zawartości dla elementów
+  directus_extensions: Konfiguracja rozszerzeń
 fields:
   directus_activity:
     item: Klucz główny produktu
@@ -1095,6 +1257,7 @@ fields:
     unarchive_value: Niezarchiwizowane wartości
     sort_field: Pole sortowania
     accountability: Śledzenie Aktywności i Wersji
+    versioning: Wersjonowanie
     archive_field: Pole archiwum
     item_duplication_fields: Pola Duplikacji Produktu
   directus_files:
@@ -1133,15 +1296,12 @@ fields:
     tags: Etykiety
     user_preferences: Ustawienia użytkownika
     language: Język
-    theme: Motyw
-    theme_auto: Automatyczne (Oparte na systemie)
-    theme_light: Tryb jasny
-    theme_dark: Tryb ciemny
     tfa_secret: Uwierzytelnianie dwuetapowe
     admin_options: Opcje administratora
     status: Status
     status_draft: Szkic
     status_invited: Zaproszono
+    status_unverified: Niezweryfikowane
     status_active: Aktywne
     status_suspended: Zawieszony
     status_archived: Zarchiwizowane
@@ -1152,12 +1312,18 @@ fields:
     last_page: Ostatnia strona
     last_access: Ostatni dostęp
     email_notifications: Powiadomienia e-mail
+    appearance: Wygląd
+    theme_light: Motyw jasny
+    theme_dark: Motyw ciemny
+    theme_light_overrides: Dostosowanie jasnego motywu
+    theme_dark_overrides: Dostosowanie ciemnego motywu
   directus_settings:
     jpg: JPEG
     png: PNG
     webP: WebP
     tiff: Wskazówka
     avif: AVIF
+    reporting: Zgłaszanie
     mapping: Mapowanie
     basemaps: Podstawowe
     basemaps_raster: Raster
@@ -1175,10 +1341,14 @@ fields:
     project_color: Kolor projektu
     project_logo: Logo projektu
     default_language: Domyślny język
-    branding: Marka i Styl
+    branding: Marka
     public_foreground: Publiczny Foreground
     public_background: Tło publiczne
     public_note: Notatka publiczna
+    theming: Ustawienia domyślne motywu
+    default_appearance: Domyślny wygląd
+    default_theme_light: Domyślny jasny motyw
+    default_theme_dark: Domyślny ciemny motyw
     auth_password_policy: Zasady haseł
     auth_login_attempts: Próby logowania
     files_and_thumbnails: Pliki i pamięć
@@ -1193,6 +1363,16 @@ fields:
     transformations_presets: Ogranicz transformacje do poniższych ustawień
     image_editor: Edytor obrazu
     custom_aspect_ratios: Niestandardowe proporcje
+    theme_light_overrides: Dostosowanie jasnego motywu
+    theme_dark_overrides: Dostosowanie ciemnego motywu
+    public_registration: Rejestracja użytkownika
+    public_registration_note: Pozwala użytkownikom na rejestrację przez [ścieżkę rejestracji](/admin/register).
+    public_registration_role: Rola użytkownika
+    public_registration_role_note: Ta rola jest przypisana do użytkowników, którzy rejestrują się za pomocą tej metody. Nie ma wpływu na już zarejestrowanych użytkowników.
+    public_registration_email_filter: Filtr adresu e-mail
+    public_registration_email_filter_note: Tylko adresy e-mail pasujące do tego filtra mogą się zarejestrować.
+    public_registration_verify_email: Potwierdź e-mail
+    public_registration_verify_email_note: Wysyła e-mail do użytkownika rejestrującego z prośbą o kliknięcie na link weryfikacyjny zanim będzie mógł się zalogować.
   directus_shares:
     name: Nazwa
     role: Rola
@@ -1213,12 +1393,10 @@ fields:
     name: Nazwa roli
     icon: Ikona roli
     description: Opis
-    app_access: Dostęp aplikacji
-    admin_access: Dostęp do panelu administratora
-    ip_access: Dostęp IP
-    enforce_tfa: Wymagaj uwierzytelniania dwuskładnikowego
     users: Użytkownicy w roli
-    module_list: Moduł Nawigacji
+  directus_policies:
+    name: Nazwa polityki
+    description: Opis
   directus_webhooks:
     name: Nazwa
     method: Metoda
@@ -1235,7 +1413,8 @@ field_options:
   directus_settings:
     project_name_placeholder: Mój projekt...
     project_color_note: Tło logowania i logo
-    project_logo_note: Biały 40x40 SVG/PNG
+    project_logo_note: Biały 40×40 SVG/PNG
+    project_favicon_note: 32×32 ICO
     public_note_placeholder: Krótka, publiczna wiadomość, która obsługuje formatowanie markdown...
     security_divider_title: Bezpieczeństwo
     auth_password_policy:
@@ -1290,17 +1469,24 @@ field_options:
     accountability_divider: Odpowiedzialność
     duplication_divider: Duplikacja
     preview_divider: Podgląd
+    content_versioning_divider: Wersja treści
+    enable_versioning: Włącz wersjonowanie
   directus_files:
     title: Unikalny tytuł...
     description: Opcjonalny opis...
     location: Opcjonalna lokalizacja...
     storage_divider: Nazwy plików
+    focal_point_divider: Punkt ogniskowy
     filename_disk: Nazwa na dysku...
     filename_download: Nazwa podczas pobierania...
+  directus_policies:
+    name: Unikalna nazwa dla tej polityki...
+    description: Opis tej polityki...
+    ip_access: Dodaj dozwolone adresy IP, zakresy IP i bloki CIDR. Pozostaw puste, aby zezwolić na wszystkie...
+    enforce_tfa: Wymuś uwierzytelnianie dwuetapowe
   directus_roles:
     name: Unikalna nazwa dla tej roli...
     description: Opis tej roli...
-    ip_access: Dodaj dozwolone adresy IP, pozostaw puste, aby zezwolić na wszystkie...
     fields:
       icon_name: Ikona
       name_name: Nazwa
@@ -1357,7 +1543,7 @@ live_preview:
   toggle_3d: Przełącz 3D
 shares: Udostępnienia
 unlimited_usage: Nieograniczone użycie
-uses_left: Brak pozostałych zastosowań | 1 zastosowanie | {n} zastosowań pozostało
+uses_left: Brak pozostałych zastosowań | Pozostało jedno użycie | {n} pozostało do użycia
 no_shares: Brak udostępnień do wyświetlenia
 new_share: Nowe udostępnianie
 expired: Wygasły
@@ -1391,6 +1577,9 @@ continue_label: Kontynuuj
 continue_as: >-
   {name} jest obecnie uwierzytelniony. Jeśli rozpoznajesz to konto, naciśnij przycisk Kontynuuj.
 editing_role: 'Rola {role}'
+editing_policy: 'Polityka {policy}'
+no_permissions: Brak uprawnień
+permission_add_collection: Dodaj kolekcję
 creating_webhook: Tworzenie Webhooka
 default_label: Domyślny
 delete_label: Usuń
@@ -1436,6 +1625,7 @@ authenticated: Uwierzytelniony
 options: Opcje
 otp: Jednorazowe hasło
 password: Hasło
+confirm_password: Potwierdź hasło
 permissions: Uprawnienia
 relationship: Powiązanie
 reset: Resetuj
@@ -1450,7 +1640,16 @@ search: Wyszukaj
 select_existing: Wybierz istniejące
 select_field_type: Wybierz typ pola
 select_interface: Wybierz interfejs
+select_display: Wybierz wyświetlanie
 settings: Ustawienia
+register: Zarejestruj
+registration_successful_headline: Sukces!
+registration_successful_note: Teraz możesz przejść do strony logowania.
+registration_successful_check_email_note: |
+  Pamiętaj, że zanim będziesz mógł się zalogować, musisz zweryfikować swój adres e-mail, klikając na link weryfikacyjny wysłany do Ciebie.
+dont_have_an_account: Nie masz jeszcze konta?
+already_have_an_account: Posiadasz już konto?
+sign_up_now: Zarejestruj się teraz
 sign_in: Zaloguj się
 sign_out: Wyloguj się
 sign_out_confirm: Na pewno chcesz się wylogować?
@@ -1480,7 +1679,12 @@ navigate_to_item: Przejdź do elementu
 undo_removed_item: Cofnij usunięcie elementu
 remove_item: Usuń element
 delete_item: Usuń element
+pause: Wstrzymaj
+resume: Wznów
 interfaces:
+  list-m2a:
+    prefix_note: Domyślnie używa nazwy kolekcji powiązanych elementów.
+    sorting_disabled: Sortowanie jest wyłączone, ponieważ jest więcej elementów niż może się zmieścić na jednej stronie.
   filter:
     name: Filtr
     description: Skonfiguruj filtr obiektu.
@@ -1609,12 +1813,20 @@ interfaces:
     description: Wybierz lub prześlij plik
     crop: Przytnij aby dopasować
     crop_label: Przytnij obraz w razie potrzeby
+    letterbox_label: Dodaj dopełnienie do podglądu obrazu
   system-interface:
     interface: Interfejs
     description: Wybierz istniejący interfejs
     placeholder: Wybierz interfejs...
   system-interface-options:
     interface-options: Opcje interfejsu
+    description: Okno do wyboru opcji interfejsu
+  system-display:
+    display: Pokaż
+    description: Wybierz istniejący interfejs
+    placeholder: Wybierz wyświetlanie...
+  system-display-options:
+    display-options: Opcje wyświetlania
     description: Okno do wyboru opcji interfejsu
   list-m2m:
     many-to-many: Wiele do wielu
@@ -1635,6 +1847,9 @@ interfaces:
     preview: Podgląd
     editorFont: Czcionka edytora
     previewFont: Podgląd czcionki
+    default_view: Widok domyślny
+    default_view_editor: Edytor
+    default_view_preview: Podgląd
     customSyntax: Niestandardowe bloki
     customSyntax_label: Dodaj własne typy składni
     customSyntax_add: Dodaj własną składnię
@@ -1668,7 +1883,7 @@ interfaces:
     description: Wybierz wiele powiązanych elementów
     no_collection: Kolekcja nie została znaleziona
   system-folder:
-    folder: Folder
+    folder: Katalog główny
     description: Wybierz folder
     field_hint: Domyślny katalog przesłanych plików bez określonego folderu. Nie ma wpływu na istniejące pliki.
     root_name: Root biblioteki plików
@@ -1685,6 +1900,8 @@ interfaces:
     sort_placeholder: Ręcznie
     field_note_placeholder: Wprowadź opis pola...
     incompatible_data: Bieżące dane nie są kompatybilne z interfejsem iteratora i zostaną nadpisane podczas dodawania elementów do iteratora
+    interface_group: Opcje interfejsu
+    display_group: Opcje wyświetlania
   slider:
     slider: Suwak
     description: Wybierz numer używając suwaka
@@ -1737,6 +1954,7 @@ interfaces:
     no_collection: Brak kolekcji
     toggle_split_view: Przełącz widok dzielony
     enable: Włącz
+    default_split_view_state: Domyślny stan widoku podzielonego
     user_language: Użyj bieżącego języka użytkownika
     default_language: Domyślny język
     language_field: Pole identyfikacji języka
@@ -1757,7 +1975,9 @@ interfaces:
     description: Edytor zawartość HTML
     toolbar: Pasek narzędzi
     custom_formats: Niestandardowe formaty
+    custom_formats_note: Lista formatów zawartości TinyMCE. Więcej informacji można znaleźć w dokumentacji TinyMCE na temat [Formatowania Treści](https://www.tiny.cloud/docs/tinymce/latest/content-formatting/).
     options_override: Zastąp opcje
+    options_override_note: Klucze formatowania użytkownika TinyMCE i ich wartości. Więcej informacji można znaleźć w dokumentacji TinyMCE na temat opcji [Formatowania Użytkownika](https://www.tiny.cloud/docs/tinymce/latest/user-formatting-options/).
     folder_note: Folder dla przesłanych plików. Nie ma wpływu na istniejące pliki.
     imageToken: Statyczny token dostępu
     imageToken_label: Statyczny token dostępu jest dołączony do adresu URL aktywów
@@ -1813,6 +2033,9 @@ interfaces:
   system-raw-editor:
     system-raw-editor: Edycja bezpośrednia
     description: Zezwalaj na wprowadzanie wartości szablonów surowych lub muszlowych
+  input-password:
+    input-password: Wprowadź hasło
+    description: Wprowadzanie hasła z przełącznikiem, aby ukryć wartość
 displays:
   translations:
     translations: Tłumaczenia
@@ -1889,11 +2112,16 @@ displays:
     icon: Ikona
     border: Krawędź
     border_label: Pokaż obramowanie
+    mask: Zamaskowany
+    mask_label: Ukryj rzeczywistą wartość
     text: Tekst
     text_placeholder: Opcjonalna wartość nadpisana...
   formatted-json-value:
     formatted-json-value: Sformatowana wartość JSON
     description: Wyświetl sformatowaną wersję obiektu
+  hash:
+    hash: Hash
+    description: Wyświetlanie zredagowanej wersji wartości
   icon:
     icon: Ikona
     description: Wyświetl ikonę
@@ -1999,9 +2227,9 @@ layouts:
     show_ungrouped: Pokaż nie pogrupowane
     show: Pokaż
     no_group: Brak grupy
-    not_all_loaded: Można załadować tylko pierwszych 1000 elementów.
 horizontal: Poziomy
 vertical: Pionowo
+axis: Oś
 x_axis: Oś X
 y_axis: Oś Y
 y_axis_function: Funkcja osi Y
@@ -2028,6 +2256,9 @@ panels:
     name: Metryczny
     description: Pokaż pojedynczą wartość na podstawie zapytania
     field: Pole
+  metric_list:
+    name: Lista metryczna
+    description: Listuj i wizualizuj zagregowane metryki z kolekcji
   time_series:
     name: Seria czasowa
     description: Renderowanie wykresu liniowego na podstawie wartości w czasie
@@ -2056,6 +2287,7 @@ panels:
     smooth: Gładki
     straight: Prosta
     step_line: Linia kroku
+    show_legend: Pokaż Legendę
   meter:
     name: Licznik
     description: Licznik wartości śledzenia
@@ -2140,9 +2372,19 @@ operations:
     payload: Ładunek
     query: Zapytanie
   json-web-token:
+    name: JSON Web Token (JWT)
+    description: Podpisz i zweryfikuj tokeny sieciowe JSON
+    operation: Operacja
+    secret: Sekretny
+    secret_placeholder: Wprowadź sekretny klucz...
     payload: Ładunek
     token: Token
+    token_placeholder: eyJhbGciOi......
     options: Opcje
+    options_placeholder: 'Zobacz https://www.npmjs.com/package/jsonwebtoken#use dla dostępnych opcji'
+    sign: Token podpisu
+    verify: Weryfikuj token
+    decode: Odszyfrowany token
   log:
     name: Logi do konsoli
     description: Wyjście czegoś do konsoli
@@ -2196,3 +2438,46 @@ operations:
     batch: Partia
     batch_size: Rozmiar partii
     cache: Cache
+unit: Jednostka
+standard: Standardowy
+scientific: Naukowy
+engineering: Inżynieria
+compact: Kompaktowy
+currency: Waluta
+notation: Notacja
+style: Style
+fonts:
+  thin: Cienka
+  extra_light: Ekstra jasny
+  light: Jasny
+  normal: Normalny
+  medium: Średni
+  semi_bold: Półpogrubiona
+  bold: Pogrubiony
+  extra_bold: Ekstra pogrubione
+  black: Czarny
+  italic: Kursywa
+  oblique: Ukośna
+  small: Mały
+  large: Duży
+  auto: Automatycznie
+text_wrap: Zawijanie tekstu
+center: Wyśrodkowany
+justify: Wyjustuj
+text_align: Wyrównanie tekstu
+font_weight: Grubość czcionki
+font_style: Styl czcionki
+font_size: Rozmiar czcionki
+minimum_fraction_digits: Minimalna liczba miejsc po przecinku
+maximum_fraction_digits: Maksymalna liczba miejsc po przecinku
+show_percentage: Pokaż procent
+aggregation: Agregacja
+series_grouping: Grupowanie serii
+date_precision: Precyzja daty
+export_dashboard: Eksportuj pulpit
+duplicate_dashboard: Duplikuj pulpit
+search_dashboard: Szukaj na pulpicie...
+search_flow: Szukaj przepływu...
+percent: Procent
+show_password: Pokaż hasło
+hide_password: Schowaj hasło

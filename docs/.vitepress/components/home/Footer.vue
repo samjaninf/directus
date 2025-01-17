@@ -1,3 +1,11 @@
+<script setup lang="ts">
+import Divider from '../Divider.vue';
+import SocialIcon from './SocialIcon.vue';
+import Logo from './icons/Logo.vue';
+
+const currentYear = new Date().getFullYear();
+</script>
+
 <template>
 	<footer>
 		<div class="container">
@@ -50,18 +58,9 @@
 	</footer>
 </template>
 
-<script setup lang="ts">
-import Divider from '../Divider.vue';
-import SocialIcon from './SocialIcon.vue';
-import Logo from './icons/Logo.vue';
-
-const currentYear = new Date().getFullYear();
-</script>
-
 <style scoped>
 footer {
 	padding-bottom: 60px;
-	background: var(--vp-docs-section-bg);
 	padding: 24px 32px;
 }
 
@@ -71,7 +70,7 @@ footer {
 }
 
 a {
-	color: var(--vp-c-text-dark-2);
+	color: var(--footer-link-color);
 }
 
 .content ul {
@@ -89,15 +88,11 @@ a {
 	margin-block-end: 24px;
 }
 
-.content ul a:hover {
-	color: white;
+.content:deep(.logo) {
+	margin: 0 auto 2em;
 }
 
-.content ul a:hover :deep(path) {
-	fill: white;
-}
-
-@media screen and (min-width: 1000px) {
+@media screen and (min-width: 1400px) {
 	.content {
 		display: grid;
 		grid-template-columns: repeat(3, 1fr);
@@ -115,7 +110,7 @@ a {
 		order: 1;
 	}
 
-	.content .logo {
+	.content:deep(.logo) {
 		order: 2;
 		margin: 0 auto;
 	}
@@ -131,7 +126,7 @@ a {
 
 small {
 	text-align: center;
-	color: var(--vp-c-text-dark-2);
+	color: var(--footer-link-color);
 	font-weight: 500;
 	margin-block-start: 24px;
 	display: block;

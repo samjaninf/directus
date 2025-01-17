@@ -4,9 +4,9 @@ import { throwIfEmpty } from '../../utils/index.js';
 import type { RestCommand } from '../../types.js';
 
 export type UpdateFieldOutput<
-	Schema extends object,
+	Schema,
 	TQuery extends Query<Schema, Item>,
-	Item extends object = DirectusField<Schema>
+	Item extends object = DirectusField<Schema>,
 > = ApplyQueryFields<Schema, Item, TQuery['fields']>;
 
 /**
@@ -20,11 +20,11 @@ export type UpdateFieldOutput<
  * @throws Will throw if field is empty
  */
 export const updateField =
-	<Schema extends object, const TQuery extends Query<Schema, DirectusField<Schema>>>(
+	<Schema, const TQuery extends Query<Schema, DirectusField<Schema>>>(
 		collection: DirectusField<Schema>['collection'],
 		field: DirectusField<Schema>['field'],
 		item: NestedPartial<DirectusField<Schema>>,
-		query?: TQuery
+		query?: TQuery,
 	): RestCommand<UpdateFieldOutput<Schema, TQuery>, Schema> =>
 	() => {
 		throwIfEmpty(collection, 'Keys cannot be empty');

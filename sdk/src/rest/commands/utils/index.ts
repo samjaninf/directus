@@ -7,3 +7,5 @@ export * from './operations.js';
 export * from './shares.js';
 export * from './sort.js';
 export * from './users.js';
+export * from './versions.js';
+export * from './random.js';

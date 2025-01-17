@@ -11,6 +11,7 @@ type RawColumn = {
 	schema: string;
 	data_type: string;
 	is_nullable: boolean;
+	index_name: null | string;
 	generation_expression: null | string;
 	default_value: null | string;
 	is_generated: boolean;
@@ -122,7 +123,7 @@ export default class Postgres implements SchemaInspector {
           t.table_type = 'BASE TABLE'
           AND c.table_schema IN (${bindings});
       `,
-				this.explodedSchema
+				this.explodedSchema,
 			),
 
 			this.knex.raw(
@@ -143,7 +144,7 @@ export default class Postgres implements SchemaInspector {
           AND indnatts = 1
 			 AND relkind != 'S'
       `,
-				this.explodedSchema
+				this.explodedSchema,
 			),
 		]);
 
@@ -173,7 +174,7 @@ export default class Postgres implements SchemaInspector {
 					AND t.table_type = 'BASE TABLE'
 				WHERE f_table_schema in (${bindings})
 				`,
-				this.explodedSchema
+				this.explodedSchema,
 			);
 
 			geometryColumns = result.rows;
@@ -200,11 +201,28 @@ export default class Postgres implements SchemaInspector {
 		}
 
 		for (const { table_name, column_name } of primaryKeys) {
-			overview[table_name]!.primary = column_name;
+			if (overview[table_name]) {
+				overview[table_name].primary = column_name;
+			} else {
+				/* eslint-disable-next-line no-console */
+				console.error(`Could not set primary key "${column_name}" for unknown table "${table_name}"`);
+			}
 		}
 
 		for (const { table_name, column_name, data_type } of geometryColumns) {
-			overview[table_name]!.columns[column_name]!.data_type = data_type;
+			if (overview[table_name]) {
+				if (overview[table_name].columns[column_name]) {
+					overview[table_name].columns[column_name].data_type = data_type;
+				} else {
+					/* eslint-disable-next-line no-console */
+					console.error(
+						`Could not set data type "${data_type}" for unknown column "${column_name}" in table "${table_name}"`,
+					);
+				}
+			} else {
+				/* eslint-disable-next-line no-console */
+				console.error(`Could not set geometry column "${column_name}" for unknown table "${table_name}"`);
+			}
 		}
 
 		return overview;
@@ -229,7 +247,7 @@ export default class Postgres implements SchemaInspector {
 			rel.relnamespace IN (${schemaIn})
 			AND rel.relkind = 'r'
 		 ORDER BY rel.relname
-	  `
+	  `,
 		);
 
 		return result.rows.map((row: { name: string }) => row.name);
@@ -262,7 +280,7 @@ export default class Postgres implements SchemaInspector {
 			AND rel.relkind = 'r'
 		 ORDER BY rel.relname
 	  `,
-			bindings
+			bindings,
 		);
 
 		if (table) return result.rows[0];
@@ -287,7 +305,7 @@ export default class Postgres implements SchemaInspector {
 			AND rel.relname = ?
 		 ORDER BY rel.relname
 	  `,
-			[table]
+			[table],
 		);
 
 		return result.rows.length > 0;
@@ -320,7 +338,7 @@ export default class Postgres implements SchemaInspector {
 			AND att.attnum > 0
 			AND NOT att.attisdropped;
 	  `,
-			bindings
+			bindings,
 		);
 
 		return result.rows;
@@ -363,10 +381,11 @@ export default class Postgres implements SchemaInspector {
 			knex.raw<{ rows: RawColumn[] }>(
 				`
 			SELECT
-				att.attname AS name,
+			  att.attname AS name,
 			  rel.relname AS table,
 			  rel.relnamespace::regnamespace::text as schema,
 			  att.atttypid::regtype::text AS data_type,
+			  ix_rel.relname as index_name,
 			  NOT att.attnotnull AS is_nullable,
 			  ${generationSelect}
 			  CASE
@@ -401,6 +420,18 @@ export default class Postgres implements SchemaInspector {
 			  LEFT JOIN pg_class rel ON att.attrelid = rel.oid
 			  LEFT JOIN pg_attrdef ad ON (att.attrelid, att.attnum) = (ad.adrelid, ad.adnum)
 			  LEFT JOIN pg_description des ON (att.attrelid, att.attnum) = (des.objoid, des.objsubid)
+			  LEFT JOIN LATERAL (
+			    SELECT
+				 indexrelid
+			    FROM
+				 pg_index ix
+			    WHERE
+				 att.attrelid = ix.indrelid
+				 AND att.attnum = ALL(ix.indkey)
+				 AND ix.indisunique = false
+			    LIMIT 1
+			  ) ix ON true
+			  LEFT JOIN pg_class ix_rel ON ix_rel.oid=ix.indexrelid
 			WHERE
 			  rel.relnamespace IN (${schemaIn})
 			  ${table ? 'AND rel.relname = ?' : ''}
@@ -410,7 +441,7 @@ export default class Postgres implements SchemaInspector {
 			  AND NOT att.attisdropped
 			ORDER BY rel.relname, att.attnum;
 		 `,
-				bindings
+				bindings,
 			),
 			knex.raw<{ rows: Constraint[] }>(
 				`
@@ -437,26 +468,36 @@ export default class Postgres implements SchemaInspector {
 			  ${table ? 'AND rel.relname = ?' : ''}
 			  ${column ? 'AND att.attname = ?' : ''}
 			`,
-				bindings
+				bindings,
 			),
 		]);
 
 		const parsedColumns: Column[] = columns.rows.map((col): Column => {
 			const constraintsForColumn = constraints.rows.filter(
-				(constraint) => constraint.table === col.table && constraint.column === col.name
+				(constraint) => constraint.table === col.table && constraint.column === col.name,
 			);
 
 			const foreignKeyConstraint = constraintsForColumn.find((constraint) => constraint.type === 'f');
 
 			return {
-				...col,
+				name: col.name,
+				table: col.table,
+				data_type: col.data_type,
+				default_value: parseDefaultValue(col.default_value),
+				generation_expression: col.generation_expression,
+				max_length: col.max_length,
+				numeric_precision: col.numeric_precision,
+				numeric_scale: col.numeric_scale,
+				is_generated: col.is_generated,
+				is_nullable: col.is_nullable,
 				is_unique: constraintsForColumn.some((constraint) => ['u', 'p'].includes(constraint.type)),
+				is_indexed: !!col.index_name && col.index_name.length > 0,
 				is_primary_key: constraintsForColumn.some((constraint) => constraint.type === 'p'),
 				has_auto_increment: constraintsForColumn.some((constraint) => constraint.has_auto_increment),
-				default_value: parseDefaultValue(col.default_value),
 				foreign_key_schema: foreignKeyConstraint?.foreign_key_schema ?? null,
 				foreign_key_table: foreignKeyConstraint?.foreign_key_table ?? null,
 				foreign_key_column: foreignKeyConstraint?.foreign_key_column ?? null,
+				comment: col.comment,
 			};
 		});
 
@@ -482,7 +523,7 @@ export default class Postgres implements SchemaInspector {
 				select * from geometry_columns
 				union
 				select * from geography_columns
-		`)
+		`),
 			)
 			.select<Column[]>({
 				table: 'f_table_name',
@@ -543,7 +584,7 @@ export default class Postgres implements SchemaInspector {
 			AND att.attnum > 0
 			AND NOT att.attisdropped;
 	  `,
-			[table, column]
+			[table, column],
 		);
 
 		return result.rows;
@@ -568,7 +609,7 @@ export default class Postgres implements SchemaInspector {
 			  AND array_length(con.conkey, 1) <= 1
 			  AND rel.relname = ?
 	  `,
-			[table]
+			[table],
 		);
 
 		return result.rows?.[0]?.column ?? null;
@@ -632,7 +673,7 @@ export default class Postgres implements SchemaInspector {
 			  AND con.contype = 'f'
 			  ${table ? 'AND rel.relname = ?' : ''}
 	  `,
-			bindings
+			bindings,
 		);
 
 		return result.rows;

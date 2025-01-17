@@ -1,12 +1,13 @@
-import { isDirectusError } from '@directus/errors';
+import { ErrorCode, ForbiddenError, isDirectusError } from '@directus/errors';
+import type { PrimaryKey } from '@directus/types';
 import express from 'express';
-import { ErrorCode } from '../errors/index.js';
+import getDatabase from '../database/index.js';
 import { respond } from '../middleware/respond.js';
 import useCollection from '../middleware/use-collection.js';
 import { validateBatch } from '../middleware/validate-batch.js';
+import { fetchAccountabilityCollectionAccess } from '../permissions/modules/fetch-accountability-collection-access/fetch-accountability-collection-access.js';
 import { MetaService } from '../services/meta.js';
 import { PermissionsService } from '../services/permissions.js';
-import type { PrimaryKey } from '../types/index.js';
 import asyncHandler from '../utils/async-handler.js';
 import { sanitizeQuery } from '../utils/sanitize-query.js';
 
@@ -50,7 +51,7 @@ router.post(
 
 		return next();
 	}),
-	respond
+	respond,
 );
 
 const readHandler = asyncHandler(async (req, res, next) => {
@@ -88,6 +89,23 @@ router.get('/', validateBatch('read'), readHandler, respond);
 router.search('/', validateBatch('read'), readHandler, respond);
 
 router.get(
+	'/me',
+	asyncHandler(async (req, res, next) => {
+		if (!req.accountability?.user && !req.accountability?.role && !req.accountability?.share)
+			throw new ForbiddenError();
+
+		const result = await fetchAccountabilityCollectionAccess(req.accountability, {
+			schema: req.schema,
+			knex: getDatabase(),
+		});
+
+		res.locals['payload'] = { data: result };
+		return next();
+	}),
+	respond,
+);
+
+router.get(
 	'/:pk',
 	asyncHandler(async (req, res, next) => {
 		if (req.path.endsWith('me')) return next();
@@ -102,7 +120,7 @@ router.get(
 		res.locals['payload'] = { data: record };
 		return next();
 	}),
-	respond
+	respond,
 );
 
 router.patch(
@@ -138,7 +156,7 @@ router.patch(
 
 		return next();
 	}),
-	respond
+	respond,
 );
 
 router.patch(
@@ -164,7 +182,7 @@ router.patch(
 
 		return next();
 	}),
-	respond
+	respond,
 );
 
 router.delete(
@@ -187,7 +205,7 @@ router.delete(
 
 		return next();
 	}),
-	respond
+	respond,
 );
 
 router.delete(
@@ -202,7 +220,26 @@ router.delete(
 
 		return next();
 	}),
-	respond
+	respond,
+);
+
+router.get(
+	'/me/:collection/:pk?',
+	asyncHandler(async (req, res, next) => {
+		const { collection, pk } = req.params;
+
+		const service = new PermissionsService({
+			accountability: req.accountability,
+			schema: req.schema,
+		});
+
+		const itemPermissions = await service.getItemPermissions(collection!, pk);
+
+		res.locals['payload'] = { data: itemPermissions };
+
+		return next();
+	}),
+	respond,
 );
 
 export default router;

@@ -1,22 +1,23 @@
 ---
 description:
-  This guide explains how to install the _Development_ version of Directus locally so that you can work on the
+  This guide explains how to setup and run a _Development_ environment for Directus so that you can work on the
   platform's source code.
 readTime: 4 min read
 ---
 
-# Running Locally
+# Running Dev Environment
 
-> This guide explains how to install the _Development_ version of Directus locally so that you can work on the
-> platform's source code. To install the _Production_ version locally, please follow to our
+> This guide explains how to setup and run a _Development_ environment for Directus so that you can work on the
+> platform's source code. To install the _Production_ version, please follow to our
 > [Docker Guide](/self-hosted/docker-guide).
 
 ::: tip Minimum Requirements
 
-You will need to have [the latest LTS version of Node](https://nodejs.org/en/download) to _build_ a Development version
-of Directus.
+You will need to have [version 22 of Node.js](https://nodejs.org/en/download) for the Development environment of
+Directus.
 
-You will also need to have the package manager [pnpm](https://pnpm.io) installed.
+You will also need to have the package manager [pnpm](https://pnpm.io) installed. It's recommended to install
+[pnpm via Corepack](https://pnpm.io/installation#using-corepack) for automatic use of the correct version.
 
 :::
 
@@ -37,14 +38,14 @@ git clone git@github.com:YOUR-USERNAME/directus.git
 git checkout -b YOUR-BRANCH-NAME
 ```
 
-## 4. Install the dependencies and build the project
+## 4. Install dependencies and build the project
 
 ```bash
 pnpm install
 pnpm build
 ```
 
-## 5. Setup Local Configuration
+## 5. Setup local configuration
 
 ### Create a `.env` file in `/api`
 
@@ -53,12 +54,12 @@ Create an `.env` file under the `api` folder using vars from the online
 
 ::: tip Config Values
 
-The `KEY`& `SECRET` config options from [Security](https://docs.directus.io/self-hosted/config-options.html#security)
-are mandatory.
+The `SECRET` config option from [Security](https://docs.directus.io/self-hosted/config-options.html#security) is
+mandatory in production.
 
 Also the [Database Configuration](https://docs.directus.io/self-hosted/config-options.html#database) must be specified.
 You might want to use the [docker-compose.yml](https://github.com/directus/directus/blob/main/docker-compose.yml) file
-to spin up a test database.
+to spin up a test database or a local mail server.
 
 :::
 
@@ -75,7 +76,7 @@ which will create the database (file) for you.
 ::: tip Admin Account
 
 Adding the `ADMIN_EMAIL` & `ADMIN_PASSWORD` to the `.env` file before running the `bootstrap` command, will populate the
-admin user with the provided credentials instead of random values.
+admin user with the provided credentials instead of random values. `ADMIN_TOKEN` sets the API token for the admin user.
 
 :::
 

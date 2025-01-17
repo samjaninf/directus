@@ -1,12 +1,11 @@
+import { ErrorCode, isDirectusError } from '@directus/errors';
+import type { PrimaryKey } from '@directus/types';
 import express from 'express';
-import { isDirectusError } from '@directus/errors';
-import { ErrorCode } from '../errors/index.js';
 import { respond } from '../middleware/respond.js';
 import useCollection from '../middleware/use-collection.js';
 import { validateBatch } from '../middleware/validate-batch.js';
 import { MetaService } from '../services/meta.js';
 import { OperationsService } from '../services/operations.js';
-import type { PrimaryKey } from '../types/index.js';
 import asyncHandler from '../utils/async-handler.js';
 import { sanitizeQuery } from '../utils/sanitize-query.js';
 
@@ -50,7 +49,7 @@ router.post(
 
 		return next();
 	}),
-	respond
+	respond,
 );
 
 const readHandler = asyncHandler(async (req, res, next) => {
@@ -87,7 +86,7 @@ router.get(
 		res.locals['payload'] = { data: record || null };
 		return next();
 	}),
-	respond
+	respond,
 );
 
 router.patch(
@@ -123,7 +122,7 @@ router.patch(
 
 		return next();
 	}),
-	respond
+	respond,
 );
 
 router.patch(
@@ -149,7 +148,7 @@ router.patch(
 
 		return next();
 	}),
-	respond
+	respond,
 );
 
 router.delete(
@@ -171,7 +170,7 @@ router.delete(
 
 		return next();
 	}),
-	respond
+	respond,
 );
 
 router.delete(
@@ -186,7 +185,7 @@ router.delete(
 
 		return next();
 	}),
-	respond
+	respond,
 );
 
 export default router;

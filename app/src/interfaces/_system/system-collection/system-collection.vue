@@ -1,13 +1,3 @@
-<template>
-	<v-select
-		:model-value="value"
-		:disabled="disabled"
-		:items="items"
-		:placeholder="t('select_a_collection')"
-		@update:model-value="$emit('input', $event)"
-	/>
-</template>
-
 <script setup lang="ts">
 import { useCollectionsStore } from '@/stores/collections';
 import { computed } from 'vue';
@@ -20,7 +10,7 @@ const props = withDefaults(
 		includeSystem?: boolean;
 		includeSingleton?: boolean;
 	}>(),
-	{ includeSingleton: true }
+	{ includeSingleton: true },
 );
 
 defineEmits<{
@@ -32,16 +22,13 @@ const { t } = useI18n();
 const collectionsStore = useCollectionsStore();
 
 const collections = computed(() => {
-	let collections = collectionsStore.collections;
+	let collections = collectionsStore.allCollections;
 
 	if (!props.includeSingleton) {
 		collections = collections.filter((collection) => collection?.meta?.singleton === false);
 	}
 
-	return [
-		...collections.filter((collection) => collection.collection.startsWith('directus_') === false),
-		...(props.includeSystem ? collectionsStore.crudSafeSystemCollections : []),
-	];
+	return [...collections, ...(props.includeSystem ? collectionsStore.crudSafeSystemCollections : [])];
 });
 
 const items = computed(() => {
@@ -57,3 +44,13 @@ const items = computed(() => {
 	}, []);
 });
 </script>
+
+<template>
+	<v-select
+		:model-value="value"
+		:disabled="disabled"
+		:items="items"
+		:placeholder="t('select_a_collection')"
+		@update:model-value="$emit('input', $event)"
+	/>
+</template>

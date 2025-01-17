@@ -1,20 +1,7 @@
-<template>
-	<form @submit.prevent="onSubmit">
-		<v-input v-model="email" autofocus autocomplete="username" type="email" :placeholder="t('email')" />
-		<v-notice v-if="done" type="success">{{ t('password_reset_sent') }}</v-notice>
-		<v-notice v-if="error" type="danger">
-			{{ errorFormatted }}
-		</v-notice>
-		<div class="buttons">
-			<v-button type="submit" :loading="sending" large>{{ t('reset') }}</v-button>
-			<router-link :to="signInLink" class="sign-in">{{ t('sign_in') }}</router-link>
-		</div>
-	</form>
-</template>
-
 <script setup lang="ts">
 import api, { RequestError } from '@/api';
 import { translateAPIError } from '@/lang';
+import { useHead } from '@unhead/vue';
 import { computed, ref } from 'vue';
 import { useI18n } from 'vue-i18n';
 
@@ -52,7 +39,25 @@ async function onSubmit() {
 		sending.value = false;
 	}
 }
+
+useHead({
+	title: t('reset_password'),
+});
 </script>
+
+<template>
+	<form @submit.prevent="onSubmit">
+		<v-input v-model="email" autofocus autocomplete="username" type="email" :placeholder="t('email')" />
+		<v-notice v-if="done" type="success">{{ t('password_reset_sent') }}</v-notice>
+		<v-notice v-if="error" type="danger">
+			{{ errorFormatted }}
+		</v-notice>
+		<div class="buttons">
+			<v-button type="submit" :loading="sending" large>{{ t('reset') }}</v-button>
+			<router-link :to="signInLink" class="sign-in">{{ t('sign_in') }}</router-link>
+		</div>
+	</form>
+</template>
 
 <style lang="scss" scoped>
 .buttons {
@@ -67,11 +72,11 @@ async function onSubmit() {
 }
 
 .sign-in {
-	color: var(--foreground-subdued);
+	color: var(--theme--foreground-subdued);
 	transition: color var(--fast) var(--transition);
 
 	&:hover {
-		color: var(--foreground-normal);
+		color: var(--theme--foreground);
 	}
 }
 </style>

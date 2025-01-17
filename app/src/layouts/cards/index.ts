@@ -1,13 +1,15 @@
 import { useRelationsStore } from '@/stores/relations';
 import { adjustFieldsForDisplays } from '@/utils/adjust-fields-for-displays';
-import { formatCollectionItemsCount } from '@/utils/format-collection-items-count';
+import { formatItemsCountPaginated } from '@/utils/format-items-count';
 import { getItemRoute } from '@/utils/get-route';
 import { saveAsCSV } from '@/utils/save-as-csv';
 import { syncRefProperty } from '@/utils/sync-ref-property';
 import { useCollection, useItems, useSync } from '@directus/composables';
-import { defineLayout, getFieldsFromTemplate } from '@directus/utils';
+import { defineLayout } from '@directus/extensions';
+import { getFieldsFromTemplate } from '@directus/utils';
 import { clone } from 'lodash';
 import { computed, ref, toRefs } from 'vue';
+import { useI18n } from 'vue-i18n';
 import CardsActions from './actions.vue';
 import CardsLayout from './cards.vue';
 import CardsOptions from './options.vue';
@@ -16,7 +18,7 @@ import { LayoutOptions, LayoutQuery } from './types';
 export default defineLayout<LayoutOptions, LayoutQuery>({
 	id: 'cards',
 	name: '$t:layouts.cards.cards',
-	icon: 'grid_4',
+	icon: 'grid_view',
 	component: CardsLayout,
 	headerShadow: false,
 	slots: {
@@ -25,13 +27,14 @@ export default defineLayout<LayoutOptions, LayoutQuery>({
 		actions: CardsActions,
 	},
 	setup(props, { emit }) {
+		const { t, n } = useI18n();
 		const relationsStore = useRelationsStore();
 
 		const selection = useSync(props, 'selection', emit);
 		const layoutOptions = useSync(props, 'layoutOptions', emit);
 		const layoutQuery = useSync(props, 'layoutQuery', emit);
 
-		const { collection, filter, search, filterUser } = toRefs(props);
+		const { collection, filter, search, filterSystem, filterUser } = toRefs(props);
 
 		const { info, primaryKeyField, fields: fieldsInCollection } = useCollection(collection);
 
@@ -62,11 +65,21 @@ export default defineLayout<LayoutOptions, LayoutQuery>({
 				fields,
 				filter,
 				search,
+				filterSystem,
 			});
 
 		const showingCount = computed(() => {
-			const filtering = Boolean((itemCount.value || 0) < (totalCount.value || 0) && filterUser.value);
-			return formatCollectionItemsCount(itemCount.value || 0, page.value, limit.value, filtering);
+			// Don't show count if there are no items
+			if (!totalCount.value || !itemCount.value) return;
+
+			return formatItemsCountPaginated({
+				currentItems: itemCount.value,
+				currentPage: page.value,
+				perPage: limit.value,
+				isFiltered: !!filterUser.value,
+				totalItems: totalCount.value,
+				i18n: { t, n },
+			});
 		});
 
 		const width = ref(0);
@@ -104,7 +117,7 @@ export default defineLayout<LayoutOptions, LayoutQuery>({
 			refresh,
 			selectAll,
 			resetPresetAndRefresh,
-			filter,
+			filterUser,
 			search,
 			download,
 		};

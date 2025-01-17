@@ -4,9 +4,9 @@ import { throwIfEmpty } from '../../utils/index.js';
 import type { RestCommand } from '../../types.js';
 
 export type ReadOperationOutput<
-	Schema extends object,
+	Schema,
 	TQuery extends Query<Schema, Item>,
-	Item extends object = DirectusOperation<Schema>
+	Item extends object = DirectusOperation<Schema>,
 > = ApplyQueryFields<Schema, Item, TQuery['fields']>;
 
 /**
@@ -15,8 +15,8 @@ export type ReadOperationOutput<
  * @returns An array of up to limit operation objects. If no items are available, data will be an empty array.
  */
 export const readOperations =
-	<Schema extends object, const TQuery extends Query<Schema, DirectusOperation<Schema>>>(
-		query?: TQuery
+	<Schema, const TQuery extends Query<Schema, DirectusOperation<Schema>>>(
+		query?: TQuery,
 	): RestCommand<ReadOperationOutput<Schema, TQuery>[], Schema> =>
 	() => ({
 		path: `/operations`,
@@ -32,9 +32,9 @@ export const readOperations =
  * @throws Will throw if key is empty
  */
 export const readOperation =
-	<Schema extends object, const TQuery extends Query<Schema, DirectusOperation<Schema>>>(
+	<Schema, const TQuery extends Query<Schema, DirectusOperation<Schema>>>(
 		key: DirectusOperation<Schema>['id'],
-		query?: TQuery
+		query?: TQuery,
 	): RestCommand<ReadOperationOutput<Schema, TQuery>, Schema> =>
 	() => {
 		throwIfEmpty(String(key), 'Key cannot be empty');

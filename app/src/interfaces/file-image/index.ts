@@ -1,4 +1,4 @@
-import { defineInterface } from '@directus/utils';
+import { defineInterface } from '@directus/extensions';
 import InterfaceFileImage from './file-image.vue';
 import PreviewSVG from './preview.svg?raw';
 
@@ -36,6 +36,21 @@ export default defineInterface({
 			},
 			schema: {
 				default_value: true,
+			},
+		},
+		{
+			field: 'letterbox',
+			name: '$t:interfaces.file-image.letterbox',
+			type: 'boolean',
+			meta: {
+				width: 'half',
+				interface: 'boolean',
+				options: {
+					label: '$t:interfaces.file-image.letterbox_label',
+				},
+			},
+			schema: {
+				default_value: false,
 			},
 		},
 	],

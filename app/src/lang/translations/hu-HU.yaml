@@ -1,24 +1,4 @@
 ---
-## Be aware:
-#Due to the way this is imported, JavaScript reserved words, including "delete", "private",
-#"void", etc are stripped out. See
-#https://github.com/rollup/plugins/blob/8748b8cd3bbab3c5ac6190556930219f19060e63/packages/pluginutils/src/makeLegalIdentifier.ts#L4
-#and
-#https://github.com/rollup/plugins/blob/8748b8cd3bbab3c5ac6190556930219f19060e63/packages/yaml/src/index.js#L45
-#Illegal words:
-#'break', 'case', 'class', 'catch', 'const', 'continue', 'debugger', 'default', 'delete', 'do',
-#'else', 'export', 'extends', 'finally', 'for', 'function', 'if', 'import', 'in', 'instanceof',
-#'let', 'new', 'return', 'super', 'switch', 'this', 'throw', 'try', 'typeof', 'var', 'void',
-#'while', 'with', 'yield', 'enum', 'await', 'implements', 'package', 'protected', 'static',
-#'interface', 'private', 'public', 'arguments', 'Infinity', 'NaN', 'undefined', 'null', 'true',
-#'false', 'eval', 'uneval', 'isFinite', 'isNaN', 'parseFloat', 'parseInt', 'decodeURI',
-#'decodeURIComponent', 'encodeURI', 'encodeURIComponent', 'escape', 'unescape', 'Object',
-#'Function', 'Boolean', 'Symbol', 'Error', 'EvalError', 'InternalError', 'RangeError',
-#'ReferenceError', 'SyntaxError', 'TypeError', 'URIError', 'Number', 'Math', 'Date', 'String',
-#'RegExp', 'Array', 'Int8Array', 'Uint8Array', 'Uint8ClampedArray', 'Int16Array', 'Uint16Array',
-#'Int32Array', 'Uint32Array', 'Float32Array', 'Float64Array', 'Map', 'Set', 'WeakMap', 'WeakSet',
-#'SIMD', 'ArrayBuffer', 'DataView', 'JSON', 'Promise', 'Generator', 'GeneratorFunction', 'Reflect',
-#'Proxy', 'Intl'
 identifier: Azonosító
 avatar: Profilkép
 application: Alkalmazás
@@ -52,6 +32,13 @@ or: Vagy
 init: Init
 dataset_too_large_currently_showing_n_items: Túlméretes adathalmaz. Jelenleg az első {n} adat jelenik meg.
 modifier: Módosító
+extension_interface: Kezelőfelület
+extension_display: Megjelenés
+extension_layout: Elrendezés
+extension_panel: Panel
+extension_hook: Beavatkozási rutin
+extension_modules: Modulok
+enable: Engedélyez
 custom: Egyedi
 hook: Beavatkozási rutin
 fill_width: Teret kitöltő
@@ -95,6 +82,7 @@ rename_folder: Mappa átnevezése
 delete_folder: Mappa törlése
 prefix: Előtag
 suffix: Utótag
+promote_version_preview: Előnézet
 reset_bookmark: Könyvjelző visszaállítása
 update_bookmark: Könyvjelző frissítése
 delete_bookmark: Könyvjelző törlése
@@ -236,13 +224,6 @@ time: Idő
 timestamp: Időbélyeg
 uuid: UUID
 hash: Hash
-geometry: Geometria (összes)
-geometry.Point: Pont
-geometry.LineString: Vonal
-geometry.Polygon: Sokszög
-geometry.MultiPoint: Többpontos
-geometry.MultiLineString: Többvonalas
-geometry.MultiPolygon: Több poligonos
 not_available_for_type: Ehhez a típushoz nem elérhető
 create_translations: Fordítás létrehozása
 auto_refresh: Automatikus frissítés
@@ -373,6 +354,7 @@ move: Áthelyezés
 system: Rendszer
 add_field_related: Mező hozzáadása kapcsolódó gyűjteményhez
 interface_label: Kezelőfelület
+display_label: Megjelenés
 today: Ma
 yesterday: Tegnap
 delete_comment: Hozzászólás törlése
@@ -423,7 +405,6 @@ dimensions: Méretek
 size: Méret
 created: Létrehozva
 modified: Módosítva
-checksum: Ellenőrző
 owner: Tulajdonos
 edited_by: Módosította
 folder: Könyvtár
@@ -442,7 +423,6 @@ replace_from_library: Fájl cseréje Könyvtárból
 replace_from_url: Fájl cseréje URL-ből
 no_file_selected: Nincs kijelölt fájl
 download_file: Fájl letöltése
-open_file_in_tab: Megnyitás új fülön
 start_export: Indítsa el az exportálást
 not_available_for_local_downloads: Nem érhető el helyi letöltésekhez
 exporting_all_items_in_collection: A(z) {collection} összes {total} elemének exportálása.
@@ -562,39 +542,37 @@ auto_fill: Automatikus kitöltés
 corresponding_field: Megfelelő mező
 errors:
   COLLECTION_NOT_FOUND: "Gyűjtemény nem létezik"
+  CONTAINS_NULL_VALUES: A mező null értékeket tartalmaz
   FIELD_NOT_FOUND: Mező nem található
   FORBIDDEN: Tilos
+  ILLEGAL_ASSET_TRANSFORMATION: A forráskép túl nagy az előnézethez
+  INTERNAL_SERVER_ERROR: Váratlan hiba történt
+  INVALID_CONFIG: Érvénytelen konfiguráció
   INVALID_CREDENTIALS: Hibás felhasználónév vagy jelszó
+  INVALID_FOREIGN_KEY: Érvénytelen idegen kulcs
+  INVALID_IP: Nem engedélyezett IP-cím
   INVALID_OTP: Helytelen az egyszer használatos jelszó
   INVALID_PAYLOAD: Érvénytelen payload
   INVALID_PROVIDER: A felhasználó egy másik hitelesítési szolgáltatóhoz tartozik
   INVALID_QUERY: Érvénytelen lekérdezés
-  INVALID_CONFIG: Érvénytelen konfiguráció
   INVALID_TOKEN: Érvénytelen token
-  INVALID_IP: Nem engedélyezett IP-cím
   INVALID_USER: Érvénytelen felhasználó
   ITEM_LIMIT_REACHED: Elérte az elemek maximális számát
   ITEM_NOT_FOUND: Elem nem található
-  ROUTE_NOT_FOUND: Nem található
-  RECORD_NOT_UNIQUE: Ismétlődő értéket észleltem
-  USER_SUSPENDED: Felhasználó felfüggesztve
-  CONTAINS_NULL_VALUES: A mező null értékeket tartalmaz
-  UNPROCESSABLE_ENTITY: Feldolgozhatatlan entitás
-  INTERNAL_SERVER_ERROR: Váratlan hiba történt
-  NOT_NULL_VIOLATION: Az érték nem lehet null
-  ILLEGAL_ASSET_TRANSFORMATION: A forráskép túl nagy az előnézethez
-  VALUE_TOO_LONG: Az érték túl hosszú
-  VALUE_OUT_OF_RANGE: Érték a megengedett tartományon kívül esik
-  INVALID_FOREIGN_KEY: Érvénytelen idegen kulcs
-  UNKNOWN: Váratlan hiba történt
-  GRAPHQL_VALIDATION_EXCEPTION: Graphl validáció kivétel
-  SERVICE_UNAVAILABLE: Szolgáltatás nem elérhető
-  UNSUPPORTED_MEDIA_TYPE: Nem támogatott fájltípus
-  UNEXPECTED_RESPONSE: Nem várt kiszolgálóhiba
-  TOKEN_EXPIRED: A token lejárt
-  RANGE_NOT_SATISFIABLE: Érvénytelen tartomány
   METHOD_NOT_ALLOWED: A módszer nem támogatott
+  NOT_NULL_VIOLATION: Az érték nem lehet null
+  RANGE_NOT_SATISFIABLE: Érvénytelen tartomány
+  RECORD_NOT_UNIQUE: Ismétlődő értéket észleltem
   REQUESTS_EXCEEDED: Elérte a kérelmek számának maximumát
+  ROUTE_NOT_FOUND: Nem található
+  SERVICE_UNAVAILABLE: Szolgáltatás nem elérhető
+  TOKEN_EXPIRED: A token lejárt
+  UNEXPECTED_RESPONSE: Nem várt kiszolgálóhiba
+  UNKNOWN: Váratlan hiba történt
+  UNSUPPORTED_MEDIA_TYPE: Nem támogatott fájltípus
+  USER_SUSPENDED: Felhasználó felfüggesztve
+  VALUE_OUT_OF_RANGE: Érték a megengedett tartományon kívül esik
+  VALUE_TOO_LONG: Az érték túl hosszú
 security: Biztonság
 value_hashed: Biztonságosan hashelt érték
 bookmark_name: Könyvjelző neve...
@@ -608,7 +586,6 @@ cannot_edit_global_bookmarks: Globális könyvjelző nem szerkeszthető
 bookmarks: Könyvjelzők
 presets: Alapbeállítások
 unexpected_error: Váratlan hiba történt
-unexpected_error_copy: Váratlan hiba történt. Kérjük, próbálja meg később újra!
 copy_details: Részletek másolása
 no_app_access: Nincs alkalmazás hozzáférés
 no_app_access_copy: Ez a felhasználó nem jogosult az admin alkalmazás használatára.
@@ -633,10 +610,6 @@ make_collection_hidden: A Gyűjtemény legyen rejtett
 make_folder_visible: Mappa láthatóvá tétele
 make_folder_hidden: Mappa elrejtése
 goto_collection_content: Tartalom megtekintése
-start_end_of_count_items: '{start}-{end} {count} elemből'
-start_end_of_count_filtered_items: '{start}-{end} {count} szűrt elemből'
-one_item: '1 elem'
-one_filtered_item: '1 szűrt elem'
 delete_collection_are_you_sure: >-
   Biztos, hogy törölni szeretné ezt a gyűjteményt"{collection}"? Ez törli a gyűjteményt a benne lévő összes elemével együtt. Ez a művelet végleges.
 delete_folder_are_you_sure: Biztosan törli a(z) "{folder}" mappát? A beágyazott mappák és gyűjtemények a legfelső szintre kerülnek.
@@ -714,14 +687,12 @@ layout_options: Elrendezés beállításai
 rows: Sorok
 columns: Oszlopok
 collection_setup: Gyűjtemény beállítások
-optional_system_fields: Opcionális rendszer mezők
 value_unique: Egyedi érték szükséges
 all_activity: Minden Tevékenység
 create_item: Elem létrehozása
 display_template: Megjelenítési sablon
 language_display_template: Nyelvi megjelenítés sablon
 translations_display_template: Fordítások megjelenítése sablon
-n_items_selected: 'Nincs elem kiválasztva | 1 elem van kiválasztva | {n} elem van kiválasztva'
 per_page: oldalanként
 all_files: Minden fájl
 my_files: A saját fájljaim
@@ -858,8 +829,6 @@ tooltip: Buboréksúgó
 tooltip_placeholder: Írjon be egy buboréksúgó szöveget...
 unlimited: Korlátlan
 open_link_in: Hivatkozás megnyitása itt
-new_tab: Új fül
-current_tab: Jelenlegi fül
 save_image: Kép mentése
 save_media: Média mentése
 wysiwyg_options:
@@ -925,11 +894,11 @@ editing_unit: '{unit} szerkesztése'
 editing_in_batch: '{count} elem szerkesztése'
 no_options_available: Nincs választási lehetőség
 settings_data_model: Adatmodell
-settings_permissions: Szerepkörök és jogosultságok
-settings_project: Projekt beállításai
+settings_project: Beállítások
 settings_webhooks: Webhookok
 settings_flows: Folyamatok
-settings_presets: Alapértelmezések és Könyvjelzők
+settings_presets: Könyvjelzők
+settings_translations: Fordítások
 one_or_more_options_are_missing: Egy vagy több opció hiányzik
 scope: Hatókör
 actions: Műveletek
@@ -964,12 +933,10 @@ page_help_files_collection: >-
   **Fájlok könyvtára** - A projektbe feltöltött összes fájleszköz listája. Testre szabhatja az elrendezést, a szűrőket, a rendezési nézetet, és akár könyvjelzőket is menthet a különböző konfigurációkról a gyors hozzáférés érdekében.
 page_help_files_item: >-
   **File Részletek** - A fájl metaadatainak kezelésére, az eredeti eszköz szerkesztésére és a hozzáférési beállítások frissítésére szolgáló űrlap.
-page_help_settings_project: "**Projektbeállítások** - A projektje globális konfigurációs beállításai."
 page_help_settings_datamodel_collections: >-
   **Adatmodell: Gyűjtemények** - Az összes elérhető gyűjtemény listája. Ide tartoznak a látható, rejtett és rendszergyűjtemények, valamint a hozzáadható nem kezelt adatbázis táblák.
 page_help_settings_datamodel_fields: >-
   **Adatmodell: Gyűjtemény** - Egy űrlap, ezen gyűjtemény és mezőinek kezelésére.
-page_help_settings_roles_collection: '**Szerepkörök böngészése** - A Rendszergazda, a Nyilvános és az egyéni Felhasználói Szerepkörök listája.'
 page_help_settings_roles_item: "**Szerepkör Részletei** - A szerepkörök jogosultságainak és egyéb beállításainak kezelése."
 page_help_settings_presets_collection: >-
   **Alapbeállítások Böngészése** - A projektben lévő összes alapbeállítás listázása, beleértve: a felhasználói, szerepköri és globális könyvjelzőket, valamint az alapértelmezett nézeteket.
@@ -1012,7 +979,6 @@ directus_collection:
   directus_notifications: A felhasználóknak küldött értesítések
   directus_operations: A folyamatok műveletei
   directus_panels: Egyedi panelek a kimutatások irányítópultjain belül
-  directus_permissions: Hozzáférési engedélyek a szerepkörökhöz
   directus_presets: Gyűjtemény és könyvjelzők alapértelmezései
   directus_relations: Reláció konfigurációja és metaadatok
   directus_revisions: Pillanatkép minden tevékenységhez
@@ -1086,10 +1052,6 @@ fields:
     tags: Címkék
     user_preferences: Felhasználói beállítások
     language: Nyelv
-    theme: Téma
-    theme_auto: Automatikus (A rendszeren alapuló)
-    theme_light: Világos mód
-    theme_dark: Sötét mód
     tfa_secret: Kétlépcsős hitelesítés
     admin_options: Admin beállítások
     status: Állapot
@@ -1127,7 +1089,6 @@ fields:
     project_color: Projekt színe
     project_logo: Projekt logója
     default_language: Alapértelmezett nyelv
-    branding: Márkaépítés és stílus
     public_foreground: Nyilvános előtér
     public_background: Nyilvános háttér
     public_note: Nyilvános megjegyzés
@@ -1165,12 +1126,9 @@ fields:
     name: Szerepkör neve
     icon: Szerep ikonja
     description: Leírás
-    app_access: Alkalmazás hozzáférés
-    admin_access: Admin hozzáférés
-    ip_access: IP cím
-    enforce_tfa: 2FA megkövetelése
     users: Felhasználók a szerepkörben
-    module_list: Modul navigáció felülbírálása
+  directus_policies:
+    description: Leírás
   directus_webhooks:
     name: Név
     method: Metódus
@@ -1187,7 +1145,6 @@ field_options:
   directus_settings:
     project_name_placeholder: Saját projektem...
     project_color_note: Bejelentkezés és logó háttér
-    project_logo_note: Fehér 40x40 SVG/PNG
     public_note_placeholder: Egy rövid, nyilvános üzenet, mely támogatja a markdown formázást...
     security_divider_title: Biztonság
     auth_password_policy:
@@ -1252,7 +1209,6 @@ field_options:
   directus_roles:
     name: E szerepkör egyedi neve...
     description: A szerepkör leírása...
-    ip_access: Adja hozzá az engedélyezett IP-címeket, minden IP engedélyezéséhez hagyja üresen...
     fields:
       icon_name: Ikon
       name_name: Név
@@ -1303,7 +1259,6 @@ live_preview:
   new_window: Megnyitás új ablakban
 shares: Megosztások
 unlimited_usage: Korlátlan használat
-uses_left: Nincs használat hátra | 1 használat maradt | {n} használat maradt
 no_shares: Nincs megjeleníthető megosztás
 new_share: Új megosztás
 expired: Lejárt
@@ -1560,6 +1515,8 @@ interfaces:
   system-interface-options:
     interface-options: Interfész opciók
     description: Egy modál egy interfész opcióinak kiválasztásához
+  system-display:
+    display: Megjelenés
   list-m2m:
     many-to-many: Sok a sokhoz
     description: Több kapcsolódó csomóponti elem kiválasztása
@@ -1576,6 +1533,8 @@ interfaces:
     preview: Előnézet
     editorFont: Szerkesztő betűtípus
     previewFont: Betűtípus előnézete
+    default_view: Alapértelmezett nézet
+    default_view_preview: Előnézet
     customSyntax: Egyedi blokkok
     customSyntax_label: Egyéni szintaxistípusok hozzáadása
     customSyntax_add: Egyéni szintaxis hozzáadása
@@ -1608,7 +1567,6 @@ interfaces:
     description: Több kapcsolódó elem választása
     no_collection: A gyűjtemény nem található
   system-folder:
-    folder: Könyvtár
     description: Válasszon egy mappát
     root_name: Fájlok gyökérkönyvtára
     system_default: Rendszer alapértelmezései
@@ -1624,6 +1582,7 @@ interfaces:
     sort_placeholder: Manuális
     field_note_placeholder: Megjegyzés hozzáadása mezőhöz...
     incompatible_data: Az aktuális adatok nem kompatibilisek az átjátszó interfésszel, és felülbírálásra kerülnek, amikor elemeket adunk az átjátszóhoz
+    interface_group: Interfész opciók
   slider:
     slider: Csúszka
     description: Válasszon számot csúszka segítségével
@@ -1816,11 +1775,15 @@ displays:
     icon: Ikon
     border: Keret
     border_label: Keret mutatása
+    mask: Maszkolt
+    mask_label: Valós érték elrejtése
     text: Szöveg
     text_placeholder: Opcionális érték törlése...
   formatted-json-value:
     formatted-json-value: Formázott JSON érték
     description: Az objektum formázott változatának megjelenítése
+  hash:
+    hash: Hash
   icon:
     icon: Ikon
     description: Egy ikon megjelenítése
@@ -1926,7 +1889,6 @@ layouts:
     show_ungrouped: Mutasd a csoport nélkülieket
     show: Mutasd
     no_group: Keresés és szűrés engedélyezése
-    not_all_loaded: Csak az első 100 elemet sikerült betölteni.
 horizontal: Horizontális
 vertical: Függőleges
 x_axis: X-tengely
@@ -1983,6 +1945,7 @@ panels:
     smooth: Gördülékeny
     straight: Egyenes
     step_line: Lécsőzetes
+    show_legend: Mutasd a magyarázatot
   meter:
     name: Mértékegység
     description: Értékek nyomonkövetése
@@ -2119,3 +2082,14 @@ operations:
     parallel: Párhuzamos
     batch: Tömeges
     batch_size: Darabszám
+standard: Normál
+compact: Kompakt
+style: Stílus
+fonts:
+  thin: Vékony
+  normal: Normál
+  medium: Közepes
+  bold: Félkövér
+  black: Fekete
+  italic: Dőlt
+  auto: Automatikus

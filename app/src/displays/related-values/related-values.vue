@@ -1,38 +1,3 @@
-<template>
-	<value-null v-if="!relatedCollection" />
-	<v-menu
-		v-else-if="['o2m', 'm2m', 'm2a', 'translations', 'files'].includes(localType!.toLowerCase())"
-		show-arrow
-		:disabled="value?.length === 0"
-	>
-		<template #activator="{ toggle }">
-			<span class="toggle" :class="{ subdued: value?.length === 0 }" @click.stop="toggle">
-				<span class="label">
-					{{ value?.length }}
-					<template v-if="value?.length >= 100">+</template>
-					{{ unit }}
-				</span>
-			</span>
-		</template>
-
-		<v-list class="links">
-			<v-list-item v-for="item in value" :key="item[primaryKeyFieldPath!]">
-				<v-list-item-content>
-					<render-template
-						:template="internalTemplate"
-						:item="item"
-						:collection="junctionCollection ?? relatedCollection"
-					/>
-				</v-list-item-content>
-				<v-list-item-icon>
-					<router-link :to="getLinkForItem(item)!"><v-icon name="launch" small /></router-link>
-				</v-list-item-icon>
-			</v-list-item>
-		</v-list>
-	</v-menu>
-	<render-template v-else :template="internalTemplate" :item="value" :collection="relatedCollection" />
-</template>
-
 <script setup lang="ts">
 import { getLocalTypeForField } from '@/utils/get-local-type';
 import { getRelatedCollection } from '@/utils/get-related-collection';
@@ -107,19 +72,56 @@ function getLinkForItem(item: any) {
 }
 </script>
 
+<template>
+	<value-null v-if="!relatedCollection" />
+	<v-menu
+		v-else-if="['o2m', 'm2m', 'm2a', 'translations', 'files'].includes(localType!.toLowerCase())"
+		show-arrow
+		:disabled="value?.length === 0"
+	>
+		<template #activator="{ toggle }">
+			<span class="toggle" :class="{ disabled: value?.length === 0 }" @click.stop="toggle">
+				<span class="label">
+					{{ value?.length }}
+					<template v-if="value?.length >= 100">+</template>
+					{{ unit }}
+				</span>
+			</span>
+		</template>
+
+		<v-list class="links">
+			<v-list-item v-for="item in value" :key="item[primaryKeyFieldPath!]">
+				<v-list-item-content>
+					<render-template
+						:template="internalTemplate"
+						:item="item"
+						:collection="junctionCollection ?? relatedCollection"
+					/>
+				</v-list-item-content>
+				<v-list-item-icon>
+					<router-link :to="getLinkForItem(item)!"><v-icon name="launch" small /></router-link>
+				</v-list-item-icon>
+			</v-list-item>
+		</v-list>
+	</v-menu>
+	<render-template v-else :template="internalTemplate" :item="value" :collection="relatedCollection" />
+</template>
+
 <style lang="scss" scoped>
 .toggle {
 	position: relative;
+	--toggle-px: 6px;
+	--toggle-py: 4px;
 
 	&::before {
 		position: absolute;
-		top: -6px;
-		left: -6px;
+		top: calc(-1 * var(--toggle-py));
+		left: calc(-1 * var(--toggle-px));
 		z-index: 1;
-		width: calc(100% + 12px);
-		height: calc(100% + 12px);
-		background-color: var(--background-normal);
-		border-radius: var(--border-radius);
+		width: calc(100% + var(--toggle-px) * 2);
+		height: calc(100% + var(--toggle-py) * 2);
+		background-color: var(--theme--background-normal);
+		border-radius: var(--theme--border-radius);
 		opacity: 0;
 		transition: opacity var(--fast) var(--transition);
 		content: '';
@@ -130,22 +132,31 @@ function getLinkForItem(item: any) {
 		z-index: 2;
 	}
 
-	&:not(.subdued):hover::before {
+	&:not(.disabled):hover::before {
 		opacity: 1;
 	}
 
-	&:not(.subdued):active::before {
-		background-color: var(--background-normal-alt);
+	&:not(.disabled):active::before {
+		background-color: var(--theme--background-accent);
+	}
+
+	.render-template > .v-menu & {
+		margin: var(--toggle-py) var(--toggle-px);
 	}
 }
 
-.subdued {
-	color: var(--foreground-subdued);
+.render-template > .v-menu {
+	display: inline;
+}
+
+.disabled {
+	color: var(--theme--foreground-subdued);
+	pointer-events: none;
 }
 
 .links {
 	.v-list-item-content {
-		height: var(--v-list-item-min-height);
+		height: var(--v-list-item-min-height, 32px);
 	}
 }
 </style>

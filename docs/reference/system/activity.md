@@ -18,7 +18,7 @@ Action that was performed.
 Collection identifier in which the item resides.
 
 `comment` **string**\
-User comment. This will store the comments that show up in the right sidebar of the item edit page in the admin app.
+User comment. This will store the comments that show up in the right sidebar of the item edit page in the Data Studio.
 
 `id` **integer**\
 Unique identifier for the object.
@@ -62,7 +62,7 @@ Returns a list of activity actions.
 
 ### Request
 
-<SnippetToggler :choices="['REST', 'GraphQL', 'SDK']" label="API">
+<SnippetToggler :choices="['REST', 'GraphQL', 'SDK']" group="api">
 <template #rest>
 
 `GET /activity`
@@ -109,7 +109,7 @@ data will be an empty array.
 
 ### Example
 
-<SnippetToggler :choices="['REST', 'GraphQL', 'SDK']" label="API">
+<SnippetToggler :choices="['REST', 'GraphQL', 'SDK']" group="api">
 <template #rest>
 
 `GET /activity`
@@ -151,7 +151,7 @@ Returns a single activity action by primary key.
 
 ### Request
 
-<SnippetToggler :choices="['REST', 'GraphQL', 'SDK']" label="API">
+<SnippetToggler :choices="['REST', 'GraphQL', 'SDK']" group="api">
 <template #rest>
 
 `GET /activity/:id`
@@ -191,7 +191,7 @@ Returns an [activity object](#the-activity-object) if a valid identifier was pro
 
 ### Example
 
-<SnippetToggler :choices="['REST', 'GraphQL', 'SDK']" label="API">
+<SnippetToggler :choices="['REST', 'GraphQL', 'SDK']" group="api">
 <template #rest>
 
 `GET /activity/15`
@@ -222,288 +222,6 @@ const result = await client.request(
 		fields: ['*'],
 	})
 );
-```
-
-</template>
-</SnippetToggler>
-
-## Create a Comment
-
-Creates a new comment on a given item.
-
-### Request
-
-<SnippetToggler :choices="['REST', 'GraphQL', 'SDK']" label="API">
-<template #rest>
-
-`POST /activity/comment`
-
-```json
-{
-	"collection": collection_name,
-	"item": item_id,
-	"comment": comment_content
-}
-```
-
-</template>
-<template #graphql>
-
-`POST /graphql/system`
-
-```graphql
-type Mutation {
-	create_comment(collection: String!, item: ID!, comment: String!): directus_activity
-}
-```
-
-</template>
-<template #sdk>
-
-```js
-import { createDirectus, rest, createComment } from '@directus/sdk';
-
-const client = createDirectus('directus_project_url').with(rest());
-
-const result = await client.request(
-	createComment({
-		collection: collection_name,
-		item: item_id,
-		comment: comment_content,
-	})
-);
-```
-
-</template>
-</SnippetToggler>
-
-#### Request Body
-
-`collection` **Required**\
-Collection in which the item resides.
-
-`item` **Required**\
-Primary Key of the item to comment on.
-
-`comment` **Required**\
-The comment content. Supports Markdown.
-
-### Response
-
-Returns the [activity object](#the-activity-object) of the created comment.
-
-### Example
-
-<SnippetToggler :choices="['REST', 'GraphQL', 'SDK']" label="API">
-<template #rest>
-
-`POST /activity/comment`
-
-```json
-{
-	"collection": "pages",
-	"item": 3,
-	"comment": "Hello World"
-}
-```
-
-</template>
-<template #graphql>
-
-`POST /graphql/system`
-
-```graphql
-mutation {
-	create_comment(collection: "pages", item: 3, comment: "Hello World") {
-		# ...
-	}
-}
-```
-
-</template>
-<template #sdk>
-
-```js
-import { createDirectus, rest, createComment } from '@directus/sdk';
-
-const client = createDirectus('https://directus.example.com').with(rest());
-
-const result = await client.request(
-	createComment({
-		collection: 'articles',
-		item: '18',
-		comment: 'This is the wrong article to publish!',
-	})
-);
-```
-
-</template>
-</SnippetToggler>
-
-## Update a Comment
-
-Updates an existing comment by activity action primary key.
-
-### Response
-
-<SnippetToggler :choices="['REST', 'GraphQL', 'SDK']" label="API">
-<template #rest>
-
-`PATCH /activity/comment/:id`
-
-```json
-{
-	"comment": comment_content
-}
-```
-
-</template>
-<template #graphql>
-
-`POST /graphql/system`
-
-```graphql
-type Mutation {
-	delete_comment(id: ID): delete_one
-}
-```
-
-</template>
-<template #sdk>
-
-```js
-import { createDirectus, rest, updateComment } from '@directus/sdk';
-
-const client = createDirectus('directus_project_url').with(rest());
-
-const result = await client.request(
-	updateComment(comment_id, {
-		comment: comment_content,
-	})
-);
-```
-
-</template>
-</SnippetToggler>
-
-#### Request Body
-
-`comment` **Required**\
-The updated comment content. Supports Markdown.
-
-### Response
-
-Returns the [activity object](#the-activity-object) of the created comment.
-
-### Example
-
-<SnippetToggler :choices="['REST', 'GraphQL', 'SDK']" label="API">
-<template #rest>
-
-`PATCH /activity/comment/15`
-
-```json
-{
-	"comment": "Hello World!!"
-}
-```
-
-</template>
-<template #graphql>
-
-`POST /graphql/system`
-
-```graphql
-mutation {
-	update_comment(id: 3, comment: "Hello World") {
-		# ...
-	}
-}
-```
-
-</template>
-<template #sdk>
-
-```js
-import { createDirectus } from '@directus/sdk';
-import { rest, updateComment } from '@directus/sdk/rest';
-
-const client = createDirectus('https://directus.example.com').with(rest());
-
-const result = await client.request(
-	updateComment('53727', {
-		comment: 'Great work!',
-	})
-);
-```
-
-</template>
-</SnippetToggler>
-
-## Delete a Comment
-
-Deletes a comment.
-
-### Request
-
-<SnippetToggler :choices="['REST', 'GraphQL', 'SDK']" label="API">
-<template #rest>
-
-`DELETE /activity/comment/:id`
-
-</template>
-<template #graphql>
-
-`POST /graphql/system`
-
-```graphql
-type Mutation {
-	delete_comment(id: ID): delete_one
-}
-```
-
-</template>
-<template #sdk>
-
-```js
-import { createDirectus, rest, deleteComment } from '@directus/sdk';
-
-const client = createDirectus('directus_project_url').with(rest());
-
-const result = await client.request(deleteComment(comment_id));
-```
-
-</template>
-</SnippetToggler>
-
-### Example
-
-<SnippetToggler :choices="['REST', 'GraphQL', 'SDK']" label="API">
-<template #rest>
-
-`DELETE /activity/comment/15`
-
-</template>
-<template #graphql>
-
-```graphql
-mutation {
-	delete_comment(id: 3) {
-		id
-	}
-}
-```
-
-</template>
-<template #sdk>
-
-```js
-import { createDirectus } from '@directus/sdk';
-import { rest, deleteComment } from '@directus/sdk/rest';
-
-const client = createDirectus('https://directus.example.com').with(rest());
-
-const result = await client.request(deleteComment('53727'));
 ```
 
 </template>

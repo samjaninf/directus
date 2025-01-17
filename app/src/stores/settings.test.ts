@@ -4,7 +4,7 @@ import * as unexpectedErrorUtil from '@/utils/unexpected-error';
 import { Settings } from '@directus/types';
 import { createTestingPinia } from '@pinia/testing';
 import { setActivePinia } from 'pinia';
-import { afterEach, beforeEach, describe, expect, SpyInstance, test, vi } from 'vitest';
+import { afterEach, beforeEach, describe, expect, test, vi, type MockInstance } from 'vitest';
 import { useSettingsStore } from './settings';
 import { useUserStore } from './user';
 
@@ -13,7 +13,7 @@ beforeEach(() => {
 		createTestingPinia({
 			createSpy: vi.fn,
 			stubActions: false,
-		})
+		}),
 	);
 });
 
@@ -21,6 +21,9 @@ const mockSettings: Settings = {
 	id: 1,
 	project_name: 'Directus',
 	project_url: null,
+	report_error_url: null,
+	report_bug_url: null,
+	report_feature_url: null,
 	project_color: null,
 	project_logo: null,
 	public_foreground: null,
@@ -38,6 +41,12 @@ const mockSettings: Settings = {
 	project_descriptor: null,
 	default_language: 'en-US',
 	custom_aspect_ratios: null,
+	public_favicon: null,
+	default_appearance: 'auto',
+	default_theme_light: null,
+	default_theme_dark: null,
+	theme_light_overrides: null,
+	theme_dark_overrides: null,
 };
 
 const mockUser = { id: 'e7f7a94d-5b38-4978-8450-de0e38859fec', role: { admin_access: false } } as any;
@@ -73,7 +82,7 @@ vi.mock('@/api', () => {
 	};
 });
 
-let apiGetSpy: SpyInstance;
+let apiGetSpy: MockInstance;
 
 beforeEach(() => {
 	apiGetSpy = vi.spyOn(api, 'get');
@@ -129,9 +138,9 @@ describe('dehyrate action', () => {
 });
 
 describe('updateSettings action', async () => {
-	let ApiPatchSpy: SpyInstance;
-	let NotifySpy: SpyInstance;
-	let unexpectedErrorSpy: SpyInstance;
+	let ApiPatchSpy: MockInstance;
+	let NotifySpy: MockInstance;
+	let unexpectedErrorSpy: MockInstance;
 
 	beforeEach(() => {
 		ApiPatchSpy = vi.spyOn(api, 'patch');

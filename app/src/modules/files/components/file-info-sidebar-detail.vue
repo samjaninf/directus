@@ -1,207 +1,94 @@
-<template>
-	<sidebar-detail icon="info" :title="t('file_details')" close>
-		<dl v-if="file">
-			<div v-if="file.type">
-				<dt>{{ t('type') }}</dt>
-				<dd>{{ readableMimeType(file.type) || file.type }}</dd>
-			</div>
-
-			<div v-if="file.width && file.height">
-				<dt>{{ t('dimensions') }}</dt>
-				<dd>{{ n(file.width) }} × {{ n(file.height) }}</dd>
-			</div>
-
-			<div v-if="file.duration">
-				<dt>{{ t('duration') }}</dt>
-				<dd>{{ n(file.duration) }}</dd>
-			</div>
-
-			<div v-if="file.filesize">
-				<dt>{{ t('size') }}</dt>
-				<dd>{{ size }}</dd>
-			</div>
-
-			<div v-if="file.charset">
-				<dt>{{ t('charset') }}</dt>
-				<dd>{{ file.charset }}</dd>
-			</div>
-
-			<div v-if="file.embed">
-				<dt>{{ t('embed') }}</dt>
-				<dd>{{ file.embed }}</dd>
-			</div>
-
-			<div v-if="creationDate">
-				<dt>{{ t('created') }}</dt>
-				<dd>{{ creationDate }}</dd>
-			</div>
-
-			<div v-if="file.checksum" class="checksum">
-				<dt>{{ t('checksum') }}</dt>
-				<dd>{{ file.checksum }}</dd>
-			</div>
-
-			<div v-if="userCreated">
-				<dt>{{ t('owner') }}</dt>
-				<dd>
-					<user-popover :user="userCreated.id">
-						<router-link :to="userCreated.link">{{ userCreated.name }}</router-link>
-					</user-popover>
-				</dd>
-			</div>
-
-			<div v-if="modificationDate">
-				<dt>{{ t('modified') }}</dt>
-				<dd>{{ modificationDate }}</dd>
-			</div>
-
-			<div v-if="userModified">
-				<dt>{{ t('edited_by') }}</dt>
-				<dd>
-					<user-popover :user="userModified.id">
-						<router-link :to="userModified.link">{{ userModified.name }}</router-link>
-					</user-popover>
-				</dd>
-			</div>
-
-			<div>
-				<dt>{{ t('file') }}</dt>
-				<dd>
-					<a :href="fileLink" target="_blank">{{ t('open_in_new_window') }}</a>
-				</dd>
-			</div>
-
-			<div>
-				<dt>{{ t('folder') }}</dt>
-				<dd>
-					<router-link :to="folderLink">
-						{{ t('open_folder', { folder: folder ? folder.name : t('file_library') }) }}
-					</router-link>
-				</dd>
-			</div>
-
-			<template
-				v-if="
-					file.metadata?.ifd0?.Make ||
-					file.metadata?.ifd0?.Model ||
-					file.metadata?.exif?.FNumber ||
-					file.metadata?.exif?.ExposureTime ||
-					file.metadata?.exif?.FocalLength ||
-					file.metadata?.exif?.ISO
-				"
-			>
-				<v-divider />
-
-				<div v-if="file.metadata.ifd0?.Make && file.metadata.ifd0?.Model">
-					<dt>{{ t('camera') }}</dt>
-					<dd>{{ file.metadata.ifd0.Make }} {{ file.metadata.ifd0.Model }}</dd>
-				</div>
-
-				<div v-if="file.metadata.exif?.FNumber">
-					<dt>{{ t('exposure') }}</dt>
-					<dd>ƒ/{{ file.metadata.exif.FNumber }}</dd>
-				</div>
-
-				<div v-if="file.metadata.exif?.ExposureTime">
-					<dt>{{ t('shutter') }}</dt>
-					<dd>1/{{ Math.round(1 / +file.metadata.exif.ExposureTime) }} {{ t('second') }}</dd>
-				</div>
-
-				<div v-if="file.metadata.exif?.FocalLength">
-					<dt>{{ t('focal_length') }}</dt>
-					<dd>{{ file.metadata.exif.FocalLength }}mm</dd>
-				</div>
-
-				<div v-if="file.metadata.exif?.ISO">
-					<dt>{{ t('iso') }}</dt>
-					<dd>{{ file.metadata.exif.ISO }}</dd>
-				</div>
-			</template>
-		</dl>
-
-		<v-divider />
-
-		<div v-md="t('page_help_files_item')" class="page-description" />
-	</sidebar-detail>
-</template>
-
 <script setup lang="ts">
-import api, { addTokenToURL } from '@/api';
+import api from '@/api';
 import { formatFilesize } from '@/utils/format-filesize';
-import { getRootPath } from '@/utils/get-root-path';
+import { getAssetUrl } from '@/utils/get-asset-url';
 import { localizedFormat } from '@/utils/localized-format';
 import { readableMimeType } from '@/utils/readable-mime-type';
 import { userName } from '@/utils/user-name';
 import { computed, ref, watch } from 'vue';
 import { useI18n } from 'vue-i18n';
+import type { File } from '@directus/types';
 
-const props = withDefaults(
-	defineProps<{
-		file?: Record<string, any>;
-		isNew?: boolean;
-	}>(),
-	{
-		file: () => ({}),
-	}
-);
+const props = defineProps<{
+	file: File | null;
+	isNew: boolean;
+}>();
 
-const { t, n } = useI18n();
-
-const size = computed(() => {
-	if (props.isNew) return null;
-	if (!props.file) return null;
-	if (!props.file.filesize) return null;
-
-	return formatFilesize(props.file.filesize); // { locale: locale.value.split('-')[0] }
-});
-
-const { creationDate, modificationDate } = useDates();
+const { t, n, d } = useI18n();
 const { userCreated, userModified } = useUser();
 const { folder, folderLink } = useFolder();
 
-const fileLink = computed(() => {
-	return addTokenToURL(`${getRootPath()}assets/${props.file.id}`);
+const size = computed(() => {
+	if (props.isNew) return;
+	if (!props.file?.filesize) return;
+
+	return formatFilesize(props.file.filesize);
 });
 
-function useDates() {
-	const creationDate = ref<string | null>(null);
-	const modificationDate = ref<string | null>(null);
+const fileLink = computed(() => {
+	if (!props.file?.id) return;
 
-	watch(
-		() => props.file,
-		async () => {
-			if (!props.file) return null;
+	return getAssetUrl(props.file.id);
+});
 
-			creationDate.value = localizedFormat(new Date(props.file.uploaded_on), String(t('date-fns_date_short')));
+const creationDate = computed(() => ({
+	short: localizedFormat(new Date(props.file.created_on), String(t('date-fns_date_short'))),
+	long: d(props.file.created_on, 'long'),
+}));
 
-			if (props.file.modified_on) {
-				modificationDate.value = localizedFormat(new Date(props.file.modified_on), String(t('date-fns_date_short')));
-			}
-		},
-		{ immediate: true }
-	);
+const uploadDate = computed(() => {
+	if (!props.file?.uploaded_on) return;
 
-	return { creationDate, modificationDate };
-}
+	return {
+		short: localizedFormat(new Date(props.file.uploaded_on), String(t('date-fns_date_short'))),
+		long: d(props.file.uploaded_on, 'long'),
+	};
+});
+
+const modificationDate = computed(() => {
+	if (!props.file?.modified_on) return;
+
+	return {
+		short: localizedFormat(new Date(props.file.modified_on), String(t('date-fns_date_short'))),
+		long: d(props.file.modified_on, 'long'),
+	};
+});
+
+const imageMetadata = computed(() => {
+	const metadata = props.file?.metadata;
+
+	if (!metadata) return;
+
+	const { ifd0, exif } = metadata;
+
+	return {
+		Make: ifd0?.Make,
+		Model: ifd0?.Model,
+		FNumber: exif?.FNumber,
+		ExposureTime: exif?.ExposureTime,
+		FocalLength: exif?.FocalLength,
+		ISO: exif?.ISO ?? exif?.ISOSpeedRatings,
+	};
+});
 
 function useUser() {
 	type User = {
-		id: number;
+		id: string;
 		name: string;
 		link: string;
 	};
 
 	const loading = ref(false);
-	const userCreated = ref<User | null>(null);
-	const userModified = ref<User | null>(null);
+	const userCreated = ref<User>();
+	const userModified = ref<User>();
 
 	watch(() => props.file, fetchUser, { immediate: true });
 
 	return { userCreated, userModified };
 
 	async function fetchUser() {
-		if (!props.file) return null;
-		if (!props.file.uploaded_by) return null;
+		if (!props.file) return;
+		if (!props.file.uploaded_by) return;
 
 		loading.value = true;
 
@@ -263,7 +150,7 @@ function useFolder() {
 	return { folder, folderLink };
 
 	async function fetchFolder() {
-		if (!props.file) return null;
+		if (!props.file) return;
 		if (!props.file.folder) return;
 		loading.value = true;
 
@@ -287,15 +174,133 @@ function useFolder() {
 }
 </script>
 
-<style lang="scss" scoped>
-.checksum {
-	dd {
-		font-family: var(--family-monospace);
-	}
-}
+<template>
+	<sidebar-detail icon="info" :title="t('file_details')" close>
+		<dl v-if="file">
+			<div v-if="file.type">
+				<dt>{{ t('type') }}</dt>
+				<dd>{{ readableMimeType(file.type) || file.type }}</dd>
+			</div>
 
+			<div v-if="file.width && file.height">
+				<dt>{{ t('dimensions') }}</dt>
+				<dd>{{ n(file.width) }} × {{ n(file.height) }}</dd>
+			</div>
+
+			<div v-if="file.duration">
+				<dt>{{ t('duration') }}</dt>
+				<dd>{{ n(file.duration) }}</dd>
+			</div>
+
+			<div v-if="file.filesize">
+				<dt>{{ t('size') }}</dt>
+				<dd>{{ size }}</dd>
+			</div>
+
+			<div v-if="file.charset">
+				<dt>{{ t('charset') }}</dt>
+				<dd>{{ file.charset }}</dd>
+			</div>
+
+			<div v-if="file.embed">
+				<dt>{{ t('embed') }}</dt>
+				<dd>{{ file.embed }}</dd>
+			</div>
+
+			<div v-if="creationDate">
+				<dt>{{ t('created') }}</dt>
+				<dd>
+					<span v-tooltip="creationDate.long">{{ creationDate.short }}</span>
+				</dd>
+			</div>
+
+			<div v-if="userCreated">
+				<dt>{{ t('owner') }}</dt>
+				<dd>
+					<user-popover :user="userCreated.id">
+						<router-link :to="userCreated.link">{{ userCreated.name }}</router-link>
+					</user-popover>
+				</dd>
+			</div>
+
+			<div v-if="uploadDate">
+				<dt>{{ t('uploaded') }}</dt>
+				<dd>
+					<span v-tooltip="uploadDate.long">{{ uploadDate.short }}</span>
+				</dd>
+			</div>
+
+			<div v-if="modificationDate">
+				<dt>{{ t('modified') }}</dt>
+				<dd>
+					<span v-tooltip="modificationDate.long">{{ modificationDate.short }}</span>
+				</dd>
+			</div>
+
+			<div v-if="userModified">
+				<dt>{{ t('edited_by') }}</dt>
+				<dd>
+					<user-popover :user="userModified.id">
+						<router-link :to="userModified.link">{{ userModified.name }}</router-link>
+					</user-popover>
+				</dd>
+			</div>
+
+			<div v-if="fileLink">
+				<dt>{{ t('file') }}</dt>
+				<dd>
+					<a :href="fileLink" target="_blank">{{ t('open_in_new_window') }}</a>
+				</dd>
+			</div>
+
+			<div>
+				<dt>{{ t('folder') }}</dt>
+				<dd>
+					<router-link :to="folderLink">
+						{{ t('open_folder', { folder: folder ? folder.name : t('file_library') }) }}
+					</router-link>
+				</dd>
+			</div>
+
+			<template v-if="imageMetadata">
+				<v-divider />
+
+				<div v-if="imageMetadata.Make && imageMetadata.Model">
+					<dt>{{ t('camera') }}</dt>
+					<dd>{{ imageMetadata.Make }} {{ imageMetadata.Model }}</dd>
+				</div>
+
+				<div v-if="imageMetadata.FNumber">
+					<dt>{{ t('exposure') }}</dt>
+					<dd>ƒ/{{ imageMetadata.FNumber }}</dd>
+				</div>
+
+				<div v-if="imageMetadata.ExposureTime">
+					<dt>{{ t('shutter') }}</dt>
+					<dd>1/{{ Math.round(1 / +imageMetadata.ExposureTime) }} {{ t('second') }}</dd>
+				</div>
+
+				<div v-if="imageMetadata.FocalLength">
+					<dt>{{ t('focal_length') }}</dt>
+					<dd>{{ imageMetadata.FocalLength }}mm</dd>
+				</div>
+
+				<div v-if="imageMetadata.ISO">
+					<dt>{{ t('iso') }}</dt>
+					<dd>{{ imageMetadata.ISO }}</dd>
+				</div>
+			</template>
+		</dl>
+
+		<v-divider />
+
+		<div v-md="t('page_help_files_item')" class="page-description" />
+	</sidebar-detail>
+</template>
+
+<style lang="scss" scoped>
 button {
-	color: var(--primary);
+	color: var(--theme--primary);
 }
 
 .v-divider {

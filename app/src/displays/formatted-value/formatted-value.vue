@@ -1,24 +1,3 @@
-<template>
-	<value-null v-if="displayValue === null || displayValue === undefined" />
-
-	<div
-		v-else
-		class="display-formatted"
-		:class="[
-			{ bold, italic },
-			font,
-			{ 'has-background': computedFormat.background, 'has-border': computedStyle.borderWidth !== 0 },
-		]"
-		:style="computedStyle"
-	>
-		<v-icon v-if="computedFormat.icon" :name="computedFormat.icon" :color="computedFormat.color" left small />
-
-		<span class="value">
-			{{ displayValue }}
-		</span>
-	</div>
-</template>
-
 <script setup lang="ts">
 import formatTitle from '@directus/format-title';
 import dompurify from 'dompurify';
@@ -41,6 +20,8 @@ const props = withDefaults(
 		background?: string;
 		icon?: string;
 		border?: boolean;
+		masked?: boolean;
+		translate?: boolean;
 		conditionalFormatting?: {
 			operator: 'eq' | 'neq' | 'gt' | 'gte' | 'lt' | 'lte' | 'contains' | 'starts_with' | 'ends_with';
 			value: string;
@@ -53,13 +34,13 @@ const props = withDefaults(
 	{
 		font: 'sans-serif',
 		conditionalFormatting: () => [],
-	}
+	},
 );
 
 const { t, n } = useI18n();
 
-const matchedConditions = computed(() => {
-	return (props.conditionalFormatting || []).filter(({ operator, value }) => {
+const matchedConditions = computed(() =>
+	(props.conditionalFormatting || []).filter(({ operator, value }) => {
 		if (['string', 'text'].includes(props.type)) {
 			const left = String(props.value);
 			const right = String(value);
@@ -73,8 +54,8 @@ const matchedConditions = computed(() => {
 			const right = parseInt(String(value));
 			return matchNumber(left, right, operator);
 		}
-	});
-});
+	}),
+);
 
 const computedFormat = computed(() => {
 	const { color, background, icon } = props;
@@ -91,7 +72,7 @@ const computedFormat = computed(() => {
 			background,
 			icon,
 			text: '',
-		}
+		},
 	);
 });
 
@@ -106,6 +87,8 @@ const computedStyle = computed(() => {
 });
 
 const displayValue = computed(() => {
+	if (props.masked) return '**********';
+
 	if (computedFormat.value.text) {
 		const { text } = computedFormat.value;
 		return text.startsWith('$t:') ? t(text.slice(3)) : text;
@@ -113,7 +96,13 @@ const displayValue = computed(() => {
 
 	if (isNil(props.value) || props.value === '') return null;
 
-	let value = String(props.value);
+	let value = Array.isArray(props.value)
+		? props.value.map((v) => (isNil(v) || v === '' ? '--' : v)).join(', ')
+		: String(props.value);
+
+	if (props.translate && value.startsWith('$t:')) {
+		value = t(value.slice(3));
+	}
 
 	// Strip out all HTML tags
 	value = dompurify.sanitize(value, { ALLOWED_TAGS: [] });
@@ -150,6 +139,8 @@ function matchString(left: string, right: string, operator: string) {
 		case 'ends_with':
 			return left.endsWith(right);
 	}
+
+	return;
 }
 
 function matchNumber(left: number, right: number, operator: string) {
@@ -167,8 +158,31 @@ function matchNumber(left: number, right: number, operator: string) {
 		case 'lte':
 			return left <= right;
 	}
+
+	return;
 }
 </script>
+
+<template>
+	<value-null v-if="displayValue === null || displayValue === undefined" />
+
+	<div
+		v-else
+		class="display-formatted"
+		:class="[
+			{ bold, italic },
+			font,
+			{ 'has-background': computedFormat.background, 'has-border': computedStyle.borderWidth !== 0 },
+		]"
+		:style="computedStyle"
+	>
+		<v-icon v-if="computedFormat.icon" :name="computedFormat.icon" :color="computedFormat.color" left small />
+
+		<span class="value">
+			{{ displayValue }}
+		</span>
+	</div>
+</template>
 
 <style lang="scss" scoped>
 .display-formatted {
@@ -190,7 +204,7 @@ function matchNumber(left: number, right: number, operator: string) {
 	}
 
 	&.bold {
-		color: var(--foreground-normal-alt);
+		color: var(--theme--foreground-accent);
 		font-weight: 700;
 	}
 
@@ -199,15 +213,15 @@ function matchNumber(left: number, right: number, operator: string) {
 	}
 
 	&.sans-serif {
-		font-family: var(--family-sans-serif);
+		font-family: var(--theme--fonts--sans--font-family);
 	}
 
 	&.serif {
-		font-family: var(--family-serif);
+		font-family: var(--theme--fonts--serif--font-family);
 	}
 
 	&.monospace {
-		font-family: var(--family-monospace);
+		font-family: var(--theme--fonts--monospace--font-family);
 	}
 
 	.v-icon {

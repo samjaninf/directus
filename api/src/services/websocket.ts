@@ -1,15 +1,30 @@
+import { useEnv } from '@directus/env';
+import { ServiceUnavailableError } from '@directus/errors';
 import type { ActionHandler } from '@directus/types';
+import { toBoolean } from '@directus/utils';
+import emitter from '../emitter.js';
 import { getWebSocketController } from '../websocket/controllers/index.js';
 import type { WebSocketController } from '../websocket/controllers/rest.js';
-import type { WebSocketClient } from '../websocket/types.js';
 import type { WebSocketMessage } from '../websocket/messages.js';
-import emitter from '../emitter.js';
+import type { WebSocketClient } from '../websocket/types.js';
+
+const env = useEnv();
 
 export class WebSocketService {
 	private controller: WebSocketController;
 
 	constructor() {
-		this.controller = getWebSocketController();
+		if (!toBoolean(env['WEBSOCKETS_ENABLED']) || !toBoolean(env['WEBSOCKETS_REST_ENABLED'])) {
+			throw new ServiceUnavailableError({ service: 'ws', reason: 'WebSocket server is disabled' });
+		}
+
+		const controller = getWebSocketController();
+
+		if (!controller) {
+			throw new ServiceUnavailableError({ service: 'ws', reason: 'WebSocket server is not initialized' });
+		}
+
+		this.controller = controller;
 	}
 
 	on(event: 'connect' | 'message' | 'error' | 'close', callback: ActionHandler) {

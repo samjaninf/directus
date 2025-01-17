@@ -1,22 +1,3 @@
-<template>
-	<transition-group class="notifications-group" :class="{ 'sidebar-open': sidebarOpen }" name="slide-fade" tag="div">
-		<slot />
-		<notification-item
-			v-for="(notification, index) in queue"
-			:id="notification.id"
-			:key="notification.id"
-			:title="notification.title"
-			:icon="notification.icon"
-			:type="notification.type"
-			:loading="notification.loading"
-			:progress="notification.progress"
-			:tail="index === queue.length - 1"
-			:dense="sidebarOpen === false"
-			:show-close="notification.persist === true && notification.closeable !== false"
-		/>
-	</transition-group>
-</template>
-
 <script setup lang="ts">
 import { useNotificationsStore } from '@/stores/notifications';
 import { toRefs } from 'vue';
@@ -29,6 +10,30 @@ defineProps<{
 const notificationsStore = useNotificationsStore();
 const queue = toRefs(notificationsStore).queue;
 </script>
+
+<template>
+	<transition-group class="notifications-group" :class="{ 'sidebar-open': sidebarOpen }" name="slide-fade" tag="div">
+		<slot />
+		<notification-item
+			v-for="(notification, index) in queue"
+			:id="notification.id"
+			:key="notification.id"
+			:title="notification.title"
+			:text="notification.text"
+			:icon="notification.icon"
+			:type="notification.type"
+			:loading="notification.loading"
+			:progress="notification.progress"
+			:tail="index === queue.length - 1"
+			:dense="sidebarOpen === false"
+			:show-close="notification.persist === true && notification.closeable !== false"
+			:always-show-text="notification.alwaysShowText"
+			:dismiss-icon="notification.dismissIcon"
+			:dismiss-text="notification.dismissText"
+			:dismiss-action="notification.dismissAction"
+		/>
+	</transition-group>
+</template>
 
 <style lang="scss" scoped>
 .notifications-group {

@@ -1,31 +1,11 @@
 ---
-## Be aware:
-#Due to the way this is imported, JavaScript reserved words, including "delete", "private",
-#"void", etc are stripped out. See
-#https://github.com/rollup/plugins/blob/8748b8cd3bbab3c5ac6190556930219f19060e63/packages/pluginutils/src/makeLegalIdentifier.ts#L4
-#and
-#https://github.com/rollup/plugins/blob/8748b8cd3bbab3c5ac6190556930219f19060e63/packages/yaml/src/index.js#L45
-#Illegal words:
-#'break', 'case', 'class', 'catch', 'const', 'continue', 'debugger', 'default', 'delete', 'do',
-#'else', 'export', 'extends', 'finally', 'for', 'function', 'if', 'import', 'in', 'instanceof',
-#'let', 'new', 'return', 'super', 'switch', 'this', 'throw', 'try', 'typeof', 'var', 'void',
-#'while', 'with', 'yield', 'enum', 'await', 'implements', 'package', 'protected', 'static',
-#'interface', 'private', 'public', 'arguments', 'Infinity', 'NaN', 'undefined', 'null', 'true',
-#'false', 'eval', 'uneval', 'isFinite', 'isNaN', 'parseFloat', 'parseInt', 'decodeURI',
-#'decodeURIComponent', 'encodeURI', 'encodeURIComponent', 'escape', 'unescape', 'Object',
-#'Function', 'Boolean', 'Symbol', 'Error', 'EvalError', 'InternalError', 'RangeError',
-#'ReferenceError', 'SyntaxError', 'TypeError', 'URIError', 'Number', 'Math', 'Date', 'String',
-#'RegExp', 'Array', 'Int8Array', 'Uint8Array', 'Uint8ClampedArray', 'Int16Array', 'Uint16Array',
-#'Int32Array', 'Uint32Array', 'Float32Array', 'Float64Array', 'Map', 'Set', 'WeakMap', 'WeakSet',
-#'SIMD', 'ArrayBuffer', 'DataView', 'JSON', 'Promise', 'Generator', 'GeneratorFunction', 'Reflect',
-#'Proxy', 'Intl'
 identifier: Identifiseerder
 avatar: Profiel prentjie
 application: Toepassing
 default_provider: Verstek
 method: Metode
 published: Gepubliseer
-draft: Draft
+draft: Konsep
 archived: Geargiveer
 modules: Modules
 module_bar: Modulebalk
@@ -49,6 +29,8 @@ export_items: Voer items uit
 and: En
 or: Of
 modifier: Wysiger
+extension_hook: Haak
+extension_modules: Modules
 custom: Pasgemaak
 hook: Haak
 fill_width: Vulbreedte
@@ -106,7 +88,6 @@ auto_generate: Auto-Genereer
 add_note: Voeg 'n nuttige nota vir gebruikers...
 default_value: Standaard Waarde
 title: Titel
-checksum: Kontrolesom
 owner: Eienaar
 created_by: Geskep Deur
 created_on: Geskep Op
@@ -132,6 +113,7 @@ wysiwyg_options:
   codeblock: Kode
   table: Tafel
 choices: Keuses
+settings_presets: Boekmerke
 add_new: Voeg nuwe
 all: Alle
 batch_delete_confirm: >-
@@ -175,7 +157,6 @@ fields:
     description: Beskrywing
     tags: Sleutelwoorde
     language: Taal
-    theme: Tema
     tfa_secret: Twee-Faktor Verifikasie
     status: Status
     role: Rol
@@ -189,6 +170,8 @@ fields:
     display_template: Modelvorm
   directus_roles:
     name: Rol Naam
+    description: Beskrywing
+  directus_policies:
     description: Beskrywing
   directus_webhooks:
     status: Status
@@ -253,3 +236,4 @@ operations:
   notification:
     message: Boodskap
     subject: Onderwerp
+compact: Kompak

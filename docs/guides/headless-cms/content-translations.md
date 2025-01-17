@@ -37,12 +37,12 @@ Create a new collection for all the different languages your application will su
    languages
 
    - code (Primary Key Field, Type: Manually entered string )
-   - name (Type: String, Inferface: Input)
+   - name (Type: String, Interface: Input)
    - direction (Type: String, Interface: Dropdown, Default Value: ltr)
    ```
 
    a. When creating the collection, set the primary key to `code` and use the `Manually entered string` type. There's no
-   need to add Optional System Fields.
+   need to add Optional Fields.
 
    ![The Creating New Collection form overlay is shown. The active tab is Collection Setup. Name, Singleton, Primary Key Field, and Type fields are shown and editable by the user.](https://marketing.directus.app/assets/e4fe9a63-9cfd-48d9-a1a9-7aedff6279a9.png?key=doc)
 
@@ -114,7 +114,7 @@ within, you can choose to Continue in Advanced Field Creation Mode.
    - title (Type: String, Interface: Input )
    - slug (Type: String, Interface: Input)
    - summary (Type: Text, Inteface: Textarea)
-   - content (Type: Text, Inferface: WYSIWYG)
+   - content (Type: Text, Interface: WYSIWYG)
    ```
 
    ![Data Model settings screen for the Articles Translations collection is displayed. The following fields are shown: id, articles_id, languages_code, title, slug, summary, content.](https://marketing.directus.app/assets/e2ee5c61-3449-40cf-9cd4-24f9edb2ae6a.png?key=doc)
@@ -161,8 +161,7 @@ relational data . It's incredible powerful.
 **Sample Request**
 
 ```js
-import { createDirectus } from '@directus/sdk';
-import { rest, readItems } from '@directus/sdk/rest';
+import { createDirectus, rest, readItems } from '@directus/sdk';
 
 // Initialize the SDK.
 const directus = createDirectus('https://directus.example.com').with(rest());

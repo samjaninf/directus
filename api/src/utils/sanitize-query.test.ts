@@ -1,33 +1,28 @@
-import { afterEach, describe, expect, test, vi } from 'vitest';
-import env from '../env.js';
+import { useEnv } from '@directus/env';
+import { parseFilter, parseJSON } from '@directus/utils';
+import { afterEach, beforeEach, describe, expect, test, vi } from 'vitest';
+import { sanitizeQuery } from './sanitize-query.js';
 
-let factoryEnv: { [k: string]: any } = {};
-
-vi.doMock('../env', () => ({
-	default: new Proxy(
-		{},
-		{
-			get(_target, prop) {
-				return { ...env, ...factoryEnv }[prop as string];
-			},
-		}
-	),
-	getEnv: vi.fn().mockImplementation(() => ({ ...env, ...factoryEnv })),
-}));
-
-afterEach(() => {
-	factoryEnv = {};
-});
-
-const { sanitizeQuery } = await import('./sanitize-query.js');
+// This is required because logger uses global env which is imported before the tests run. Can be
+// reduce to just mock the file when logger is also using useLogger everywhere @TODO
+vi.mock('@directus/env', () => ({ useEnv: vi.fn().mockReturnValue({}) }));
 
 vi.mock('@directus/utils', async () => {
-	const actual = (await vi.importActual('@directus/utils')) as any;
+	const actual = await vi.importActual<typeof import('@directus/utils')>('@directus/utils');
 
 	return {
 		...actual,
+		parseJSON: vi.fn().mockImplementation(actual.parseJSON),
 		parseFilter: vi.fn().mockImplementation((value) => value),
 	};
+});
+
+beforeEach(() => {
+	vi.mocked(useEnv).mockReturnValue({});
+});
+
+afterEach(() => {
+	vi.clearAllMocks();
 });
 
 describe('limit', () => {
@@ -48,7 +43,7 @@ describe('limit', () => {
 
 describe('max limit', () => {
 	test('should replace -1', () => {
-		factoryEnv = { QUERY_LIMIT_MAX: 100 };
+		vi.mocked(useEnv).mockReturnValue({ QUERY_LIMIT_MAX: 100 });
 
 		const sanitizedQuery = sanitizeQuery({ limit: -1 });
 
@@ -56,7 +51,7 @@ describe('max limit', () => {
 	});
 
 	test.each([1, 25, 150])('should accept number %i', (limit) => {
-		factoryEnv = { QUERY_LIMIT_MAX: 100 };
+		vi.mocked(useEnv).mockReturnValue({ QUERY_LIMIT_MAX: 100 });
 
 		const sanitizedQuery = sanitizeQuery({ limit });
 
@@ -64,7 +59,7 @@ describe('max limit', () => {
 	});
 
 	test('should apply max if no limit passed in request', () => {
-		factoryEnv = { QUERY_LIMIT_MAX: 100 };
+		vi.mocked(useEnv).mockReturnValue({ QUERY_LIMIT_DEFAULT: 100, QUERY_LIMIT_MAX: 1000 });
 
 		const sanitizedQuery = sanitizeQuery({});
 
@@ -72,7 +67,7 @@ describe('max limit', () => {
 	});
 
 	test('should apply lower value if no limit passed in request', () => {
-		factoryEnv = { QUERY_LIMIT_MAX: 100, QUERY_LIMIT_DEFAULT: 25 };
+		vi.mocked(useEnv).mockReturnValue({ QUERY_LIMIT_MAX: 100, QUERY_LIMIT_DEFAULT: 25 });
 
 		const sanitizedQuery = sanitizeQuery({});
 
@@ -86,7 +81,7 @@ describe('max limit', () => {
 	});
 
 	test('should apply limit from request if max is unlimited', () => {
-		factoryEnv = { QUERY_LIMIT_MAX: -1 };
+		vi.mocked(useEnv).mockReturnValue({ QUERY_LIMIT_MAX: -1 });
 
 		const sanitizedQuery = sanitizeQuery({ limit: 150 });
 
@@ -196,15 +191,33 @@ describe('sort', () => {
 
 		expect(sanitizedQuery.sort).toEqual(['field_a', 'field_b']);
 	});
+
+	test('should trim csv array results', () => {
+		const sort = 'field_a, field_b';
+
+		const sanitizedQuery = sanitizeQuery({ sort });
+
+		expect(sanitizedQuery.sort).toEqual(['field_a', 'field_b']);
+	});
 });
 
 describe('filter', () => {
-	test('should accept valid value', () => {
+	test('should accept valid filter', () => {
 		const filter = { field_a: { _eq: 'test' } };
 
 		const sanitizedQuery = sanitizeQuery({ filter });
 
 		expect(sanitizedQuery.filter).toEqual({ field_a: { _eq: 'test' } });
+	});
+
+	test('should throw error on invalid filter', () => {
+		const filter = { field_a: null };
+
+		vi.mocked(parseFilter).mockImplementationOnce(() => {
+			throw new Error();
+		});
+
+		expect(() => sanitizeQuery({ filter })).toThrowError('Invalid query. Invalid filter object.');
 	});
 
 	test('should parse as json when it is a string', () => {
@@ -213,6 +226,16 @@ describe('filter', () => {
 		const sanitizedQuery = sanitizeQuery({ filter });
 
 		expect(sanitizedQuery.filter).toEqual({ field_a: { _eq: 'test' } });
+	});
+
+	test('should throw error on invalid json', () => {
+		const filter = '{ "field_a": }';
+
+		vi.mocked(parseJSON).mockImplementationOnce(() => {
+			throw new Error();
+		});
+
+		expect(() => sanitizeQuery({ filter })).toThrowError('Invalid query. Invalid JSON for filter object.');
 	});
 });
 
@@ -343,7 +366,7 @@ describe('deep', () => {
 	});
 
 	test('should work in combination with query limit', () => {
-		factoryEnv = { QUERY_LIMIT_MAX: 100 };
+		vi.mocked(useEnv).mockReturnValue({ QUERY_LIMIT_DEFAULT: 100, QUERY_LIMIT_MAX: 1000 });
 
 		const deep = { deep: { relational_field_a: { _sort: ['name'] } } };
 

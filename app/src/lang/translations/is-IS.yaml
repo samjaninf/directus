@@ -1,24 +1,4 @@
 ---
-## Be aware:
-#Due to the way this is imported, JavaScript reserved words, including "delete", "private",
-#"void", etc are stripped out. See
-#https://github.com/rollup/plugins/blob/8748b8cd3bbab3c5ac6190556930219f19060e63/packages/pluginutils/src/makeLegalIdentifier.ts#L4
-#and
-#https://github.com/rollup/plugins/blob/8748b8cd3bbab3c5ac6190556930219f19060e63/packages/yaml/src/index.js#L45
-#Illegal words:
-#'break', 'case', 'class', 'catch', 'const', 'continue', 'debugger', 'default', 'delete', 'do',
-#'else', 'export', 'extends', 'finally', 'for', 'function', 'if', 'import', 'in', 'instanceof',
-#'let', 'new', 'return', 'super', 'switch', 'this', 'throw', 'try', 'typeof', 'var', 'void',
-#'while', 'with', 'yield', 'enum', 'await', 'implements', 'package', 'protected', 'static',
-#'interface', 'private', 'public', 'arguments', 'Infinity', 'NaN', 'undefined', 'null', 'true',
-#'false', 'eval', 'uneval', 'isFinite', 'isNaN', 'parseFloat', 'parseInt', 'decodeURI',
-#'decodeURIComponent', 'encodeURI', 'encodeURIComponent', 'escape', 'unescape', 'Object',
-#'Function', 'Boolean', 'Symbol', 'Error', 'EvalError', 'InternalError', 'RangeError',
-#'ReferenceError', 'SyntaxError', 'TypeError', 'URIError', 'Number', 'Math', 'Date', 'String',
-#'RegExp', 'Array', 'Int8Array', 'Uint8Array', 'Uint8ClampedArray', 'Int16Array', 'Uint16Array',
-#'Int32Array', 'Uint32Array', 'Float32Array', 'Float64Array', 'Map', 'Set', 'WeakMap', 'WeakSet',
-#'SIMD', 'ArrayBuffer', 'DataView', 'JSON', 'Promise', 'Generator', 'GeneratorFunction', 'Reflect',
-#'Proxy', 'Intl'
 identifier: Auðkenni
 avatar: Auðkennismynd
 application: Forrit
@@ -42,6 +22,9 @@ group: Hópur
 export_items: Flytja út Hluti
 and: Og
 or: Eða
+extension_layout: Framsetning
+extension_hook: Krókur
+extension_modules: Einingar
 custom: Sérsniðið
 hook: Krókur
 fill_width: Fylla Breidd
@@ -65,6 +48,7 @@ emails: Tölvupóstar
 primary: Aðal
 delete_folder: Eyða Möppu
 prefix: Forskeyti
+promote_version_preview: Forskoða
 reset_bookmark: Endursetja Bókamerki
 update_bookmark: Uppfæra bókamerki
 delete_bookmark: Eyða bókamerki
@@ -108,7 +92,6 @@ string: Strengur
 text: Texti
 time: Tími
 timestamp: Tímastimpill
-geometry.Point: Punktur
 auto_refresh: Sjálfkrafa Endurhlaða
 search_collection: Leit Safn...
 search_field: Leit Reitur...
@@ -272,8 +255,6 @@ width: Breidd
 height: Hæð
 interface_group_groups: Hópar
 interface_group_other: Annað
-new_tab: Nýr Flipi
-current_tab: Núverandi Flipi
 save_image: Vista Mynd
 wysiwyg_options:
   aligncenter: Jafna Miðju
@@ -307,7 +288,9 @@ choices: Val
 deselect_all: Afvelja Allt
 other: Annað...
 unknown_user: Óþekktur Notandi
+settings_project: Stillingar
 settings_flows: Flæðir
+settings_translations: Þýðingar
 select: Velja...
 layout: Framsetning
 tree_view: Tré Sýn
@@ -358,7 +341,6 @@ fields:
     tags: Merki
     user_preferences: Notandi Stillingar
     language: Tungumál
-    theme: Þema
     status: Staða
     status_draft: Drög
     status_invited: Boðið
@@ -378,6 +360,8 @@ fields:
     display_template: Sniðmát
   directus_roles:
     name: Hlutverks Nafn
+    description: Lýsing
+  directus_policies:
     description: Lýsing
   directus_webhooks:
     name: Nafn
@@ -466,14 +450,13 @@ interfaces:
   input-rich-text-md:
     edit: Breyta
     preview: Forskoða
+    default_view_preview: Forskoða
     box: Blokk / Í línu
   map:
     map: Kort
     zoom: Aðdráttur
   presentation-notice:
     notice: Tilkynning
-  system-folder:
-    folder: Mappa
   list:
     sort: Flokka
   tags:
@@ -647,3 +630,10 @@ operations:
     data: Gögn
     serial: Raðnúmer
     parallel: Samhliða
+standard: Staðlað
+fonts:
+  thin: Þunnt
+  medium: Meðal
+  bold: Feitletrað
+  italic: Skáletrað
+  auto: Sjálfvirkt
